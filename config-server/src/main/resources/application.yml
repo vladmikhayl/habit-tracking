@@ -1,0 +1,13 @@
+server:
+  port: 8888
+spring:
+  profiles:
+    active: native
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        native:
+          # where to fetch config files from (relative to the directory of this file)
+          search-locations: classpath:/configurations

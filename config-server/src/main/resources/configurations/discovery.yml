@@ -1,0 +1,12 @@
+# the name of this file must be exactly like the name of the application
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false # eureka server itself should not register with itself
+    fetch-registry: false # and it should not fetch data about available services
+    service-url:
+      # address at which microservices should be registered
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+server:
+  port: 8761
