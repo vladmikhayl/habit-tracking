@@ -27,6 +27,15 @@ public class HabitApplication {
 					.frequency("Ежедневно")
 					.build();
 			habitRepository.save(habit1);
+
+			Habit habit2 = Habit.builder()
+					.userId(1L)
+					.name("Ложиться в 1 час ночи")
+					.frequency("Ежедневно")
+					.photoAllowed(true)
+					.durationDays(30)
+					.build();
+			habitRepository.save(habit2);
 		};
 	}
 

@@ -33,12 +33,13 @@ public class Habit {
     @Column(nullable = false)
     private String frequency; // TODO: поменять на ENUM или объект через композицию
 
+    @Column(nullable = false)
+    private boolean photoAllowed = false;
+
+    private Integer durationDays;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(insertable = false)
-    private LocalDateTime updatedAt;
 
 }
