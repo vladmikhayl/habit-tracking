@@ -27,6 +27,10 @@ public class AuthTokenFilter implements WebFilter {
         if (token != null && jwtUtils.validateJwtToken(token)) {
             Authentication authentication = jwtUtils.getAuthenticationFromJwtToken(token);
             SecurityContext securityContext = new SecurityContextImpl(authentication);
+            String userId = jwtUtils.getClaimsFromJwtToken(token).getId(); // Получаем ID юзера
+            exchange = exchange.mutate()
+                    .request(r -> r.header("X-User-Id", userId))
+                    .build(); // Добавляем ID юзера в заголовок запроса
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
         }

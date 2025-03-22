@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,11 @@ public class UserService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            String token = jwtTokenProvider.generateToken(loginRequest.getUsername());
+            String username = loginRequest.getUsername();
+            Long userId = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"))
+                    .getId();
+            String token = jwtTokenProvider.generateToken(username, userId);
 
             return new AuthResponse(token);
         } catch (BadCredentialsException ex) {

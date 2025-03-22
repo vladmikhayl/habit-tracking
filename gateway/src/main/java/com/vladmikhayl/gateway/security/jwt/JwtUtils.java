@@ -26,12 +26,16 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
-    public Authentication getAuthenticationFromJwtToken(String token) {
-        Claims claims = Jwts.parser()
+    public Claims getClaimsFromJwtToken(String token) {
+        return Jwts.parser()
                 .verifyWith((SecretKey) key())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public Authentication getAuthenticationFromJwtToken(String token) {
+        Claims claims = getClaimsFromJwtToken(token);
         String username = claims.getSubject();
         return new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
     }

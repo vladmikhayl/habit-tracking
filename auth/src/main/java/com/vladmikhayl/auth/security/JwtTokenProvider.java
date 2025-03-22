@@ -19,9 +19,10 @@ public class JwtTokenProvider {
     @Value("${spring.app.jwtExpirationMs}")
     private long jwtExpirationMs;
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Long userId) {
         return Jwts.builder()
                 .subject(username)
+                .id(userId.toString())
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key())
