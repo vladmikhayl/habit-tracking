@@ -25,7 +25,6 @@ public class HabitApplication {
 					.userId(1L)
 					.name("Вставать в 10 утра")
 					.frequency("Ежедневно")
-					.createdAt(LocalDateTime.now())
 					.build();
 			habitRepository.save(habit1);
 		};

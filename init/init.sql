@@ -1,1 +1,2 @@
 CREATE DATABASE habits;
+CREATE DATABASE users;

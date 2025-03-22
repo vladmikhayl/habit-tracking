@@ -2,6 +2,8 @@ package com.vladmikhayl.habit.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -31,9 +33,11 @@ public class Habit {
     @Column(nullable = false)
     private String frequency; // TODO: поменять на ENUM или объект через композицию
 
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(insertable = false)
     private LocalDateTime updatedAt;
 

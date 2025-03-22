@@ -13,8 +13,13 @@ public class HabitService {
 
     private final HabitRepository habitRepository;
 
-    public List<Habit> getAllUserHabits(Long userId) {
-        return habitRepository.findAllByUserId(userId);
+    public List<Habit> getAllUserHabits(String userId) {
+        try {
+            Long userIdLong = Long.parseLong(userId);
+            return habitRepository.findAllByUserId(userIdLong);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Invalid user ID format");
+        }
     }
 
 }

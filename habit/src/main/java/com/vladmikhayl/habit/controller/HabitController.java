@@ -22,13 +22,7 @@ public class HabitController {
     public ResponseEntity<?> getAllUserHabits(
             @RequestHeader("X-User-Id") String userId
     ) {
-        try {
-            Long userIdLong = Long.parseLong(userId);
-            List<Habit> allUserHabits = habitService.getAllUserHabits(userIdLong);
-            return ResponseEntity.ok(allUserHabits);
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body("Invalid user ID format"); // TODO: сделать нормальную ошибку
-        }
+        return ResponseEntity.ok(habitService.getAllUserHabits(userId));
     }
 
 }
