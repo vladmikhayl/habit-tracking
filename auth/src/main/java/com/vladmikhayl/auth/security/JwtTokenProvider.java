@@ -17,7 +17,7 @@ public class JwtTokenProvider {
     private String secretKey;
 
     @Value("${spring.app.jwtExpirationMs}")
-    private int jwtExpirationMs;
+    private long jwtExpirationMs;
 
     public String generateToken(String username) {
         return Jwts.builder()

@@ -1,6 +1,5 @@
 package com.vladmikhayl.habit.controller;
 
-import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.service.HabitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
