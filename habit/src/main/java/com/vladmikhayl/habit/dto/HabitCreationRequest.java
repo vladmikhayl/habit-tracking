@@ -3,12 +3,15 @@ package com.vladmikhayl.habit.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.DayOfWeek;
 import java.util.Set;
 
 @Data
+@Builder
 public class HabitCreationRequest {
 
     @NotBlank(message = "Name cannot be blank")
