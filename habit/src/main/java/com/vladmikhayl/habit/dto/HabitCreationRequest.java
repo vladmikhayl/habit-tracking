@@ -53,4 +53,9 @@ public class HabitCreationRequest {
         };
     }
 
+    @AssertTrue(message = "A habit with this FrequencyType cannot be harmful")
+    public boolean isValidHarmful() {
+        return !isHarmful || frequencyType == FrequencyType.WEEKLY_ON_DAYS;
+    }
+
 }

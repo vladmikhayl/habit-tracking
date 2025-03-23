@@ -1,13 +1,21 @@
 package com.vladmikhayl.habit.service;
 
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
+import com.vladmikhayl.habit.dto.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.HabitShortInfoResponse;
 import com.vladmikhayl.habit.dto.HabitsListResponse;
+import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +58,49 @@ public class HabitService {
                 .build();
 
         habitRepository.save(habit);
+    }
+
+    @Transactional
+    public void editHabit(
+            Long habitId,
+            HabitEditingRequest request,
+            String userId
+    ) {
+        Long userIdLong = parseUserId(userId);
+
+        Habit habit = habitRepository.findByIdAndUserId(habitId, userIdLong)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have a habit with this id"));
+
+        if (request.getName() != null) {
+            if (habitRepository.existsByUserIdAndName(userIdLong, request.getName())) {
+                throw new DataIntegrityViolationException("This user already has a habit with that name");
+            }
+            habit.setName(request.getName());
+        }
+
+        if (request.getDescription() != null) {
+            habit.setDescription(request.getDescription());
+        }
+
+        if (request.getIsPhotoAllowed() != null) {
+            habit.setPhotoAllowed(request.getIsPhotoAllowed());
+        }
+
+        if (request.getIsHarmful() != null) {
+            if (habit.getFrequencyType() != FrequencyType.WEEKLY_ON_DAYS && request.getIsHarmful()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A habit with this FrequencyType cannot be harmful");
+            }
+            habit.setHarmful(request.getIsHarmful());
+        }
+
+        // Чтобы положить значение null в поле durationDays, в качестве этого параметра нужно передать 0
+        if (request.getDurationDays() != null) {
+            if (request.getDurationDays() == 0) {
+                habit.setDurationDays(null);
+            } else {
+                habit.setDurationDays(request.getDurationDays());
+            }
+        }
     }
 
     public HabitsListResponse getAllUserHabits(String userId) {
