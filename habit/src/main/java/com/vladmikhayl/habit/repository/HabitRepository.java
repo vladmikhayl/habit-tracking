@@ -9,6 +9,6 @@ public interface HabitRepository extends JpaRepository<Habit, Long> {
 
     List<Habit> findAllByUserId(Long userId);
 
-    int countByUserIdAndName(Long userId, String name);
+    boolean existsByUserIdAndName(Long userId, String name);
 
 }

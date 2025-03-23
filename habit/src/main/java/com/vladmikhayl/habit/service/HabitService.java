@@ -27,22 +27,26 @@ public class HabitService {
     }
 
     public void createHabit(
-            HabitCreationRequest habitCreationRequest,
+            HabitCreationRequest request,
             String userId
     ) {
         Long userIdLong = parseUserId(userId);
 
-        if (habitRepository.countByUserIdAndName(userIdLong, habitCreationRequest.getName()) > 0) {
+        if (habitRepository.existsByUserIdAndName(userIdLong, request.getName())) {
             throw new DataIntegrityViolationException("This user already has a habit with that name");
         }
 
         Habit habit = Habit.builder()
                 .userId(userIdLong)
-                .name(habitCreationRequest.getName())
-                .description(habitCreationRequest.getDescription())
-                .frequency(habitCreationRequest.getFrequency())
-                .photoAllowed(habitCreationRequest.isPhotoAllowed())
-                .durationDays(habitCreationRequest.getDurationDays())
+                .name(request.getName())
+                .description(request.getDescription())
+                .isPhotoAllowed(request.isPhotoAllowed())
+                .isHarmful(request.isHarmful())
+                .durationDays(request.getDurationDays())
+                .frequencyType(request.getFrequencyType())
+                .daysOfWeek(request.getDaysOfWeek())
+                .timesPerWeek(request.getTimesPerWeek())
+                .timesPerMonth(request.getTimesPerMonth())
                 .build();
 
         habitRepository.save(habit);

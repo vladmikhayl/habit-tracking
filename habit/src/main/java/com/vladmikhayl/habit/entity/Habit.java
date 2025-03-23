@@ -5,7 +5,9 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "habits")
@@ -31,12 +33,24 @@ public class Habit {
     private String description;
 
     @Column(nullable = false)
-    private String frequency; // TODO: поменять на ENUM или объект через композицию
+    private boolean isPhotoAllowed = false;
 
     @Column(nullable = false)
-    private boolean photoAllowed = false;
+    private boolean isHarmful = false;
 
     private Integer durationDays;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FrequencyType frequencyType;
+
+    @ElementCollection
+    @CollectionTable(name = "habit_week_days", joinColumns = @JoinColumn(name = "habit_id"))
+    private Set<DayOfWeek> daysOfWeek; // если frequencyType == WEEKLY_ON_DAYS
+
+    private Integer timesPerWeek; // если frequencyType == WEEKLY_X_TIMES
+
+    private Integer timesPerMonth; // если frequencyType == MONTHLY_X_TIMES
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
