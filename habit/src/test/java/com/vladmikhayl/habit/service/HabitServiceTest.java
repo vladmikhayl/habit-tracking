@@ -1,10 +1,10 @@
 package com.vladmikhayl.habit.service;
 
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
+import com.vladmikhayl.habit.dto.HabitEditingRequest;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,9 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.DayOfWeek;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -123,7 +125,7 @@ class HabitServiceTest {
     }
 
     @Test
-    void failCreateHabitWithSameName() {
+    void failCreateHabitWhenUserAlreadyHasHabitWithSameName() {
         HabitCreationRequest request = HabitCreationRequest.builder()
                 .name("Чистить зубы 2 раза в день")
                 .description(null)
@@ -146,6 +148,196 @@ class HabitServiceTest {
                 .hasMessage("This user already has a habit with that name");
 
         verify(habitRepository, never()).save(any());
+    }
+
+    @Test
+    void canMaxEditHabit() {
+        Habit habit = Habit.builder()
+                .name("Старое название привычки")
+                .description("Старое описание привычки")
+                .isPhotoAllowed(false)
+                .isHarmful(false)
+                .durationDays(null)
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .build();
+
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name("Новое название привычки")
+                .description("Новое описание привычки")
+                .isPhotoAllowed(true)
+                .isHarmful(true)
+                .durationDays(60)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+        when(habitRepository.existsByUserIdAndName(userId, request.getName())).thenReturn(false);
+
+        underTest.editHabit(habitId, request, userIdStr);
+
+        assertThat(habit.getName()).isEqualTo("Новое название привычки");
+        assertThat(habit.getDescription()).isEqualTo("Новое описание привычки");
+        assertThat(habit.isPhotoAllowed()).isTrue();
+        assertThat(habit.isHarmful()).isTrue();
+        assertThat(habit.getDurationDays()).isEqualTo(60);
+    }
+
+    @Test
+    void canEditOnlyName() {
+        Habit habit = Habit.builder()
+                .name("Старое название привычки")
+                .description("Старое описание привычки")
+                .isPhotoAllowed(false)
+                .isHarmful(false)
+                .durationDays(30)
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .timesPerWeek(3)
+                .build();
+
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name("Новое название привычки")
+                .description(null)
+                .isPhotoAllowed(null)
+                .isHarmful(null)
+                .durationDays(null)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+
+        underTest.editHabit(habitId, request, userIdStr);
+
+        assertThat(habit.getName()).isEqualTo("Новое название привычки");
+        assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
+        assertThat(habit.isPhotoAllowed()).isFalse();
+        assertThat(habit.isHarmful()).isFalse();
+        assertThat(habit.getDurationDays()).isEqualTo(30);
+    }
+
+    @Test
+    void canSetDurationDaysToNull() {
+        Habit habit = Habit.builder()
+                .name("Старое название привычки")
+                .description("Старое описание привычки")
+                .isPhotoAllowed(false)
+                .isHarmful(false)
+                .durationDays(30)
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .timesPerWeek(3)
+                .build();
+
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name(null)
+                .description(null)
+                .isPhotoAllowed(null)
+                .isHarmful(null)
+                .durationDays(0)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+
+        underTest.editHabit(habitId, request, userIdStr);
+
+        assertThat(habit.getName()).isEqualTo("Старое название привычки");
+        assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
+        assertThat(habit.isPhotoAllowed()).isFalse();
+        assertThat(habit.isHarmful()).isFalse();
+        assertThat(habit.getDurationDays()).isNull();
+    }
+
+    @Test
+    void failEditHabitWhenUserDoesNotHaveThisHabit() {
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name("Новое название привычки")
+                .description("Новое описание привычки")
+                .isPhotoAllowed(true)
+                .isHarmful(true)
+                .durationDays(60)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("This user doesn't have a habit with this id");
+    }
+
+    @Test
+    void failEditHabitWhenUserAlreadyHasHabitWithSameName() {
+        Habit habit = Habit.builder()
+                .name("Старое название привычки")
+                .description("Старое описание привычки")
+                .isPhotoAllowed(false)
+                .isHarmful(false)
+                .durationDays(30)
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .timesPerWeek(3)
+                .build();
+
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name("Новое название привычки")
+                .description("Новое описание привычки")
+                .isPhotoAllowed(true)
+                .isHarmful(true)
+                .durationDays(60)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+        when(habitRepository.existsByUserIdAndName(userId, request.getName())).thenReturn(true);
+
+        assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessage("This user already has a habit with that name");
+    }
+
+    @Test
+    void failSetHarmfulTrueWithNotWeeklyOnDaysFrequency() {
+        Habit habit = Habit.builder()
+                .name("Старое название привычки")
+                .description("Старое описание привычки")
+                .isPhotoAllowed(false)
+                .isHarmful(false)
+                .durationDays(30)
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .timesPerWeek(3)
+                .build();
+
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name(null)
+                .description(null)
+                .isPhotoAllowed(null)
+                .isHarmful(true)
+                .durationDays(null)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+
+        assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("A habit with this FrequencyType cannot be harmful");
     }
 
 }

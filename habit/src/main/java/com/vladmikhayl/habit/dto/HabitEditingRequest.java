@@ -2,9 +2,11 @@ package com.vladmikhayl.habit.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class HabitEditingRequest {
 
     /*
