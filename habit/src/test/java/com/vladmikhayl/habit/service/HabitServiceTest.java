@@ -33,7 +33,7 @@ class HabitServiceTest {
     private HabitService underTest;
 
     @Test
-    void canCreateMinInfoHabit() {
+    void canCreateHabitWithMinInfo() {
         HabitCreationRequest request = HabitCreationRequest.builder()
                 .name("Чистить зубы 2 раза в день")
                 .description(null)
@@ -79,7 +79,7 @@ class HabitServiceTest {
     }
 
     @Test
-    void canCreateMaxInfoHabit() {
+    void canCreateHabitWithMaxInfo() {
         HabitCreationRequest request = HabitCreationRequest.builder()
                 .name("Чистить зубы 2 раза в день")
                 .description("Чистка зубов - это очень полезно")
@@ -215,6 +215,41 @@ class HabitServiceTest {
         underTest.editHabit(habitId, request, userIdStr);
 
         assertThat(habit.getName()).isEqualTo("Новое название привычки");
+        assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
+        assertThat(habit.isPhotoAllowed()).isFalse();
+        assertThat(habit.isHarmful()).isFalse();
+        assertThat(habit.getDurationDays()).isEqualTo(30);
+    }
+
+    @Test
+    void canNullEditHabit() {
+        Habit habit = Habit.builder()
+                .name("Старое название привычки")
+                .description("Старое описание привычки")
+                .isPhotoAllowed(false)
+                .isHarmful(false)
+                .durationDays(30)
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .timesPerWeek(3)
+                .build();
+
+        HabitEditingRequest request = HabitEditingRequest.builder()
+                .name(null)
+                .description(null)
+                .isPhotoAllowed(null)
+                .isHarmful(null)
+                .durationDays(null)
+                .build();
+
+        String userIdStr = "1";
+        Long userId = 1L;
+        Long habitId = 2L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+
+        underTest.editHabit(habitId, request, userIdStr);
+
+        assertThat(habit.getName()).isEqualTo("Старое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
         assertThat(habit.isPhotoAllowed()).isFalse();
         assertThat(habit.isHarmful()).isFalse();
