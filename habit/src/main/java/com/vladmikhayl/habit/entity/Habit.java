@@ -9,13 +9,13 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Entity
-@Table(name = "habits")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "habits")
 public class Habit {
 
     @Id

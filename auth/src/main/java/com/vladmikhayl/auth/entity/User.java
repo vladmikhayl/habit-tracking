@@ -10,10 +10,10 @@ import java.util.Collections;
 
 @Getter
 @Setter
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
