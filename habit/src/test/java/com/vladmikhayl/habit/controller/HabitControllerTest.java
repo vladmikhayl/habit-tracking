@@ -443,7 +443,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Название")
                 .description("Описание")
-                .isPhotoAllowed(true)
                 .isHarmful(true)
                 .durationDays(30)
                 .build();
@@ -467,7 +466,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(0)
                 .build();
@@ -491,7 +489,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -515,7 +512,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("")
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -541,7 +537,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("А".repeat(256))
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -567,7 +562,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description("А".repeat(1001))
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -593,7 +587,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(-1)
                 .build();
@@ -619,7 +612,6 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(731)
                 .build();

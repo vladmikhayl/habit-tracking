@@ -21,9 +21,6 @@ public class HabitEditingRequest {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
-    @JsonProperty("isPhotoAllowed")
-    private Boolean isPhotoAllowed;
-
     @JsonProperty("isHarmful")
     private Boolean isHarmful;
 

@@ -306,7 +306,6 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Новое название")
                 .description("Описание")
-                .isPhotoAllowed(false)
                 .isHarmful(true)
                 .durationDays(30)
                 .build();
@@ -322,7 +321,7 @@ public class HabitControllerIntegrationTest {
                 .userId(userId)
                 .name("Новое название")
                 .description("Описание")
-                .isPhotoAllowed(false)
+                .isPhotoAllowed(true)
                 .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
@@ -367,7 +366,6 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(0)
                 .build();
@@ -427,7 +425,6 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Новое название")
                 .description("Описание")
-                .isPhotoAllowed(false)
                 .isHarmful(true)
                 .durationDays(30)
                 .build();
@@ -490,7 +487,6 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Название 1")
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -538,7 +534,6 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(true)
                 .durationDays(null)
                 .build();

@@ -79,10 +79,6 @@ public class HabitService {
             habit.setDescription(request.getDescription());
         }
 
-        if (request.getIsPhotoAllowed() != null) {
-            habit.setPhotoAllowed(request.getIsPhotoAllowed());
-        }
-
         if (request.getIsHarmful() != null) {
             if (habit.getFrequencyType() != FrequencyType.WEEKLY_ON_DAYS && request.getIsHarmful()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A habit with this FrequencyType cannot be harmful");

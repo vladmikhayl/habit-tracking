@@ -155,7 +155,6 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
@@ -165,7 +164,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Новое название привычки")
                 .description("Новое описание привычки")
-                .isPhotoAllowed(true)
                 .isHarmful(true)
                 .durationDays(60)
                 .build();
@@ -181,7 +179,6 @@ class HabitServiceTest {
 
         assertThat(habit.getName()).isEqualTo("Новое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Новое описание привычки");
-        assertThat(habit.isPhotoAllowed()).isTrue();
         assertThat(habit.isHarmful()).isTrue();
         assertThat(habit.getDurationDays()).isEqualTo(60);
     }
@@ -191,7 +188,6 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
@@ -201,7 +197,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Новое название привычки")
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -216,7 +211,6 @@ class HabitServiceTest {
 
         assertThat(habit.getName()).isEqualTo("Новое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
-        assertThat(habit.isPhotoAllowed()).isFalse();
         assertThat(habit.isHarmful()).isFalse();
         assertThat(habit.getDurationDays()).isEqualTo(30);
     }
@@ -226,7 +220,6 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
@@ -236,7 +229,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(null)
                 .build();
@@ -251,7 +243,6 @@ class HabitServiceTest {
 
         assertThat(habit.getName()).isEqualTo("Старое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
-        assertThat(habit.isPhotoAllowed()).isFalse();
         assertThat(habit.isHarmful()).isFalse();
         assertThat(habit.getDurationDays()).isEqualTo(30);
     }
@@ -261,7 +252,6 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
@@ -271,7 +261,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(null)
                 .durationDays(0)
                 .build();
@@ -286,7 +275,6 @@ class HabitServiceTest {
 
         assertThat(habit.getName()).isEqualTo("Старое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
-        assertThat(habit.isPhotoAllowed()).isFalse();
         assertThat(habit.isHarmful()).isFalse();
         assertThat(habit.getDurationDays()).isNull();
     }
@@ -296,7 +284,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Новое название привычки")
                 .description("Новое описание привычки")
-                .isPhotoAllowed(true)
                 .isHarmful(true)
                 .durationDays(60)
                 .build();
@@ -317,7 +304,6 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
@@ -327,7 +313,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name("Новое название привычки")
                 .description("Новое описание привычки")
-                .isPhotoAllowed(true)
                 .isHarmful(true)
                 .durationDays(60)
                 .build();
@@ -349,7 +334,6 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
@@ -359,7 +343,6 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
                 .name(null)
                 .description(null)
-                .isPhotoAllowed(null)
                 .isHarmful(true)
                 .durationDays(null)
                 .build();
