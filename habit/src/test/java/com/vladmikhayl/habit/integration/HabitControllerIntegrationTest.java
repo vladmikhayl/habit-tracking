@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@ActiveProfiles("test") // чтобы CommandLineRunner в коде HabitApplication не выполнялся
+@ActiveProfiles("test") // чтобы CommandLineRunner в коде Application не выполнялся
 @TestPropertySource(properties = {
         // чтобы Спринг не пытался использовать конфиг-сервер и Эврику
         "spring.config.location=classpath:/application-test.yml",

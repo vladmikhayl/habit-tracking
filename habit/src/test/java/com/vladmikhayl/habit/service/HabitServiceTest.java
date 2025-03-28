@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -296,6 +297,10 @@ class HabitServiceTest {
 
         assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
                 .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
                 .hasMessageContaining("This user doesn't have a habit with this id");
     }
 
@@ -355,6 +360,10 @@ class HabitServiceTest {
 
         assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
                 .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                })
                 .hasMessageContaining("A habit with this FrequencyType cannot be harmful");
     }
 

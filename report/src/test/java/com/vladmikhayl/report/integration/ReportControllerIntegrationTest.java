@@ -1,0 +1,291 @@
+package com.vladmikhayl.report.integration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vladmikhayl.report.dto.ReportCreationRequest;
+import com.vladmikhayl.report.entity.HabitPhotoAllowedCache;
+import com.vladmikhayl.report.entity.Report;
+import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
+import com.vladmikhayl.report.repository.ReportRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@ActiveProfiles("test") // чтобы CommandLineRunner в коде Application не выполнялся
+@TestPropertySource(properties = {
+        // чтобы Спринг не пытался использовать конфиг-сервер и Эврику
+        "spring.config.location=classpath:/application-test.yml",
+        "eureka.client.enabled=false",
+        "spring.cloud.config.enabled=false"
+})
+@Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
+@AutoConfigureMockMvc
+public class ReportControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ReportRepository reportRepository;
+
+    @Autowired
+    private HabitPhotoAllowedCacheRepository habitPhotoAllowedCacheRepository;
+
+    private static ObjectMapper objectMapper;
+
+    private static PostgreSQLContainer<?> postgresContainer;
+
+    @BeforeAll
+    public static void setUp() {
+        objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+
+        postgresContainer = new PostgreSQLContainer<>("postgres:15")
+                .withDatabaseName("testdb")
+                .withUsername("test")
+                .withPassword("test");
+
+        // Запускаем контейнер с Постгресом
+        postgresContainer.start();
+
+        // Указываем настройки для подключения к БД
+        System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
+        System.setProperty("spring.datasource.username", postgresContainer.getUsername());
+        System.setProperty("spring.datasource.password", postgresContainer.getPassword());
+        System.setProperty("spring.datasource.driver-class-name", "org.postgresql.Driver");
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        if (postgresContainer != null) {
+            postgresContainer.stop();
+        }
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCreateReportWithoutPhotoWhenPhotoIsNotAllowed() throws Exception {
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(1L)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isCreated());
+
+        Optional<Report> report = reportRepository.findByHabitIdAndDate(request.getHabitId(), request.getDate());
+        assertThat(report.isPresent()).isTrue();
+
+        Report expected = Report.builder()
+                .id(1L)
+                .userId(userId)
+                .habitId(1L)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        assertThat(report.get())
+                .usingRecursiveComparison()
+                .ignoringFields("createdAt")
+                .isEqualTo(expected);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCreateReportWithoutPhotoWhenPhotoIsAllowed() throws Exception {
+        Long habitId = 10L;
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        habitPhotoAllowedCacheRepository.save(
+                HabitPhotoAllowedCache.builder()
+                        .habitId(habitId)
+                        .build()
+        );
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isCreated());
+
+        Optional<Report> report = reportRepository.findByHabitIdAndDate(request.getHabitId(), request.getDate());
+        assertThat(report.isPresent()).isTrue();
+
+        Report expected = Report.builder()
+                .id(1L)
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        assertThat(report.get())
+                .usingRecursiveComparison()
+                .ignoringFields("createdAt")
+                .isEqualTo(expected);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCreateReportWithPhotoWhenPhotoIsAllowed() throws Exception {
+        Long habitId = 10L;
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl("https://start.spring.io/")
+                .build();
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        habitPhotoAllowedCacheRepository.save(
+                HabitPhotoAllowedCache.builder()
+                        .habitId(habitId)
+                        .build()
+        );
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isCreated());
+
+        Optional<Report> report = reportRepository.findByHabitIdAndDate(request.getHabitId(), request.getDate());
+        assertThat(report.isPresent()).isTrue();
+
+        Report expected = Report.builder()
+                .id(1L)
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl("https://start.spring.io/")
+                .build();
+
+        assertThat(report.get())
+                .usingRecursiveComparison()
+                .ignoringFields("createdAt")
+                .isEqualTo(expected);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failCreateReportWithPhotoWhenPhotoIsNotAllowed() throws Exception {
+        Long habitId = 10L;
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl("https://start.spring.io/")
+                .build();
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("This habit doesn't imply a photo, but it was attached"));
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failCreateReportWithFutureDate() throws Exception {
+        Long habitId = 10L;
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.now().plusDays(1))
+                .photoUrl(null)
+                .build();
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("It is forbidden to mark a habit as completed for a day that has not yet arrived"));
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failCreateReportThatHasAlreadyBeenCreated() throws Exception {
+        Long habitId = 10L;
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 20))
+                .photoUrl(null)
+                .build();
+
+        reportRepository.save(existingReport);
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 20))
+                .photoUrl(null)
+                .build();
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("This habit has already been marked as completed on this day"));
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(1);
+    }
+
+    // TODO: тест на createReport когда у юзера нет такой привычки в этот день
+
+}
