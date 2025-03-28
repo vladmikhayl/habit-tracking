@@ -3,6 +3,7 @@ package com.vladmikhayl.report.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vladmikhayl.report.dto.ReportCreationRequest;
+import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.HabitPhotoAllowedCache;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -287,5 +289,180 @@ public class ReportControllerIntegrationTest {
     }
 
     // TODO: тест на createReport когда у юзера нет такой привычки в этот день
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canChangeReportPhotoWhenItHasAlreadyBeenAttached() throws Exception {
+        String userIdStr = "2";
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        habitPhotoAllowedCacheRepository.save(
+                HabitPhotoAllowedCache.builder()
+                        .habitId(habitId)
+                        .build()
+        );
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl("https://old-photo-url.com/")
+                .build();
+
+        reportRepository.save(existingReport);
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://new-photo-url.com/")
+                .build();
+
+        mockMvc.perform(put("/api/v1/reports/1/change-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk());
+
+        Optional<Report> report = reportRepository.findById(1L);
+        assertThat(report.isPresent()).isTrue();
+        assertThat(report.get().getPhotoUrl()).isEqualTo("https://new-photo-url.com/");
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canChangeReportPhotoWhenItHasNotBeenAttachedYet() throws Exception {
+        String userIdStr = "2";
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        habitPhotoAllowedCacheRepository.save(
+                HabitPhotoAllowedCache.builder()
+                        .habitId(habitId)
+                        .build()
+        );
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        reportRepository.save(existingReport);
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://new-photo-url.com/")
+                .build();
+
+        mockMvc.perform(put("/api/v1/reports/1/change-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk());
+
+        Optional<Report> report = reportRepository.findById(1L);
+        assertThat(report.isPresent()).isTrue();
+        assertThat(report.get().getPhotoUrl()).isEqualTo("https://new-photo-url.com/");
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canChangeReportPhotoToNull() throws Exception {
+        String userIdStr = "2";
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        habitPhotoAllowedCacheRepository.save(
+                HabitPhotoAllowedCache.builder()
+                        .habitId(habitId)
+                        .build()
+        );
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl("https://old-photo-url.com/")
+                .build();
+
+        reportRepository.save(existingReport);
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("")
+                .build();
+
+        mockMvc.perform(put("/api/v1/reports/1/change-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk());
+
+        Optional<Report> report = reportRepository.findById(1L);
+        assertThat(report.isPresent()).isTrue();
+        assertThat(report.get().getPhotoUrl()).isNull();
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failChangeReportPhotoWhenUserDoesNotHaveThisReport() throws Exception {
+        String userIdStr = "2";
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://new-photo-url.com/")
+                .build();
+
+        mockMvc.perform(put("/api/v1/reports/1/change-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have this report"));
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failChangeReportPhotoWhenThisHabitDoesNotImplyPhotos() throws Exception {
+        String userIdStr = "2";
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        reportRepository.save(existingReport);
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://new-photo-url.com/")
+                .build();
+
+        mockMvc.perform(put("/api/v1/reports/1/change-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This habit doesn't imply a photo"));
+
+        Optional<Report> report = reportRepository.findById(1L);
+        assertThat(report.isPresent()).isTrue();
+        assertThat(report.get().getPhotoUrl()).isNull();
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(1);
+    }
 
 }

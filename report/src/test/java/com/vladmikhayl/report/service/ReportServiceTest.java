@@ -1,6 +1,7 @@
 package com.vladmikhayl.report.service;
 
 import com.vladmikhayl.report.dto.ReportCreationRequest;
+import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -182,5 +184,162 @@ class ReportServiceTest {
     // TODO: тест на createReport когда у юзера нет такой привычки в этот день
 
     // TODO: тест на createReport когда некорректный URL фото
+
+    @Test
+    void canChangeReportPhotoWhenItHasAlreadyBeenAttached() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+        Long habitId = 5L;
+
+        Report report = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 27))
+                .photoUrl("https://chatgpt.com/")
+                .build();
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://dzen.ru/")
+                .build();
+
+        when(reportRepository.findByIdAndUserId(reportId, userId)).thenReturn(Optional.of(report));
+        when(habitPhotoAllowedCacheRepository.existsById(habitId)).thenReturn(true);
+
+        underTest.changeReportPhoto(reportId, request, userIdStr);
+
+        assertThat(report.getPhotoUrl()).isEqualTo("https://dzen.ru/");
+    }
+
+    @Test
+    void canChangeReportPhotoWhenItHasNotBeenAttachedYet() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+        Long habitId = 5L;
+
+        Report report = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 27))
+                .photoUrl(null)
+                .build();
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://dzen.ru/")
+                .build();
+
+        when(reportRepository.findByIdAndUserId(reportId, userId)).thenReturn(Optional.of(report));
+        when(habitPhotoAllowedCacheRepository.existsById(habitId)).thenReturn(true);
+
+        underTest.changeReportPhoto(reportId, request, userIdStr);
+
+        assertThat(report.getPhotoUrl()).isEqualTo("https://dzen.ru/");
+    }
+
+    @Test
+    void canChangeReportPhotoToNull() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+        Long habitId = 5L;
+
+        Report report = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 27))
+                .photoUrl("https://chatgpt.com/")
+                .build();
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("")
+                .build();
+
+        when(reportRepository.findByIdAndUserId(reportId, userId)).thenReturn(Optional.of(report));
+        when(habitPhotoAllowedCacheRepository.existsById(habitId)).thenReturn(true);
+
+        underTest.changeReportPhoto(reportId, request, userIdStr);
+
+        assertThat(report.getPhotoUrl()).isEqualTo(null);
+    }
+
+    @Test
+    void canNullChangeReportPhoto() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+        Long habitId = 5L;
+
+        Report report = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 27))
+                .photoUrl("https://chatgpt.com/")
+                .build();
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl(null)
+                .build();
+
+        when(reportRepository.findByIdAndUserId(reportId, userId)).thenReturn(Optional.of(report));
+        when(habitPhotoAllowedCacheRepository.existsById(habitId)).thenReturn(true);
+
+        underTest.changeReportPhoto(reportId, request, userIdStr);
+
+        assertThat(report.getPhotoUrl()).isEqualTo("https://chatgpt.com/");
+    }
+
+    @Test
+    void failChangeReportPhotoWhenUserDoesNotHaveThisReport() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://dzen.ru/")
+                .build();
+
+        when(reportRepository.findByIdAndUserId(reportId, userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.changeReportPhoto(reportId, request, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have this report");
+    }
+
+    @Test
+    void failChangeReportPhotoWhenThisHabitDoesNotImplyPhotos() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+        Long habitId = 5L;
+
+        Report report = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 27))
+                .photoUrl("https://chatgpt.com/")
+                .build();
+
+        ReportPhotoEditingRequest request = ReportPhotoEditingRequest.builder()
+                .photoUrl("https://dzen.ru/")
+                .build();
+
+        when(reportRepository.findByIdAndUserId(reportId, userId)).thenReturn(Optional.of(report));
+        when(habitPhotoAllowedCacheRepository.existsById(habitId)).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.changeReportPhoto(reportId, request, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This habit doesn't imply a photo");
+    }
+
+    // TODO: тест на changeReportPhoto когда некорректный URL фото
 
 }

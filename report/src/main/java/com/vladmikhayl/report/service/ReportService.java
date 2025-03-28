@@ -1,6 +1,7 @@
 package com.vladmikhayl.report.service;
 
 import com.vladmikhayl.report.dto.ReportCreationRequest;
+import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -28,14 +30,14 @@ public class ReportService {
         }
     }
 
+    // TODO: проверять что URL фото правильное
     public void createReport(
             ReportCreationRequest request,
             String userId
     ) {
-
         Long userIdLong = parseUserId(userId);
 
-        boolean isHabitCurrentAtThatDateForThatUser = true;
+        boolean isHabitCurrentAtThatDateForThatUser = true; // TODO: добавить реальную проверку
 
         if (!isHabitCurrentAtThatDateForThatUser) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this habit on this day");
@@ -63,7 +65,37 @@ public class ReportService {
                 .build();
 
         reportRepository.save(report);
+    }
 
+    // TODO: проверять что URL фото правильное
+    @Transactional
+    public void changeReportPhoto(
+            Long reportId,
+            ReportPhotoEditingRequest request,
+            String userId
+    ) {
+        Long userIdLong = parseUserId(userId);
+
+        Report report = reportRepository.findByIdAndUserId(reportId, userIdLong)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this report"));
+
+        long habitId = report.getHabitId();
+
+        if (!habitPhotoAllowedCacheRepository.existsById(habitId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This habit doesn't imply a photo");
+        }
+
+        String photoUrl = request.getPhotoUrl();
+
+        if (photoUrl == null) {
+            return;
+        }
+
+        if (photoUrl.isEmpty()) {
+            report.setPhotoUrl(null);
+        } else {
+            report.setPhotoUrl(photoUrl);
+        }
     }
 
 }

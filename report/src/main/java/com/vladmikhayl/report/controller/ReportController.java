@@ -1,6 +1,7 @@
 package com.vladmikhayl.report.controller;
 
 import com.vladmikhayl.report.dto.ReportCreationRequest;
+import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,21 @@ public class ReportController {
 
     @PostMapping("/create")
     public ResponseEntity<Void> createReport(
-            @Valid @RequestBody ReportCreationRequest reportCreationRequest,
+            @Valid @RequestBody ReportCreationRequest request,
             @RequestHeader("X-User-Id") String userId
     ) {
-        reportService.createReport(reportCreationRequest, userId);
+        reportService.createReport(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{reportId}/change-photo")
+    public ResponseEntity<Void> changeReportPhoto(
+            @PathVariable Long reportId,
+            @RequestBody ReportPhotoEditingRequest request,
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        reportService.changeReportPhoto(reportId, request, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

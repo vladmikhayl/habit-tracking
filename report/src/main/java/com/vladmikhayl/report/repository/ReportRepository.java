@@ -12,4 +12,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     Optional<Report> findByHabitIdAndDate(Long habitId, LocalDate date);
 
+    Optional<Report> findByIdAndUserId(Long id, Long userId);
+
 }
