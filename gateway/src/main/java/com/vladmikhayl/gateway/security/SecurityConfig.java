@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/auth/**").permitAll()
+                        .pathMatchers("/internal/**").permitAll() // TODO: сделать проверку на серверный токен для внутренних эндпоинтов
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt));

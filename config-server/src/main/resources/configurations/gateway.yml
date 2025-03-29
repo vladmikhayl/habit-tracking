@@ -26,3 +26,8 @@ spring:
           uri: lb://report
           predicates:
             - Path=/api/v1/reports/**
+        # if the request path is /internal/reports/**, it is redirected to report microservice
+        - id: report-internal
+          uri: lb://report
+          predicates:
+            - Path=/internal/reports/**

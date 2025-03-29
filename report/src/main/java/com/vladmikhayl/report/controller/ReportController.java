@@ -4,6 +4,7 @@ import com.vladmikhayl.report.dto.ReportCreationRequest;
 import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.service.ReportService;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
