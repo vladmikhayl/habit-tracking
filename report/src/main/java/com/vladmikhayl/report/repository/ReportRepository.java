@@ -10,6 +10,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     boolean existsByHabitIdAndDate(Long habitId, LocalDate date);
 
+    boolean existsByIdAndUserId(Long id, Long userId);
+
     Optional<Report> findByHabitIdAndDate(Long habitId, LocalDate date);
 
     Optional<Report> findByIdAndUserId(Long id, Long userId);

@@ -91,11 +91,25 @@ public class ReportService {
             return;
         }
 
+        // Чтобы положить значение null в поле photoUrl, в качестве этого параметра нужно передать пустую строку
         if (photoUrl.isEmpty()) {
             report.setPhotoUrl(null);
         } else {
             report.setPhotoUrl(photoUrl);
         }
+    }
+
+    public void deleteReport(
+            Long reportId,
+            String userId
+    ) {
+        Long userIdLong = parseUserId(userId);
+
+        if (!reportRepository.existsByIdAndUserId(reportId, userIdLong)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this report");
+        }
+
+        reportRepository.deleteById(reportId);
     }
 
 }

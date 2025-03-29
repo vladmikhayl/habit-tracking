@@ -35,4 +35,13 @@ public class ReportController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @DeleteMapping("/{reportId}/delete")
+    public ResponseEntity<Void> deleteReport(
+            @PathVariable Long reportId,
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        reportService.deleteReport(reportId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

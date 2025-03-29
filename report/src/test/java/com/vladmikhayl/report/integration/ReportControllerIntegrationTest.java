@@ -23,11 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -463,6 +463,69 @@ public class ReportControllerIntegrationTest {
 
         long reportsCount = reportRepository.count();
         assertThat(reportsCount).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canDeleteReport() throws Exception {
+        String userIdStr = "2";
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        reportRepository.save(existingReport);
+
+        assertThat(reportRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/reports/1/delete")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk());
+
+        assertThat(reportRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failDeleteReportWhenThatReportDoesNotExist() throws Exception {
+        String userIdStr = "2";
+
+        mockMvc.perform(delete("/api/v1/reports/1/delete")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have this report"));
+
+        assertThat(reportRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failDeleteReportWhenThatReportBelongsToAnotherUser() throws Exception {
+        String userIdStr = "2";
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(1L)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        reportRepository.save(existingReport);
+
+        assertThat(reportRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/reports/1/delete")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have this report"));
+
+        assertThat(reportRepository.count()).isEqualTo(1);
     }
 
 }

@@ -342,4 +342,36 @@ class ReportServiceTest {
 
     // TODO: тест на changeReportPhoto когда некорректный URL фото
 
+    @Test
+    void canDeleteReport() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+
+        when(reportRepository.existsByIdAndUserId(reportId, userId)).thenReturn(true);
+
+        underTest.deleteReport(reportId, userIdStr);
+
+        verify(reportRepository).deleteById(reportId);
+    }
+
+    @Test
+    void failDeleteReportWhenUserDoesNotHaveThatReport() {
+        String userIdStr = "3";
+        Long userId = 3L;
+        Long reportId = 2L;
+
+        when(reportRepository.existsByIdAndUserId(reportId, userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.deleteReport(reportId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have this report");
+
+        verify(reportRepository, never()).deleteById(reportId);
+    }
+
 }
