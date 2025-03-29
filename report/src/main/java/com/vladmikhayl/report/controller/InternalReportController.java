@@ -25,4 +25,13 @@ public class InternalReportController {
         return ResponseEntity.ok(reportFullInfo);
     }
 
+    @GetMapping("/{habitId}/is-completed/at-day/{date}")
+    public ResponseEntity<Boolean> isCompletedAtDay(
+            @PathVariable Long habitId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        boolean isCompleted = internalReportService.isCompletedAtDay(habitId, date);
+        return ResponseEntity.ok(isCompleted);
+    }
+
 }

@@ -36,4 +36,11 @@ public class InternalReportService {
                 .build();
     }
 
+    public boolean isCompletedAtDay(
+            Long habitId,
+            LocalDate date
+    ) {
+        return reportRepository.existsByHabitIdAndDate(habitId, date);
+    }
+
 }

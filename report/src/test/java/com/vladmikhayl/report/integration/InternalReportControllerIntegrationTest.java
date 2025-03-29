@@ -20,8 +20,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test") // чтобы CommandLineRunner в коде Application не выполнялся
@@ -124,6 +123,54 @@ public class InternalReportControllerIntegrationTest {
                 .andExpect(jsonPath("$.completed").value(false))
                 .andExpect(jsonPath("$.completionTime").isEmpty())
                 .andExpect(jsonPath("$.photoUrl").isEmpty());
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCheckIsCompletedWhenReportIsPresent() throws Exception {
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl("https://photo-url.com/")
+                .build();
+
+        reportRepository.save(existingReport);
+
+        mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCheckIsCompletedWhenReportIsPresentForAnotherDay() throws Exception {
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 27))
+                .photoUrl("https://photo-url.com/")
+                .build();
+
+        reportRepository.save(existingReport);
+
+        mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCheckIsCompletedWhenReportIsNotPresentAtAll() throws Exception {
+        mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"));
     }
 
 }
