@@ -16,4 +16,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     Optional<Report> findByIdAndUserId(Long id, Long userId);
 
+    int countByHabitIdAndDateBetween(Long habitId, LocalDate startDate, LocalDate endDate);
+
 }

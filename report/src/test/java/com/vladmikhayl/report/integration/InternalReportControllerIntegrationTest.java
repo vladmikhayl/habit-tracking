@@ -173,4 +173,109 @@ public class InternalReportControllerIntegrationTest {
                 .andExpect(content().string("false"));
     }
 
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCountCompletionsInWeekPeriod() throws Exception {
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        // Создаем 3 отчета на искомой неделе для искомой привычки
+        for (int i = 0; i < 3; i++) {
+            Report existingReport = Report.builder()
+                    .userId(userId)
+                    .habitId(habitId)
+                    .date(LocalDate.of(2025, 3, 24 + i))
+                    .photoUrl(null)
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        // Создаем 1 отчет на другой неделе для искомой привычки
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 23))
+                .photoUrl(null)
+                .build();
+        reportRepository.save(existingReport);
+
+
+        mockMvc.perform(get("/internal/reports/10/completion-count/WEEK/at/2025-03-29"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("3"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCountCompletionsInWeekPeriodWhenAmountIsZero() throws Exception {
+        mockMvc.perform(get("/internal/reports/10/completion-count/WEEK/at/2025-03-29"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCountCompletionsInMonthPeriod() throws Exception {
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        // Создаем 5 отчетов в искомом месяце для искомой привычки
+        for (int i = 0; i < 5; i++) {
+            Report existingReport = Report.builder()
+                    .userId(userId)
+                    .habitId(habitId)
+                    .date(LocalDate.of(2025, 2, 10 + i*2))
+                    .photoUrl(null)
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        // Создаем 3 отчета в другом месяце для искомой привычки
+        for (int i = 0; i < 3; i++) {
+            Report existingReport = Report.builder()
+                    .userId(userId)
+                    .habitId(habitId)
+                    .date(LocalDate.of(2025, 3, i + 1))
+                    .photoUrl(null)
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        // Создаем 1 отчет в искомом месяце, но для другой привычки
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(9L)
+                .date(LocalDate.of(2025, 2, 23))
+                .photoUrl(null)
+                .build();
+        reportRepository.save(existingReport);
+
+
+        mockMvc.perform(get("/internal/reports/10/completion-count/MONTH/at/2025-02-01"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("5"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCountCompletionsInMonthPeriodWhenAmountIsZero() throws Exception {
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        // Создаем 3 отчета в другом месяце для искомой привычки
+        for (int i = 0; i < 3; i++) {
+            Report existingReport = Report.builder()
+                    .userId(userId)
+                    .habitId(habitId)
+                    .date(LocalDate.of(2025, 1, i + 1))
+                    .photoUrl(null)
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        mockMvc.perform(get("/internal/reports/10/completion-count/MONTH/at/2025-03-01"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+    }
+
 }

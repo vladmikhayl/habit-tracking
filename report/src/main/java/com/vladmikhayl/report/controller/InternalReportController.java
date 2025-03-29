@@ -1,6 +1,7 @@
 package com.vladmikhayl.report.controller;
 
 import com.vladmikhayl.report.dto.ReportFullInfoResponse;
+import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.service.InternalReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +33,16 @@ public class InternalReportController {
     ) {
         boolean isCompleted = internalReportService.isCompletedAtDay(habitId, date);
         return ResponseEntity.ok(isCompleted);
+    }
+
+    @GetMapping("/{habitId}/completion-count/{period}/at/{date}")
+    public ResponseEntity<Integer> countCompletionsInPeriod(
+            @PathVariable Long habitId,
+            @PathVariable Period period,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        int count = internalReportService.countCompletionsInPeriod(habitId, period, date);
+        return ResponseEntity.ok(count);
     }
 
 }
