@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT
+@SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT (для Сваггера)
 @Tag(name = "Отчеты о выполнении привычек", description = "Эндпоинты для работы с отчетами о выполнении привычек")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
+        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT")
+})
 public class ReportController {
 
     private final ReportService reportService;
@@ -31,7 +35,6 @@ public class ReportController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Успешное создание"),
-            @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к созданию отчетов к этой привычке в этот день"),
             @ApiResponse(responseCode = "409", description = "Эта привычка уже отмечена выполненной в этот день")
     })
@@ -51,7 +54,6 @@ public class ReportController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное изменение"),
-            @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этому отчету")
     })
     public ResponseEntity<Void> changeReportPhoto(
@@ -70,7 +72,6 @@ public class ReportController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное удаление"),
-            @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этому отчету")
     })
     public ResponseEntity<Void> deleteReport(

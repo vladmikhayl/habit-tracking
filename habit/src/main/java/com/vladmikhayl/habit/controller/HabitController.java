@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/habits")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT
+@SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT (для Сваггера)
 @Tag(name = "Привычки", description = "Эндпоинты для работы привычками")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
+        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT")
+})
 public class HabitController {
 
     private final HabitService habitService;
@@ -28,7 +32,6 @@ public class HabitController {
     @Operation(summary = "Создать привычку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Успешное создание"),
-            @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
             @ApiResponse(responseCode = "409", description = "У пользователя уже есть привычка с таким названием")
     })
     public ResponseEntity<Void> createHabit(
@@ -43,7 +46,6 @@ public class HabitController {
     @Operation(summary = "Изменить существующую привычку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное изменение"),
-            @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке"),
             @ApiResponse(responseCode = "409", description = "У пользователя уже есть привычка с таким названием")
     })
