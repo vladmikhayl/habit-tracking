@@ -96,23 +96,23 @@ public class HabitService {
         }
     }
 
-    public HabitsListResponse getAllUserHabits(String userId) {
-        Long userIdLong = parseUserId(userId);
-
-        List<HabitShortInfoResponse> habitShortInfoResponseList = new ArrayList<>();
-
-        habitRepository.findAllByUserId(userIdLong)
-                .forEach(habit -> habitShortInfoResponseList.add(
-                        HabitShortInfoResponse.builder()
-                                .name(habit.getName())
-                                .subsAmount(0) // TODO: вставалять реально кол-во подписчиков
-                                .isCompletedNow(false) // TODO: вставлять реально выполнена ли сегодня
-                                .build()
-                ));
-
-        return HabitsListResponse.builder()
-                .habits(habitShortInfoResponseList)
-                .build();
-    }
+//    public HabitsListResponse getAllUserHabits(String userId) {
+//        Long userIdLong = parseUserId(userId);
+//
+//        List<HabitShortInfoResponse> habitShortInfoResponseList = new ArrayList<>();
+//
+//        habitRepository.findAllByUserId(userIdLong)
+//                .forEach(habit -> habitShortInfoResponseList.add(
+//                        HabitShortInfoResponse.builder()
+//                                .name(habit.getName())
+//                                .subsAmount(0) // TODO: вставалять реально кол-во подписчиков
+//                                .isCompletedNow(false) // TODO: вставлять реально выполнена ли сегодня
+//                                .build()
+//                ));
+//
+//        return HabitsListResponse.builder()
+//                .habits(habitShortInfoResponseList)
+//                .build();
+//    }
 
 }

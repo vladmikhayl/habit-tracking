@@ -16,18 +16,57 @@ spring:
           uri: lb://auth
           predicates:
             - Path=/api/v1/auth/**
+
+        # redirection for swagger requests for auth microservice
+        - id: auth-swagger
+          uri: lb://auth
+          predicates:
+            - Path=/auth/v3/api-docs
+          filters:
+            - RewritePath=/auth/v3/api-docs, /v3/api-docs
+
         # if the request path is /api/v1/habits/**, it is redirected to habit microservice
         - id: habit
           uri: lb://habit
           predicates:
             - Path=/api/v1/habits/**
+
+        # redirection for swagger requests for habit microservice
+        - id: habit-swagger
+          uri: lb://habit
+          predicates:
+            - Path=/habit/v3/api-docs
+          filters:
+            - RewritePath=/habit/v3/api-docs, /v3/api-docs
+
         # if the request path is /api/v1/reports/**, it is redirected to report microservice
         - id: report
           uri: lb://report
           predicates:
             - Path=/api/v1/reports/**
+
         # if the request path is /internal/reports/**, it is redirected to report microservice
         - id: report-internal
           uri: lb://report
           predicates:
             - Path=/internal/reports/**
+
+        # redirection for swagger requests for report microservice
+        - id: report-swagger
+          uri: lb://report
+          predicates:
+            - Path=/report/v3/api-docs
+          filters:
+            - RewritePath=/report/v3/api-docs, /v3/api-docs
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    urls:
+      - name: Auth API
+        url: /auth/v3/api-docs
+      - name: Habit API
+        url: /habit/v3/api-docs
+      - name: Report API
+        url: /report/v3/api-docs

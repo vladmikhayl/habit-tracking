@@ -41,7 +41,7 @@ public class HabitApplication {
 					.name("Не курить")
 					.frequencyType(FrequencyType.WEEKLY_ON_DAYS)
 					.daysOfWeek(
-							Set.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY)
+							Set.of(DayOfWeek.MONDAY)
 					)
 					.isHarmful(true)
 					.durationDays(30)

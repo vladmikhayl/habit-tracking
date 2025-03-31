@@ -23,6 +23,8 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/auth/**").permitAll()
+                        .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/swagger-resources/**").permitAll()
+                        .pathMatchers("/habit/v3/api-docs/**", "/auth/v3/api-docs/**", "/report/v3/api-docs/**", "/subscription/v3/api-docs/**").permitAll()
                         .pathMatchers("/internal/**").permitAll() // TODO: сделать проверку на серверный токен для внутренних эндпоинтов
                         .anyExchange().authenticated()
                 )
