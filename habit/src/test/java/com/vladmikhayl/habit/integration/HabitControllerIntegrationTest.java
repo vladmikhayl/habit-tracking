@@ -6,7 +6,6 @@ import com.vladmikhayl.habit.dto.HabitEditingRequest;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +13,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.DayOfWeek;
 import java.util.Optional;
@@ -49,32 +49,24 @@ public class HabitControllerIntegrationTest {
     private HabitRepository habitRepository;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    private static PostgreSQLContainer<?> postgresContainer;
+    private static ObjectMapper objectMapper;
 
     @BeforeAll
     public static void setUp() {
-        postgresContainer = new PostgreSQLContainer<>("postgres:15")
-                .withDatabaseName("testdb")
-                .withUsername("test")
-                .withPassword("test");
+        objectMapper = new ObjectMapper();
 
-        // Запускаем контейнер с Постгресом
-        postgresContainer.start();
-
-        // Указываем настройки для подключения к БД
-        System.setProperty("spring.datasource.url", postgresContainer.getJdbcUrl());
-        System.setProperty("spring.datasource.username", postgresContainer.getUsername());
-        System.setProperty("spring.datasource.password", postgresContainer.getPassword());
-        System.setProperty("spring.datasource.driver-class-name", "org.postgresql.Driver");
+        // Явным образом получаем контейнер Postgres (если он еще не создавался, то в этот момент создастся его синглтон)
+        TestPostgresContainer.getInstance();
     }
 
-    @AfterAll
-    public static void tearDown() {
-        if (postgresContainer != null) {
-            postgresContainer.stop();
-        }
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        // Задаем настройки для БД, используя синглтон контейнера Postgres
+        TestPostgresContainer container = TestPostgresContainer.getInstance();
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
+        registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
     }
 
     @Test
