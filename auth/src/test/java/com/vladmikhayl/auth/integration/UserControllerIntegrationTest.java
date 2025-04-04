@@ -2,6 +2,8 @@ package com.vladmikhayl.auth.integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vladmikhayl.auth.controller.UserController;
+import com.vladmikhayl.auth.dto.LoginRequest;
 import com.vladmikhayl.auth.dto.RegisterRequest;
 import com.vladmikhayl.auth.entity.User;
 import com.vladmikhayl.auth.repository.UserRepository;
@@ -45,6 +47,9 @@ public class UserControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserController userController;
 
     @BeforeAll
     public static void setUp() {
@@ -120,6 +125,77 @@ public class UserControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors").isNotEmpty());
+
+        long usersCount = userRepository.count();
+        assertThat(usersCount).isEqualTo(0);
+    }
+
+    @Test
+    void canLoginWithCorrectCredentials() throws Exception {
+        RegisterRequest registerRequest = RegisterRequest.builder()
+                .username("user")
+                .password("password")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isCreated());
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .username("user")
+                .password("password")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+
+        long usersCount = userRepository.count();
+        assertThat(usersCount).isEqualTo(1);
+    }
+
+    @Test
+    void failLoginWithWrongPassword() throws Exception {
+        RegisterRequest registerRequest = RegisterRequest.builder()
+                .username("user")
+                .password("password")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isCreated());
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .username("user")
+                .password("wrong_password")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Invalid username or password"));
+
+        long usersCount = userRepository.count();
+        assertThat(usersCount).isEqualTo(1);
+    }
+
+    @Test
+    void failLoginWhenUserDoesNotExist() throws Exception {
+        LoginRequest loginRequest = LoginRequest.builder()
+                .username("user")
+                .password("password")
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Invalid username or password"));
 
         long usersCount = userRepository.count();
         assertThat(usersCount).isEqualTo(0);
