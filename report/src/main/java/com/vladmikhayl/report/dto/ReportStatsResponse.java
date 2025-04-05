@@ -10,16 +10,25 @@ import java.util.List;
 @Builder
 public class ReportStatsResponse {
 
-    private int completionsPercent;
+    // Для всех привычек
+    private int completionsInTotal;
 
+    // Только для привычек с WEEKLY ON DAYS
+    private Integer completionsPercent;
+
+    // Только для привычек с WEEKLY ON DAYS
     private Integer serialDays;
 
+    // Только для привычек с WEEKLY X TIMES или MONTHLY X TIMES
     private Integer completionsInPeriod;
 
+    // Только для привычек с WEEKLY X TIMES или MONTHLY X TIMES
     private Integer completionsPlannedInPeriod;
 
+    // Для всех привычек
     private List<LocalDate> completedDays;
 
+    // Только для привычек с WEEKLY ON DAYS
     private List<LocalDate> uncompletedDays;
 
 }

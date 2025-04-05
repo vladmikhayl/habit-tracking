@@ -51,19 +51,19 @@ public class InternalReportController {
         return ResponseEntity.ok(count);
     }
 
-//    @GetMapping("/{habitId}/reports-info")
-//    public ResponseEntity<ReportStatsResponse> getReportStats(
-//            @PathVariable Long habitId,
-//            @RequestParam FrequencyType frequencyType,
-//            @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,
-//            @RequestParam(required = false) Integer timesPerWeek,
-//            @RequestParam(required = false) Integer timesPerMonth,
-//            @RequestParam LocalDate createdAt
-//    ) {
-//        ReportStatsResponse response = internalReportService.getReportStats(
-//                habitId, frequencyType, daysOfWeek, timesPerWeek, timesPerMonth, createdAt
-//        );
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/{habitId}/reports-info")
+    public ResponseEntity<ReportStatsResponse> getReportStats(
+            @PathVariable Long habitId,
+            @RequestParam FrequencyType frequencyType,
+            @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,
+            @RequestParam(required = false) Integer timesPerWeek,
+            @RequestParam(required = false) Integer timesPerMonth,
+            @RequestParam LocalDate createdAt
+    ) {
+        ReportStatsResponse response = internalReportService.getReportStats(
+                habitId, frequencyType, daysOfWeek, timesPerWeek, timesPerMonth, createdAt
+        );
+        return ResponseEntity.ok(response);
+    }
 
 }

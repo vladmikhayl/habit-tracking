@@ -36,6 +36,16 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Map.of(
+                        "error", ex.getMessage(),
+                        "timestamp", LocalDateTime.now()
+                )
+        );
+    }
+
     // Это исключение выкидывается только когда какие-то переданные в запрос параметры с @Valid не прошли валидацию
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
