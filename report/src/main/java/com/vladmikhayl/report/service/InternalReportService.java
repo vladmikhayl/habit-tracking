@@ -92,12 +92,6 @@ public class InternalReportService {
             }
         }
 
-        Integer serialDays = null;
-
-        if (frequencyType == FrequencyType.WEEKLY_ON_DAYS) {
-            serialDays = countSerialDays(habitId, daysOfWeek);
-        }
-
         Integer completionsInPeriod = null;
 
         if (frequencyType == FrequencyType.WEEKLY_X_TIMES) {
@@ -126,6 +120,16 @@ public class InternalReportService {
             uncompletedDays = getUncompletedDays(habitId, daysOfWeek, createdAt);
         }
 
+        Integer serialDays = null;
+
+        if (frequencyType == FrequencyType.WEEKLY_ON_DAYS) {
+            boolean shouldSerialDaysBeNull = (uncompletedDays.isEmpty() || uncompletedDays.equals(List.of(LocalDate.now())))
+                    && completionsInTotal == 0;
+            if (!shouldSerialDaysBeNull) {
+                serialDays = countSerialDays(habitId, daysOfWeek);
+            }
+        }
+
         return ReportStatsResponse.builder()
                 .completionsInTotal(completionsInTotal)
                 .completionsPercent(completionsPercent)
@@ -137,6 +141,7 @@ public class InternalReportService {
                 .build();
     }
 
+    // Вызывается для всех привычек
     private void validateFrequencyParams(
             FrequencyType frequencyType,
             Set<DayOfWeek> daysOfWeek,
@@ -171,10 +176,8 @@ public class InternalReportService {
         }
     }
 
-    private long countCompletionsPlannedInTotal(
-            Set<DayOfWeek> daysOfWeek,
-            LocalDate createdAt
-    ) {
+    // Вызывается только для привычек WEEKLY ON DAYS
+    private long countCompletionsPlannedInTotal(Set<DayOfWeek> daysOfWeek, LocalDate createdAt) {
         LocalDate today = LocalDate.now();
         long totalDays = ChronoUnit.DAYS.between(createdAt, today) + 1; // Количество дней, включая оба конца
 
@@ -194,9 +197,11 @@ public class InternalReportService {
         return count;
     }
 
+    // Вызывается только для привычек WEEKLY ON DAYS
     private int countSerialDays(Long habitId, Set<DayOfWeek> dayOfWeeks) {
         int count = 0;
-        for (LocalDate date = LocalDate.now(); true; date = date.minusDays(1)) {
+
+        for (LocalDate date = LocalDate.now().minusDays(1); true; date = date.minusDays(1)) {
             if (!dayOfWeeks.contains(date.getDayOfWeek())) {
                 continue;
             }
@@ -207,15 +212,23 @@ public class InternalReportService {
                 break;
             }
         }
+
+        boolean isCompletedToday = reportRepository.existsByHabitIdAndDate(habitId, LocalDate.now());
+        if (isCompletedToday) {
+            count++;
+        }
+
         return count;
     }
 
+    // Вызывается для всех привычек
     private List<LocalDate> getCompletedDays(Long habitId) {
         return reportRepository.findAllByHabitId(habitId).stream()
                 .map(Report::getDate)
                 .collect(Collectors.toList());
     }
 
+    // Вызывается только для привычек WEEKLY ON DAYS
     private List<LocalDate> getUncompletedDays(Long habitId, Set<DayOfWeek> daysOfWeek, LocalDate createdAt) {
         List<LocalDate> completedDays = getCompletedDays(habitId);
 
