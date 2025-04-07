@@ -9,6 +9,7 @@ import com.vladmikhayl.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 public class InternalReportService {
 
     private final ReportRepository reportRepository;
+
+    private final Clock clock;
 
     public ReportFullInfoResponse getReportAtDay(
             Long habitId,
@@ -95,11 +98,11 @@ public class InternalReportService {
         Integer completionsInPeriod = null;
 
         if (frequencyType == FrequencyType.WEEKLY_X_TIMES) {
-            completionsInPeriod = countCompletionsInPeriod(habitId, Period.WEEK, LocalDate.now());
+            completionsInPeriod = countCompletionsInPeriod(habitId, Period.WEEK, LocalDate.now(clock));
         }
 
         if (frequencyType == FrequencyType.MONTHLY_X_TIMES) {
-            completionsInPeriod = countCompletionsInPeriod(habitId, Period.MONTH, LocalDate.now());
+            completionsInPeriod = countCompletionsInPeriod(habitId, Period.MONTH, LocalDate.now(clock));
         }
 
         Integer completionsPlannedInPeriod = null;
@@ -123,7 +126,7 @@ public class InternalReportService {
         Integer serialDays = null;
 
         if (frequencyType == FrequencyType.WEEKLY_ON_DAYS) {
-            boolean shouldSerialDaysBeNull = (uncompletedDays.isEmpty() || uncompletedDays.equals(List.of(LocalDate.now())))
+            boolean shouldSerialDaysBeNull = (uncompletedDays.isEmpty() || uncompletedDays.equals(List.of(LocalDate.now(clock))))
                     && completionsInTotal == 0;
             if (!shouldSerialDaysBeNull) {
                 serialDays = countSerialDays(habitId, daysOfWeek);
@@ -178,7 +181,7 @@ public class InternalReportService {
 
     // Вызывается только для привычек WEEKLY ON DAYS
     private long countCompletionsPlannedInTotal(Set<DayOfWeek> daysOfWeek, LocalDate createdAt) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         long totalDays = ChronoUnit.DAYS.between(createdAt, today) + 1; // Количество дней, включая оба конца
 
         long fullWeeks = totalDays / 7; // Количество полных недель
@@ -201,7 +204,7 @@ public class InternalReportService {
     private int countSerialDays(Long habitId, Set<DayOfWeek> dayOfWeeks) {
         int count = 0;
 
-        for (LocalDate date = LocalDate.now().minusDays(1); true; date = date.minusDays(1)) {
+        for (LocalDate date = LocalDate.now(clock).minusDays(1); true; date = date.minusDays(1)) {
             if (!dayOfWeeks.contains(date.getDayOfWeek())) {
                 continue;
             }
@@ -213,7 +216,7 @@ public class InternalReportService {
             }
         }
 
-        boolean isCompletedToday = reportRepository.existsByHabitIdAndDate(habitId, LocalDate.now());
+        boolean isCompletedToday = reportRepository.existsByHabitIdAndDate(habitId, LocalDate.now(clock));
         if (isCompletedToday) {
             count++;
         }
@@ -232,7 +235,7 @@ public class InternalReportService {
     private List<LocalDate> getUncompletedDays(Long habitId, Set<DayOfWeek> daysOfWeek, LocalDate createdAt) {
         List<LocalDate> completedDays = getCompletedDays(habitId);
 
-        List<LocalDate> allDaysFromHabitCreating = createdAt.datesUntil(LocalDate.now().plusDays(1))
+        List<LocalDate> allDaysFromHabitCreating = createdAt.datesUntil(LocalDate.now(clock).plusDays(1))
                 .toList();
 
         return allDaysFromHabitCreating.stream()
