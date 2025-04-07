@@ -2,6 +2,7 @@ package com.vladmikhayl.report.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.ReportRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -17,8 +21,16 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
 
+import static com.vladmikhayl.report.entity.FrequencyType.WEEKLY_ON_DAYS;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,6 +45,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
 @AutoConfigureMockMvc
 public class InternalReportControllerIntegrationTest {
+
+    // При тестировании метода getReportStats() предполагается, что сегодня 7 апреля 2025
+    // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
+    private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 7);
+
+    @TestConfiguration
+    static class FixedClockConfig {
+        @Bean
+        @Primary
+        // указываем, что именно этот бин должен использоваться для времени (так как у Спринга будет 2 бина: этот и из AppConfig)
+        public Clock fixedClock() {
+            return Clock.fixed(
+                    TODAY_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+                    ZoneId.systemDefault()
+            );
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -214,7 +243,7 @@ public class InternalReportControllerIntegrationTest {
             Report existingReport = Report.builder()
                     .userId(userId)
                     .habitId(habitId)
-                    .date(LocalDate.of(2025, 2, 10 + i*2))
+                    .date(LocalDate.of(2025, 2, 10 + i * 2))
                     .photoUrl(null)
                     .build();
             reportRepository.save(existingReport);
@@ -266,6 +295,348 @@ public class InternalReportControllerIntegrationTest {
         mockMvc.perform(get("/internal/reports/10/completion-count/MONTH/at/2025-03-01"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("0"));
+    }
+
+    @Test // WEEKLY ON DAYS во все дни, создана сегодня, не выполнена ни разу
+    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedTodayWithZeroCompletions() throws Exception {
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_ON_DAYS")
+                        .param("daysOfWeek", "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY")
+                        .param("createdAt", TODAY_DATE.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(0))
+                .andExpect(jsonPath("$.completionsPercent").value(0))
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder()))
+                .andExpect(jsonPath("$.uncompletedDays").isArray())
+                .andExpect(jsonPath("$.uncompletedDays", containsInAnyOrder(TODAY_DATE.toString())));
+    }
+
+    @Test // WEEKLY ON DAYS в сегодняшний и вчерашний день, создана вчера, выполнена сегодня
+    void testReportStatsForWeeklyOnDaysOnTodayAndYesterdayThatCreatedYesterdayWithOneCompletion() throws Exception {
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE)
+                .build();
+        reportRepository.save(existingReport);
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_ON_DAYS")
+                        .param("daysOfWeek", "MONDAY,SUNDAY")
+                        .param("createdAt", TODAY_DATE.minusDays(1).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(1))
+                .andExpect(jsonPath("$.completionsPercent").value(50))
+                .andExpect(jsonPath("$.serialDays").value(1))
+                .andExpect(jsonPath("$.completionsInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(
+                        TODAY_DATE.toString()
+                )))
+                .andExpect(jsonPath("$.uncompletedDays").isArray())
+                .andExpect(jsonPath("$.uncompletedDays", containsInAnyOrder(
+                        TODAY_DATE.minusDays(1).toString()
+                )));
+    }
+
+    @Test
+        // WEEKLY ON DAYS только в сегодняшний день, создана месяц назад, выполнена 3 раза
+        // (из них 2 в эту серию, причем сегодня еще не выполнена)
+    void testReportStatsForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithThreeCompletions() throws Exception {
+        Long habitId = 10L;
+
+        Report existingReport1 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(7))
+                .build();
+        Report existingReport2 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(14))
+                .build();
+        Report existingReport3 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(28))
+                .build();
+        reportRepository.save(existingReport1);
+        reportRepository.save(existingReport2);
+        reportRepository.save(existingReport3);
+
+        // Отчет о другой привычке (он не должен участвовать в статистике)
+        Report existingReport4 = Report.builder()
+                .userId(50L)
+                .habitId(habitId + 1)
+                .date(TODAY_DATE)
+                .build();
+        reportRepository.save(existingReport4);
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_ON_DAYS")
+                        .param("daysOfWeek", "MONDAY")
+                        .param("createdAt", TODAY_DATE.minusDays(30).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(3))
+                .andExpect(jsonPath("$.completionsPercent").value(60))
+                .andExpect(jsonPath("$.serialDays").value(2))
+                .andExpect(jsonPath("$.completionsInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(
+                        TODAY_DATE.minusDays(7).toString(),
+                        TODAY_DATE.minusDays(14).toString(),
+                        TODAY_DATE.minusDays(28).toString()
+                )))
+                .andExpect(jsonPath("$.uncompletedDays").isArray())
+                .andExpect(jsonPath("$.uncompletedDays", containsInAnyOrder(
+                        TODAY_DATE.toString(),
+                        TODAY_DATE.minusDays(21).toString()
+                )));
+    }
+
+    @Test // WEEKLY ON DAYS во все дни, создана полгода назад, выполнена всегда кроме вчера и сегодня
+    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedSixMonthsAgoWithAllCompletionsExceptTwo() throws Exception {
+        Long habitId = 10L;
+
+        for (int i = 2; i <= 180; i++) {
+            Report existingReport = Report.builder()
+                    .userId(50L)
+                    .habitId(habitId)
+                    .date(TODAY_DATE.minusDays(i))
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        List<String> reportDates = IntStream.rangeClosed(2, 180)
+                .mapToObj(TODAY_DATE::minusDays)
+                .map(LocalDate::toString)
+                .toList();
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_ON_DAYS")
+                        .param("daysOfWeek", "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY")
+                        .param("createdAt", TODAY_DATE.minusDays(180).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(179))
+                .andExpect(jsonPath("$.completionsPercent").value(98))
+                .andExpect(jsonPath("$.serialDays").value(0))
+                .andExpect(jsonPath("$.completionsInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(reportDates.toArray(String[]::new))))
+                .andExpect(jsonPath("$.uncompletedDays").isArray())
+                .andExpect(jsonPath("$.uncompletedDays", containsInAnyOrder(
+                        TODAY_DATE.toString(),
+                        TODAY_DATE.minusDays(1).toString()
+                )));
+    }
+
+    @Test // WEEKLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
+    void testReportStatsForWeeklyXTimesOneTimeThatCreatedTodayWithZeroCompletions() throws Exception {
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_X_TIMES")
+                        .param("timesPerWeek", "1")
+                        .param("createdAt", TODAY_DATE.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(0))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value(0))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value(1))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder()))
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
+    }
+
+    @Test // WEEKLY X TIMES 5 раз, создана месяц назад, выполнена 3 раза (из них на этой неделе 1)
+    void testReportStatsForWeeklyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() throws Exception {
+        Long habitId = 10L;
+
+        Report existingReport1 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE)
+                .build();
+        Report existingReport2 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(8))
+                .build();
+        Report existingReport3 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(9))
+                .build();
+        reportRepository.save(existingReport1);
+        reportRepository.save(existingReport2);
+        reportRepository.save(existingReport3);
+
+        // Отчет о другой привычке (он не должен участвовать в статистике)
+        Report existingReport4 = Report.builder()
+                .userId(50L)
+                .habitId(habitId + 1)
+                .date(TODAY_DATE.minusDays(10))
+                .build();
+        reportRepository.save(existingReport4);
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_X_TIMES")
+                        .param("timesPerWeek", "5")
+                        .param("createdAt", TODAY_DATE.minusDays(30).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(3))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value(1))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value(5))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(
+                        TODAY_DATE.toString(),
+                        TODAY_DATE.minusDays(8).toString(),
+                        TODAY_DATE.minusDays(9).toString()
+                )))
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
+    }
+
+    @Test // WEEKLY X TIMES 7 раз, создана полгода назад, выполнена всегда кроме вчера и сегодня
+    void testReportStatsForWeeklyXTimesSevenTimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() throws Exception {
+        Long habitId = 10L;
+
+        for (int i = 2; i <= 180; i++) {
+            Report existingReport = Report.builder()
+                    .userId(50L)
+                    .habitId(habitId)
+                    .date(TODAY_DATE.minusDays(i))
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        List<String> reportDates = IntStream.rangeClosed(2, 180)
+                .mapToObj(TODAY_DATE::minusDays)
+                .map(LocalDate::toString)
+                .toList();
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "WEEKLY_X_TIMES")
+                        .param("timesPerWeek", "7")
+                        .param("createdAt", TODAY_DATE.minusDays(180).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(179))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value(0))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value(7))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(reportDates.toArray(String[]::new))))
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
+    }
+
+    @Test // MONTHLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
+    void testReportStatsForMonthlyXTimesOneTimeThatCreatedTodayWithZeroCompletions() throws Exception {
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "MONTHLY_X_TIMES")
+                        .param("timesPerMonth", "1")
+                        .param("createdAt", TODAY_DATE.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(0))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value(0))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value(1))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder()))
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
+    }
+
+    @Test // MONTHLY X TIMES 5 раз, создана месяц назад, выполнена 3 раза (и все в этом месяце)
+    void testReportStatsForMonthlyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() throws Exception {
+        Long habitId = 10L;
+
+        Report existingReport1 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE)
+                .build();
+        Report existingReport2 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(2))
+                .build();
+        Report existingReport3 = Report.builder()
+                .userId(50L)
+                .habitId(habitId)
+                .date(TODAY_DATE.minusDays(6))
+                .build();
+        reportRepository.save(existingReport1);
+        reportRepository.save(existingReport2);
+        reportRepository.save(existingReport3);
+
+        // Отчет о другой привычке (он не должен участвовать в статистике)
+        Report existingReport4 = Report.builder()
+                .userId(50L)
+                .habitId(habitId + 1)
+                .date(TODAY_DATE.minusDays(5))
+                .build();
+        reportRepository.save(existingReport4);
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "MONTHLY_X_TIMES")
+                        .param("timesPerMonth", "5")
+                        .param("createdAt", TODAY_DATE.minusDays(30).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(3))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value(3))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value(5))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(
+                        TODAY_DATE.toString(),
+                        TODAY_DATE.minusDays(2).toString(),
+                        TODAY_DATE.minusDays(6).toString()
+                )))
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
+    }
+
+    @Test // MONTHLY X TIMES 31 раз, создана полгода назад, выполнена всегда кроме вчера и сегодня
+    void testReportStatsForMonthlyXTimes31TimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() throws Exception {
+        Long habitId = 10L;
+
+        for (int i = 2; i <= 180; i++) {
+            Report existingReport = Report.builder()
+                    .userId(50L)
+                    .habitId(habitId)
+                    .date(TODAY_DATE.minusDays(i))
+                    .build();
+            reportRepository.save(existingReport);
+        }
+
+        List<String> reportDates = IntStream.rangeClosed(2, 180)
+                .mapToObj(TODAY_DATE::minusDays)
+                .map(LocalDate::toString)
+                .toList();
+
+        mockMvc.perform(get("/internal/reports/10/reports-info")
+                        .param("frequencyType", "MONTHLY_X_TIMES")
+                        .param("timesPerMonth", "31")
+                        .param("createdAt", TODAY_DATE.minusDays(180).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value(179))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value(5))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value(31))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.completedDays", containsInAnyOrder(reportDates.toArray(String[]::new))))
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
     }
 
 }
