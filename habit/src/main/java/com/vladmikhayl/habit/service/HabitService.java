@@ -2,11 +2,11 @@ package com.vladmikhayl.habit.service;
 
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.HabitEditingRequest;
-import com.vladmikhayl.habit.dto.HabitShortInfoResponse;
-import com.vladmikhayl.habit.dto.HabitsListResponse;
+import com.vladmikhayl.habit.dto.event.HabitWithPhotoAllowedCreatedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
+import com.vladmikhayl.habit.service.kafka.HabitEventProducer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,14 +14,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class HabitService {
 
     private final HabitRepository habitRepository;
+
+    private final HabitEventProducer habitEventProducer;
 
     private Long parseUserId(String userId) {
         try {
@@ -54,7 +53,15 @@ public class HabitService {
                 .timesPerMonth(request.getTimesPerMonth())
                 .build();
 
-        habitRepository.save(habit);
+        Habit savedHabit = habitRepository.save(habit);
+
+        // Отправка события о создании отчета с фото на report
+        if (request.isPhotoAllowed()) {
+            HabitWithPhotoAllowedCreatedEvent event = HabitWithPhotoAllowedCreatedEvent.builder()
+                    .habitId(savedHabit.getId())
+                    .build();
+            habitEventProducer.sendHabitWithPhotoAllowedCreatedEvent(event);
+        }
     }
 
     @Transactional
