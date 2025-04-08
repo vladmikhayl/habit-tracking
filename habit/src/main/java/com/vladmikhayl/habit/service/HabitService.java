@@ -3,6 +3,7 @@ package com.vladmikhayl.habit.service;
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
+import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -110,6 +111,12 @@ public class HabitService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have a habit with this id"));
 
         habitRepository.delete(habit);
+
+        // Отправка события об удалении привычки всем, кто подписан на habit-deleted
+        HabitDeletedEvent event = HabitDeletedEvent.builder()
+                .habitId(habitId)
+                .build();
+        habitEventProducer.sendHabitDeletedEvent(event);
     }
 
 }

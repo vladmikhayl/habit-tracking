@@ -3,6 +3,7 @@ package com.vladmikhayl.habit.service;
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
+import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -90,9 +91,9 @@ class HabitServiceTest {
 
         verify(habitEventProducer).sendHabitCreatedEvent(habitCreatedEventArgumentCaptor.capture());
 
-        HabitCreatedEvent habitWithPhotoEventCaptured = habitCreatedEventArgumentCaptor.getValue();
+        HabitCreatedEvent habitCreatedEventCaptured = habitCreatedEventArgumentCaptor.getValue();
 
-        assertThat(habitWithPhotoEventCaptured.habitId()).isEqualTo(30L);
+        assertThat(habitCreatedEventCaptured.habitId()).isEqualTo(30L);
     }
 
     @Test
@@ -147,9 +148,9 @@ class HabitServiceTest {
 
         verify(habitEventProducer).sendHabitCreatedEvent(habitCreatedEventArgumentCaptor.capture());
 
-        HabitCreatedEvent habitWithPhotoEventCaptured = habitCreatedEventArgumentCaptor.getValue();
+        HabitCreatedEvent habitCreatedEventCaptured = habitCreatedEventArgumentCaptor.getValue();
 
-        assertThat(habitWithPhotoEventCaptured.habitId()).isEqualTo(30L);
+        assertThat(habitCreatedEventCaptured.habitId()).isEqualTo(30L);
     }
 
     @Test
@@ -418,6 +419,15 @@ class HabitServiceTest {
         Habit capturedHabit = habitArgumentCaptor.getValue();
 
         assertThat(capturedHabit.getId()).isEqualTo(52L);
+
+        ArgumentCaptor<HabitDeletedEvent> habitDeletedEventArgumentCaptor =
+                ArgumentCaptor.forClass(HabitDeletedEvent.class);
+
+        verify(habitEventProducer).sendHabitDeletedEvent(habitDeletedEventArgumentCaptor.capture());
+
+        HabitDeletedEvent habitDeletedEventCaptured = habitDeletedEventArgumentCaptor.getValue();
+
+        assertThat(habitDeletedEventCaptured.habitId()).isEqualTo(52L);
     }
 
     @Test
@@ -435,6 +445,8 @@ class HabitServiceTest {
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
                 .hasMessageContaining("This user doesn't have a habit with this id");
+
+        verify(habitEventProducer, never()).sendHabitDeletedEvent(any());
     }
 
 }

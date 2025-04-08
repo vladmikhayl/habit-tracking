@@ -21,33 +21,33 @@ public class HabitApplication {
 		SpringApplication.run(HabitApplication.class, args);
 	}
 
-	@Bean
-	@Profile("!test")
-	CommandLineRunner commandLineRunner(
-			HabitRepository habitRepository
-	) {
-		return args -> {
-			Habit habit1 = Habit.builder()
-					.userId(1L)
-					.name("Вставать в 10 утра")
-					.frequencyType(FrequencyType.WEEKLY_X_TIMES)
-					.timesPerWeek(5)
-					.isPhotoAllowed(true)
-					.build();
-			habitRepository.save(habit1);
-
-			Habit habit2 = Habit.builder()
-					.userId(1L)
-					.name("Не курить")
-					.frequencyType(FrequencyType.WEEKLY_ON_DAYS)
-					.daysOfWeek(
-							Set.of(DayOfWeek.MONDAY)
-					)
-					.isHarmful(true)
-					.durationDays(30)
-					.build();
-			habitRepository.save(habit2);
-		};
-	}
+//	@Bean
+//	@Profile("!test")
+//	CommandLineRunner commandLineRunner(
+//			HabitRepository habitRepository
+//	) {
+//		return args -> {
+//			Habit habit1 = Habit.builder()
+//					.userId(1L)
+//					.name("Вставать в 10 утра")
+//					.frequencyType(FrequencyType.WEEKLY_X_TIMES)
+//					.timesPerWeek(5)
+//					.isPhotoAllowed(true)
+//					.build();
+//			habitRepository.save(habit1);
+//
+//			Habit habit2 = Habit.builder()
+//					.userId(1L)
+//					.name("Не курить")
+//					.frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+//					.daysOfWeek(
+//							Set.of(DayOfWeek.MONDAY)
+//					)
+//					.isHarmful(true)
+//					.durationDays(30)
+//					.build();
+//			habitRepository.save(habit2);
+//		};
+//	}
 
 }

@@ -23,4 +23,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     int countByHabitId(Long habitId);
 
+    void deleteByHabitId(Long habitId);
+
 }
