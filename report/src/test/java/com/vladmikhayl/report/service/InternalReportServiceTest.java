@@ -27,8 +27,10 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InternalReportServiceTest {
-    
-    private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 7);
+
+    // При тестировании метода getReportStats() предполагается, что сегодня 6 апреля 2025
+    // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
+    private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 6);
 
     @Mock
     private Clock clock;
@@ -791,6 +793,65 @@ class InternalReportServiceTest {
         assertThat(response.getUncompletedDays()).isNull();
     }
 
+    @Test // WEEKLY X TIMES 1 раз, создана две недели назад, выполнена на этой неделе 5 раз
+    void testReportStatsForWeeklyXTimesOneTimeThatCreatedTwoWeeksAgoWithFiveCompletionsOnThisWeek() {
+        Long habitId = 10L;
+        FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
+        int timesPerWeek = 1;
+        LocalDate createdAt = TODAY_DATE.minusDays(13);
+
+        when(reportRepository.countByHabitId(habitId)).thenReturn(5);
+
+        when(reportRepository.countByHabitIdAndDateBetween(
+                habitId,
+                TODAY_DATE.with(DayOfWeek.MONDAY),
+                TODAY_DATE.with(DayOfWeek.MONDAY).plusDays(6)
+        )).thenReturn(5);
+
+        List<Report> reports = List.of(
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(1))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(2))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(4))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(5))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(6))
+                        .build()
+        );
+
+        when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
+
+        ReportStatsResponse response = underTest.getReportStats(
+                habitId,
+                frequencyType,
+                null,
+                timesPerWeek,
+                null,
+                createdAt
+        );
+
+        assertThat(response.getCompletionsInTotal()).isEqualTo(5);
+        assertThat(response.getCompletionsPercent()).isNull();
+        assertThat(response.getSerialDays()).isNull();
+        assertThat(response.getCompletionsInPeriod()).isEqualTo(5);
+        assertThat(response.getCompletionsPlannedInPeriod()).isEqualTo(1);
+        assertThat(response.getCompletedDays()).containsExactlyInAnyOrder(
+                TODAY_DATE.minusDays(1),
+                TODAY_DATE.minusDays(2),
+                TODAY_DATE.minusDays(4),
+                TODAY_DATE.minusDays(5),
+                TODAY_DATE.minusDays(6)
+        );
+        assertThat(response.getUncompletedDays()).isNull();
+    }
+
     @Test // MONTHLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
     void testReportStatsForMonthlyXTimesOneTimeThatCreatedTodayWithZeroCompletions() {
         Long habitId = 10L;
@@ -1059,6 +1120,69 @@ class InternalReportServiceTest {
                 .mapToObj(TODAY_DATE::minusDays)
                 .toList();
         assertThat(response.getCompletedDays()).containsExactlyInAnyOrder(reportDates.toArray(LocalDate[]::new));
+        assertThat(response.getUncompletedDays()).isNull();
+    }
+
+    @Test // MONTHLY X TIMES 1 раз, создана две недели назад, выполнена в этом месяце 5 раз (и еще 1 раз в прошлом месяце)
+    void testReportStatsForMonthlyXTimesOneTimeThatCreatedTwoWeeksAgoWithFiveCompletionsOnThisMonth() {
+        Long habitId = 10L;
+        FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
+        int timesPerMonth = 1;
+        LocalDate createdAt = TODAY_DATE.minusDays(13);
+
+        when(reportRepository.countByHabitId(habitId)).thenReturn(6);
+
+        when(reportRepository.countByHabitIdAndDateBetween(
+                habitId,
+                LocalDate.of(2025, 4, 1),
+                LocalDate.of(2025, 4, 30)
+        )).thenReturn(5);
+
+        List<Report> reports = List.of(
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(1))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(2))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(3))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(4))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(5))
+                        .build(),
+                Report.builder()
+                        .date(TODAY_DATE.minusDays(6))
+                        .build()
+        );
+
+        when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
+
+        ReportStatsResponse response = underTest.getReportStats(
+                habitId,
+                frequencyType,
+                null,
+                null,
+                timesPerMonth,
+                createdAt
+        );
+
+        assertThat(response.getCompletionsInTotal()).isEqualTo(6);
+        assertThat(response.getCompletionsPercent()).isNull();
+        assertThat(response.getSerialDays()).isNull();
+        assertThat(response.getCompletionsInPeriod()).isEqualTo(5);
+        assertThat(response.getCompletionsPlannedInPeriod()).isEqualTo(1);
+        assertThat(response.getCompletedDays()).containsExactlyInAnyOrder(
+                TODAY_DATE.minusDays(1),
+                TODAY_DATE.minusDays(2),
+                TODAY_DATE.minusDays(3),
+                TODAY_DATE.minusDays(4),
+                TODAY_DATE.minusDays(5),
+                TODAY_DATE.minusDays(6)
+        );
         assertThat(response.getUncompletedDays()).isNull();
     }
 
