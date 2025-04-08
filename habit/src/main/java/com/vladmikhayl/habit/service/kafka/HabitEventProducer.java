@@ -1,6 +1,6 @@
 package com.vladmikhayl.habit.service.kafka;
 
-import com.vladmikhayl.habit.dto.event.HabitWithPhotoAllowedCreatedEvent;
+import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HabitEventProducer {
 
-    private final KafkaTemplate<String, HabitWithPhotoAllowedCreatedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, HabitCreatedEvent> kafkaTemplate;
 
-    public void sendHabitWithPhotoAllowedCreatedEvent(HabitWithPhotoAllowedCreatedEvent event) {
-        kafkaTemplate.send("habit-with-photo-allowed-created", event);
+    public void sendHabitCreatedEvent(HabitCreatedEvent event) {
+        kafkaTemplate.send("habit-created", event);
     }
 
 }

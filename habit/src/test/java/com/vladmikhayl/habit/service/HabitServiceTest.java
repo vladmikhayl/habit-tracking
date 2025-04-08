@@ -2,7 +2,7 @@ package com.vladmikhayl.habit.service;
 
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.HabitEditingRequest;
-import com.vladmikhayl.habit.dto.event.HabitWithPhotoAllowedCreatedEvent;
+import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -57,6 +57,8 @@ class HabitServiceTest {
 
         when(habitRepository.existsByUserIdAndName(userId, request.getName())).thenReturn(false);
 
+        when(habitRepository.save(any(Habit.class))).thenReturn(Habit.builder().id(30L).build());
+
         underTest.createHabit(request, userIdStr);
 
         ArgumentCaptor<Habit> habitArgumentCaptor = ArgumentCaptor.forClass(Habit.class);
@@ -83,7 +85,14 @@ class HabitServiceTest {
                 .ignoringFields("id", "createdAt")
                 .isEqualTo(expected);
 
-        verify(habitEventProducer, never()).sendHabitWithPhotoAllowedCreatedEvent(any());
+        ArgumentCaptor<HabitCreatedEvent> habitCreatedEventArgumentCaptor =
+                ArgumentCaptor.forClass(HabitCreatedEvent.class);
+
+        verify(habitEventProducer).sendHabitCreatedEvent(habitCreatedEventArgumentCaptor.capture());
+
+        HabitCreatedEvent habitWithPhotoEventCaptured = habitCreatedEventArgumentCaptor.getValue();
+
+        assertThat(habitWithPhotoEventCaptured.habitId()).isEqualTo(30L);
     }
 
     @Test
@@ -133,12 +142,12 @@ class HabitServiceTest {
                 .ignoringFields("id", "createdAt")
                 .isEqualTo(expected);
 
-        ArgumentCaptor<HabitWithPhotoAllowedCreatedEvent> habitWithPhotoCaptor =
-                ArgumentCaptor.forClass(HabitWithPhotoAllowedCreatedEvent.class);
+        ArgumentCaptor<HabitCreatedEvent> habitCreatedEventArgumentCaptor =
+                ArgumentCaptor.forClass(HabitCreatedEvent.class);
 
-        verify(habitEventProducer).sendHabitWithPhotoAllowedCreatedEvent(habitWithPhotoCaptor.capture());
+        verify(habitEventProducer).sendHabitCreatedEvent(habitCreatedEventArgumentCaptor.capture());
 
-        HabitWithPhotoAllowedCreatedEvent habitWithPhotoEventCaptured = habitWithPhotoCaptor.getValue();
+        HabitCreatedEvent habitWithPhotoEventCaptured = habitCreatedEventArgumentCaptor.getValue();
 
         assertThat(habitWithPhotoEventCaptured.habitId()).isEqualTo(30L);
     }
@@ -168,7 +177,7 @@ class HabitServiceTest {
 
         verify(habitRepository, never()).save(any());
 
-        verify(habitEventProducer, never()).sendHabitWithPhotoAllowedCreatedEvent(any());
+        verify(habitEventProducer, never()).sendHabitCreatedEvent(any());
     }
 
     @Test

@@ -2,7 +2,7 @@ package com.vladmikhayl.habit.service;
 
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.HabitEditingRequest;
-import com.vladmikhayl.habit.dto.event.HabitWithPhotoAllowedCreatedEvent;
+import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -55,13 +55,13 @@ public class HabitService {
 
         Habit savedHabit = habitRepository.save(habit);
 
-        // Отправка события о создании отчета с фото на report
-        if (request.isPhotoAllowed()) {
-            HabitWithPhotoAllowedCreatedEvent event = HabitWithPhotoAllowedCreatedEvent.builder()
-                    .habitId(savedHabit.getId())
-                    .build();
-            habitEventProducer.sendHabitWithPhotoAllowedCreatedEvent(event);
-        }
+        // Отправка события о создании привычки всем, кто подписан на habit-created
+        HabitCreatedEvent event = HabitCreatedEvent.builder()
+                .habitId(savedHabit.getId())
+                .userId(savedHabit.getUserId())
+                .isPhotoAllowed(savedHabit.isPhotoAllowed())
+                .build();
+        habitEventProducer.sendHabitCreatedEvent(event);
     }
 
     @Transactional

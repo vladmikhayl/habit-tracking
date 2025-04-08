@@ -1,6 +1,6 @@
 package com.vladmikhayl.report.service.kafka;
 
-import com.vladmikhayl.habit.dto.event.HabitWithPhotoAllowedCreatedEvent;
+import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.report.entity.HabitPhotoAllowedCache;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,14 +13,17 @@ public class ReportListener {
 
     private final HabitPhotoAllowedCacheRepository habitPhotoAllowedCacheRepository;
 
-    @KafkaListener(topics = "habit-with-photo-allowed-created", groupId = "report-group")
-    public void listen(HabitWithPhotoAllowedCreatedEvent event) {
-        habitPhotoAllowedCacheRepository.save(
-                HabitPhotoAllowedCache.builder()
-                        .habitId(event.habitId())
-                        .build()
-        );
-        System.out.println("Получено событие: создана привычка " + event.habitId() + ", предусматривающая фотоотчет");
+    @KafkaListener(topics = "habit-created", groupId = "report-group")
+    public void listen(HabitCreatedEvent event) {
+        System.out.println("Получено событие: создана привычка " + event.habitId());
+        if (event.isPhotoAllowed()) {
+            habitPhotoAllowedCacheRepository.save(
+                    HabitPhotoAllowedCache.builder()
+                            .habitId(event.habitId())
+                            .build()
+            );
+            System.out.println("В таблицу habits_photo_allowed_cache добавлена привычка " + event.habitId());
+        }
     }
 
 }
