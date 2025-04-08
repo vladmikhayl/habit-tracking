@@ -96,23 +96,13 @@ public class HabitService {
         }
     }
 
-//    public HabitsListResponse getAllUserHabits(String userId) {
-//        Long userIdLong = parseUserId(userId);
-//
-//        List<HabitShortInfoResponse> habitShortInfoResponseList = new ArrayList<>();
-//
-//        habitRepository.findAllByUserId(userIdLong)
-//                .forEach(habit -> habitShortInfoResponseList.add(
-//                        HabitShortInfoResponse.builder()
-//                                .name(habit.getName())
-//                                .subsAmount(0) // TODO: вставалять реально кол-во подписчиков
-//                                .isCompletedNow(false) // TODO: вставлять реально выполнена ли сегодня
-//                                .build()
-//                ));
-//
-//        return HabitsListResponse.builder()
-//                .habits(habitShortInfoResponseList)
-//                .build();
-//    }
+    public void deleteHabit(Long habitId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        Habit habit = habitRepository.findByIdAndUserId(habitId, userIdLong)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have a habit with this id"));
+
+        habitRepository.delete(habit);
+    }
 
 }

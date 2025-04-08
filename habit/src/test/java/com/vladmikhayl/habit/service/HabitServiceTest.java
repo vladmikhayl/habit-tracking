@@ -367,4 +367,45 @@ class HabitServiceTest {
                 .hasMessageContaining("A habit with this FrequencyType cannot be harmful");
     }
 
+    @Test
+    void canDeleteHabitWhenItBelongsToUser() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        Habit habit = Habit.builder()
+                .id(habitId)
+                .userId(userId)
+                .build();
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+
+        underTest.deleteHabit(habitId, userIdStr);
+
+        ArgumentCaptor<Habit> habitArgumentCaptor = ArgumentCaptor.forClass(Habit.class);
+
+        verify(habitRepository).delete(habitArgumentCaptor.capture());
+
+        Habit capturedHabit = habitArgumentCaptor.getValue();
+
+        assertThat(capturedHabit.getId()).isEqualTo(52L);
+    }
+
+    @Test
+    void failDeleteHabitWhenItDoesNotBelongToUser() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.deleteHabit(habitId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have a habit with this id");
+    }
+
 }

@@ -25,8 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -547,6 +546,79 @@ public class HabitControllerIntegrationTest {
 
         long habitsCount = habitRepository.count();
         assertThat(habitsCount).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canDeleteHabitWhenItBelongsToUser() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        Habit existingHabit1 = Habit.builder()
+                .name("Название 1")
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY, DayOfWeek.SUNDAY))
+                .userId(userId)
+                .build();
+        habitRepository.save(existingHabit1);
+
+        Habit existingHabit2 = Habit.builder()
+                .name("Название 2")
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY, DayOfWeek.SUNDAY))
+                .userId(userId)
+                .build();
+        habitRepository.save(existingHabit2);
+
+        assertThat(habitRepository.count()).isEqualTo(2);
+
+        mockMvc.perform(delete("/api/v1/habits/1/delete")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk());
+
+        assertThat(habitRepository.count()).isEqualTo(1);
+
+        Optional<Habit> foundHabit = habitRepository.findById(2L);
+
+        assertThat(foundHabit.isPresent()).isTrue();
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failDeleteHabitWhenItBelongsToAnotherUser() throws Exception {
+        String userIdStr = "10";
+
+        Habit existingHabit1 = Habit.builder()
+                .name("Название 1")
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .timesPerWeek(5)
+                .userId(11L)
+                .build();
+        habitRepository.save(existingHabit1);
+
+        assertThat(habitRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/habits/1/delete")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have a habit with this id"));
+
+        assertThat(habitRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failDeleteHabitWhenItDoesNotExist() throws Exception {
+        String userIdStr = "10";
+
+        assertThat(habitRepository.count()).isEqualTo(0);
+
+        mockMvc.perform(delete("/api/v1/habits/1/delete")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have a habit with this id"));
+
+        assertThat(habitRepository.count()).isEqualTo(0);
     }
 
 }

@@ -58,11 +58,18 @@ public class HabitController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-//    @GetMapping("/all-user-habits")
-//    public ResponseEntity<HabitsListResponse> getAllUserHabits(
-//            @RequestHeader("X-User-Id") String userId
-//    ) {
-//        return ResponseEntity.ok(habitService.getAllUserHabits(userId));
-//    }
+    @DeleteMapping("/{habitId}/delete")
+    @Operation(summary = "Удалить существующую привычку")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешное удаление"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке")
+    })
+    public ResponseEntity<Void> deleteHabit(
+            @PathVariable @Parameter(description = "ID удаляемой привычки", example = "1") Long habitId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        habitService.deleteHabit(habitId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
 }
