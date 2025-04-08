@@ -2,9 +2,11 @@ package com.vladmikhayl.habit.service;
 
 import com.vladmikhayl.habit.dto.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.event.HabitWithPhotoAllowedCreatedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
+import com.vladmikhayl.habit.service.kafka.HabitEventProducer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +31,9 @@ class HabitServiceTest {
 
     @Mock
     private HabitRepository habitRepository;
+
+    @Mock
+    private HabitEventProducer habitEventProducer;
 
     @InjectMocks
     private HabitService underTest;
@@ -77,6 +82,8 @@ class HabitServiceTest {
                 .usingRecursiveComparison()
                 .ignoringFields("id", "createdAt")
                 .isEqualTo(expected);
+
+        verify(habitEventProducer, never()).sendHabitWithPhotoAllowedCreatedEvent(any());
     }
 
     @Test
@@ -97,6 +104,8 @@ class HabitServiceTest {
         Long userId = 10L;
 
         when(habitRepository.existsByUserIdAndName(userId, request.getName())).thenReturn(false);
+
+        when(habitRepository.save(any(Habit.class))).thenReturn(Habit.builder().id(30L).build());
 
         underTest.createHabit(request, userIdStr);
 
@@ -123,6 +132,15 @@ class HabitServiceTest {
                 .usingRecursiveComparison()
                 .ignoringFields("id", "createdAt")
                 .isEqualTo(expected);
+
+        ArgumentCaptor<HabitWithPhotoAllowedCreatedEvent> habitWithPhotoCaptor =
+                ArgumentCaptor.forClass(HabitWithPhotoAllowedCreatedEvent.class);
+
+        verify(habitEventProducer).sendHabitWithPhotoAllowedCreatedEvent(habitWithPhotoCaptor.capture());
+
+        HabitWithPhotoAllowedCreatedEvent habitWithPhotoEventCaptured = habitWithPhotoCaptor.getValue();
+
+        assertThat(habitWithPhotoEventCaptured.habitId()).isEqualTo(30L);
     }
 
     @Test
@@ -149,6 +167,8 @@ class HabitServiceTest {
                 .hasMessage("This user already has a habit with that name");
 
         verify(habitRepository, never()).save(any());
+
+        verify(habitEventProducer, never()).sendHabitWithPhotoAllowedCreatedEvent(any());
     }
 
     @Test
