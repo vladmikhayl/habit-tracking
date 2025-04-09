@@ -31,6 +31,12 @@ spring:
           predicates:
             - Path=/api/v1/habits/**
 
+        # if the request path is /internal/habits/**, it is redirected to habit microservice
+        - id: habit-internal
+          uri: lb://habit
+          predicates:
+            - Path=/internal/habits/**
+
         # redirection for swagger requests for habit microservice
         - id: habit-swagger
           uri: lb://habit
