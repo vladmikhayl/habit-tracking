@@ -2,7 +2,7 @@ package com.vladmikhayl.report.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.vladmikhayl.report.entity.FrequencyType;
+import com.vladmikhayl.report.FeignClientTestConfig;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.ReportRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -22,11 +23,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static com.vladmikhayl.report.entity.FrequencyType.WEEKLY_ON_DAYS;
@@ -43,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.config.enabled=false"
 })
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
+@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин HabitClient
 @AutoConfigureMockMvc
 public class InternalReportControllerIntegrationTest {
 

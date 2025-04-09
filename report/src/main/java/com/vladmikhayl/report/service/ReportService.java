@@ -5,6 +5,7 @@ import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
+import com.vladmikhayl.report.service.feign.HabitClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,8 @@ public class ReportService {
 
     private final HabitPhotoAllowedCacheRepository habitPhotoAllowedCacheRepository;
 
+    private final HabitClient habitClient;
+
     private Long parseUserId(String userId) {
         try {
             return Long.parseLong(userId);
@@ -37,7 +40,11 @@ public class ReportService {
     ) {
         Long userIdLong = parseUserId(userId);
 
-        boolean isHabitCurrentAtThatDateForThatUser = true; // TODO: добавить реальную проверку
+        boolean isHabitCurrentAtThatDateForThatUser = habitClient.isCurrent(
+                request.getHabitId(),
+                userIdLong,
+                request.getDate()
+        ).getBody();
 
         if (!isHabitCurrentAtThatDateForThatUser) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this habit on this day");

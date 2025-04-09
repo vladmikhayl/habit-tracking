@@ -5,6 +5,7 @@ import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
+import com.vladmikhayl.report.service.feign.HabitClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -13,10 +14,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -31,6 +32,9 @@ class ReportServiceTest {
 
     @Mock
     private HabitPhotoAllowedCacheRepository habitPhotoAllowedCacheRepository;
+
+    @Mock
+    private HabitClient habitClient;
 
     @InjectMocks
     private ReportService underTest;
@@ -47,6 +51,8 @@ class ReportServiceTest {
 
         String userIdStr = "2";
         Long userId = 2L;
+
+        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -84,6 +90,8 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
+        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
         when(habitPhotoAllowedCacheRepository.existsById(habitId)).thenReturn(true);
@@ -120,6 +128,9 @@ class ReportServiceTest {
                 .build();
 
         String userIdStr = "2";
+        Long userId = 2L;
+
+        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -147,6 +158,9 @@ class ReportServiceTest {
                 .build();
 
         String userIdStr = "2";
+        Long userId = 2L;
+
+        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -172,6 +186,9 @@ class ReportServiceTest {
                 .build();
 
         String userIdStr = "2";
+        Long userId = 2L;
+
+        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(true);
 
@@ -182,7 +199,31 @@ class ReportServiceTest {
         verify(reportRepository, never()).save(any());
     }
 
-    // TODO: тест на createReport когда у юзера нет такой привычки в этот день
+    @Test
+    void failCreateReportWhenUserDoesNotHaveThatHabitAtThatDay() {
+        Long habitId = 1L;
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 20))
+                .photoUrl(null)
+                .build();
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(false));
+
+        assertThatThrownBy(() -> underTest.createReport(request, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have this habit on this day");
+
+        verify(reportRepository, never()).save(any());
+    }
 
     // TODO: тест на createReport когда некорректный URL фото
 

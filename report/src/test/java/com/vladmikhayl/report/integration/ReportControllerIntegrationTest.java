@@ -2,18 +2,23 @@ package com.vladmikhayl.report.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vladmikhayl.report.FeignClientTestConfig;
 import com.vladmikhayl.report.dto.ReportCreationRequest;
 import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.HabitPhotoAllowedCache;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
+import com.vladmikhayl.report.service.feign.HabitClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -39,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.config.enabled=false"
 })
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
+@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин HabitClient
 @AutoConfigureMockMvc
 public class ReportControllerIntegrationTest {
 
@@ -50,6 +56,9 @@ public class ReportControllerIntegrationTest {
 
     @Autowired
     private HabitPhotoAllowedCacheRepository habitPhotoAllowedCacheRepository;
+
+    @Autowired
+    private HabitClient habitClient;
 
     private static ObjectMapper objectMapper;
 
@@ -83,6 +92,8 @@ public class ReportControllerIntegrationTest {
 
         String userIdStr = "2";
         Long userId = 2L;
+
+        Mockito.when(habitClient.isCurrent(1L, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,6 +131,8 @@ public class ReportControllerIntegrationTest {
 
         String userIdStr = "2";
         Long userId = 2L;
+
+        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         habitPhotoAllowedCacheRepository.save(
                 HabitPhotoAllowedCache.builder()
@@ -164,6 +177,8 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
+        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+
         habitPhotoAllowedCacheRepository.save(
                 HabitPhotoAllowedCache.builder()
                         .habitId(habitId)
@@ -207,6 +222,8 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
+        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -231,6 +248,8 @@ public class ReportControllerIntegrationTest {
 
         String userIdStr = "2";
         Long userId = 2L;
+
+        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -266,6 +285,8 @@ public class ReportControllerIntegrationTest {
                 .photoUrl(null)
                 .build();
 
+        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -277,7 +298,32 @@ public class ReportControllerIntegrationTest {
         assertThat(reportsCount).isEqualTo(1);
     }
 
-    // TODO: тест на createReport когда у юзера нет такой привычки в этот день
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failCreateReportWhenUserDoesNotHaveThatHabitAtThatDay() throws Exception {
+        Long habitId = 10L;
+
+        String userIdStr = "2";
+        Long userId = 2L;
+
+        ReportCreationRequest request = ReportCreationRequest.builder()
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 20))
+                .photoUrl(null)
+                .build();
+
+        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(false));
+
+        mockMvc.perform(post("/api/v1/reports/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have this habit on this day"));
+
+        long reportsCount = reportRepository.count();
+        assertThat(reportsCount).isEqualTo(0);
+    }
 
     @Test
     @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
