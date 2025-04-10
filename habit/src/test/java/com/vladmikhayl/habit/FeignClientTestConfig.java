@@ -11,7 +11,7 @@ public class FeignClientTestConfig {
     // Это бин, который создает замоканный ReportClient, который будет использоваться в интеграционных тестах
     // (вместо бина с реальным Feign-клиентом)
     @Bean
-    public ReportClient habitClient() {
+    public ReportClient reportClient() {
         return Mockito.mock(ReportClient.class);
     }
 

@@ -54,7 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
 // чтобы создалась встроенная Кафка, которая не будет отправлять сообщения на реальные микросервисы
 @EmbeddedKafka(partitions = 1, topics = {"habit-created"})
-@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин HabitClient
+@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин ReportClient
 @AutoConfigureMockMvc
 public class HabitControllerIntegrationTest {
 
