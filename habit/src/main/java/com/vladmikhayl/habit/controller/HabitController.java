@@ -6,6 +6,7 @@ import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,8 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT (для Сваггера)
 @Tag(name = "Привычки", description = "Эндпоинты для работы привычками")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
-        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT")
+        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT", content = @Content)
 })
 public class HabitController {
 
@@ -74,15 +75,15 @@ public class HabitController {
     }
 
     @GetMapping("/{habitId}/reports-info")
-    @Operation(summary = "Просмотреть информацию о привычке, связанную с ее выполнением и отчетами о ней")
+    @Operation(summary = "Просмотреть о конкретной привычке информацию, связанную с ее выполнением и отчетами о ней")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
-                    "(он не является ее создателем или подписчиком на нее)")
+                    "(он не является ее создателем или подписчиком на нее)", content = @Content)
     })
     public ResponseEntity<ReportStatsResponse> getReportsInfo(
-            @PathVariable Long habitId,
-            @RequestHeader("X-User-Id") String userId
+            @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         ReportStatsResponse response = habitService.getReportsInfo(habitId, userId);
         return ResponseEntity.ok(response);
