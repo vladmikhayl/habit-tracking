@@ -1,4 +1,4 @@
-package com.vladmikhayl.habit.dto;
+package com.vladmikhayl.habit.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vladmikhayl.habit.entity.FrequencyType;

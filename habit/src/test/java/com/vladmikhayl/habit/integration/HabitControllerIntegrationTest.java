@@ -1,8 +1,8 @@
 package com.vladmikhayl.habit.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vladmikhayl.habit.dto.HabitCreationRequest;
-import com.vladmikhayl.habit.dto.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
+import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;

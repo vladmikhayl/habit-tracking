@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class FeignClientTestConfig {
 
-    // Это бин, который создан замоканный HabitClient, который будет использоваться в интеграционных тестах
+    // Это бин, который создает замоканный HabitClient, который будет использоваться в интеграционных тестах
     // (вместо бина с реальным Feign-клиентом)
     @Bean
     public HabitClient habitClient() {

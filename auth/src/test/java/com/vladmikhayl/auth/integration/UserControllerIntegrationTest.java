@@ -1,10 +1,9 @@
 package com.vladmikhayl.auth.integration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.auth.controller.UserController;
-import com.vladmikhayl.auth.dto.LoginRequest;
-import com.vladmikhayl.auth.dto.RegisterRequest;
+import com.vladmikhayl.auth.dto.request.LoginRequest;
+import com.vladmikhayl.auth.dto.request.RegisterRequest;
 import com.vladmikhayl.auth.entity.User;
 import com.vladmikhayl.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeAll;

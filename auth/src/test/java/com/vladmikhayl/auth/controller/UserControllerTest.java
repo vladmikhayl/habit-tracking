@@ -1,7 +1,7 @@
 package com.vladmikhayl.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vladmikhayl.auth.dto.RegisterRequest;
+import com.vladmikhayl.auth.dto.request.RegisterRequest;
 import com.vladmikhayl.auth.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

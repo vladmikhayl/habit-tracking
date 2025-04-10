@@ -1,7 +1,7 @@
 package com.vladmikhayl.report.controller;
 
-import com.vladmikhayl.report.dto.ReportCreationRequest;
-import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
+import com.vladmikhayl.report.dto.request.ReportCreationRequest;
+import com.vladmikhayl.report.dto.request.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

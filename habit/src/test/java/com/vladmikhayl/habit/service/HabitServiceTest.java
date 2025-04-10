@@ -1,7 +1,7 @@
 package com.vladmikhayl.habit.service;
 
-import com.vladmikhayl.habit.dto.HabitCreationRequest;
-import com.vladmikhayl.habit.dto.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
+import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.entity.FrequencyType;

@@ -1,4 +1,4 @@
-package com.vladmikhayl.habit.dto;
+package com.vladmikhayl.habit.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Hidden;

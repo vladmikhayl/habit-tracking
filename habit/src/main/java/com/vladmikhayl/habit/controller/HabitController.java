@@ -1,7 +1,7 @@
 package com.vladmikhayl.habit.controller;
 
-import com.vladmikhayl.habit.dto.HabitCreationRequest;
-import com.vladmikhayl.habit.dto.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
+import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -1,7 +1,7 @@
 package com.vladmikhayl.report.service;
 
-import com.vladmikhayl.report.dto.ReportFullInfoResponse;
-import com.vladmikhayl.report.dto.ReportStatsResponse;
+import com.vladmikhayl.report.dto.response.ReportFullInfoResponse;
+import com.vladmikhayl.report.dto.response.ReportStatsResponse;
 import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.entity.Report;

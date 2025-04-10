@@ -2,7 +2,7 @@ package com.vladmikhayl.report.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.vladmikhayl.report.dto.ReportCreationRequest;
+import com.vladmikhayl.report.dto.request.ReportCreationRequest;
 import com.vladmikhayl.report.service.ReportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

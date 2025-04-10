@@ -1,7 +1,7 @@
 package com.vladmikhayl.report.service;
 
-import com.vladmikhayl.report.dto.ReportCreationRequest;
-import com.vladmikhayl.report.dto.ReportPhotoEditingRequest;
+import com.vladmikhayl.report.dto.request.ReportCreationRequest;
+import com.vladmikhayl.report.dto.request.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;

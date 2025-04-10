@@ -1,4 +1,4 @@
-package com.vladmikhayl.report.dto;
+package com.vladmikhayl.report.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
