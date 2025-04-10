@@ -52,7 +52,7 @@ public class InternalReportController {
     }
 
     @GetMapping("/{habitId}/reports-info")
-    public ResponseEntity<ReportStatsResponse> getReportStats(
+    public ResponseEntity<ReportStatsResponse> getReportsInfo(
             @PathVariable Long habitId,
             @RequestParam FrequencyType frequencyType,
             @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,
@@ -60,7 +60,7 @@ public class InternalReportController {
             @RequestParam(required = false) Integer timesPerMonth,
             @RequestParam LocalDate createdAt
     ) {
-        ReportStatsResponse response = internalReportService.getReportStats(
+        ReportStatsResponse response = internalReportService.getReportsInfo(
                 habitId, frequencyType, daysOfWeek, timesPerWeek, timesPerMonth, createdAt
         );
         return ResponseEntity.ok(response);

@@ -7,7 +7,6 @@ import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
-import com.vladmikhayl.habit.entity.SubscriptionCacheId;
 import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
 import com.vladmikhayl.habit.service.feign.ReportClient;
@@ -487,7 +486,7 @@ class HabitServiceTest {
 
         when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
 
-        when(reportClient.getReportStats(
+        when(reportClient.getReportsInfo(
                 habitId,
                 FrequencyType.WEEKLY_ON_DAYS,
                 Set.of(DayOfWeek.MONDAY),
@@ -527,7 +526,7 @@ class HabitServiceTest {
 
         when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
 
-        when(reportClient.getReportStats(
+        when(reportClient.getReportsInfo(
                 habitId,
                 FrequencyType.WEEKLY_X_TIMES,
                 null,
@@ -567,7 +566,7 @@ class HabitServiceTest {
 
         when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
 
-        when(reportClient.getReportStats(
+        when(reportClient.getReportsInfo(
                 habitId,
                 FrequencyType.MONTHLY_X_TIMES,
                 null,
@@ -602,7 +601,7 @@ class HabitServiceTest {
                 })
                 .hasMessageContaining("This user doesn't have access to this habit");
 
-        verify(reportClient, never()).getReportStats(any(), any(), any(), any(), any(), any());
+        verify(reportClient, never()).getReportsInfo(any(), any(), any(), any(), any(), any());
     }
 
 }

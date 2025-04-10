@@ -153,7 +153,7 @@ public class HabitService {
 
         Set<DayOfWeek> daysOfWeek = habit.get().getDaysOfWeek();
 
-        return reportClient.getReportStats(
+        return reportClient.getReportsInfo(
                 habitId,
                 habit.get().getFrequencyType(),
                 daysOfWeek == null || daysOfWeek.isEmpty() ? null : daysOfWeek,

@@ -18,7 +18,7 @@ import java.util.Set;
 public interface ReportClient {
 
     @GetMapping("/internal/reports/{habitId}/reports-info")
-    ResponseEntity<ReportStatsResponse> getReportStats(
+    ResponseEntity<ReportStatsResponse> getReportsInfo(
             @PathVariable Long habitId,
             @RequestParam FrequencyType frequencyType,
             @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,

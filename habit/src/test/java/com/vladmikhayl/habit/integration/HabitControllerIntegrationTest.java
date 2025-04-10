@@ -659,7 +659,7 @@ public class HabitControllerIntegrationTest {
 
         habitRepository.save(habit);
 
-        Mockito.when(reportClient.getReportStats(
+        Mockito.when(reportClient.getReportsInfo(
                 eq(1L),
                 eq(FrequencyType.WEEKLY_ON_DAYS),
                 eq(Set.of(DayOfWeek.MONDAY)),
@@ -711,7 +711,7 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscriptionCache);
 
-        Mockito.when(reportClient.getReportStats(
+        Mockito.when(reportClient.getReportsInfo(
                 eq(1L),
                 eq(FrequencyType.MONTHLY_X_TIMES),
                 eq(null),

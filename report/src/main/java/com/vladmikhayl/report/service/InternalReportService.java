@@ -73,7 +73,7 @@ public class InternalReportService {
         return reportRepository.countByHabitIdAndDateBetween(habitId, startDate, endDate);
     }
 
-    public ReportStatsResponse getReportStats(
+    public ReportStatsResponse getReportsInfo(
             Long habitId,
             FrequencyType frequencyType,
             Set<DayOfWeek> daysOfWeek,
