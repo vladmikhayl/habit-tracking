@@ -2,6 +2,7 @@ package com.vladmikhayl.habit.controller;
 
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -70,6 +71,21 @@ public class HabitController {
     ) {
         habitService.deleteHabit(habitId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/{habitId}/reports-info")
+    @Operation(summary = "Просмотреть информацию о привычке, связанную с ее выполнением и отчетами о ней")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем или подписчиком на нее)")
+    })
+    public ResponseEntity<ReportStatsResponse> getReportsInfo(
+            @PathVariable Long habitId,
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        ReportStatsResponse response = habitService.getReportsInfo(habitId, userId);
+        return ResponseEntity.ok(response);
     }
 
 }

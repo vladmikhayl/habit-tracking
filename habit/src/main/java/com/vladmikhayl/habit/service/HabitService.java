@@ -4,9 +4,13 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
+import com.vladmikhayl.habit.entity.SubscriptionCacheId;
 import com.vladmikhayl.habit.repository.HabitRepository;
+import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
+import com.vladmikhayl.habit.service.feign.ReportClient;
 import com.vladmikhayl.habit.service.kafka.HabitEventProducer;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class HabitService {
@@ -22,6 +28,10 @@ public class HabitService {
     private final HabitRepository habitRepository;
 
     private final HabitEventProducer habitEventProducer;
+
+    private final SubscriptionCacheRepository subscriptionCacheRepository;
+
+    private final ReportClient reportClient;
 
     private Long parseUserId(String userId) {
         try {
@@ -117,6 +127,40 @@ public class HabitService {
                 .habitId(habitId)
                 .build();
         habitEventProducer.sendHabitDeletedEvent(event);
+    }
+
+    public ReportStatsResponse getReportsInfo(Long habitId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        boolean isUserCreator = habitRepository.existsByIdAndUserId(habitId, userIdLong);
+
+        boolean isUserSubscriber = subscriptionCacheRepository.existsById(
+                SubscriptionCacheId.builder()
+                        .habitId(habitId)
+                        .subscriberId(userIdLong)
+                        .build()
+        );
+
+        boolean doesUserHaveAccess = isUserCreator || isUserSubscriber;
+
+        if (!doesUserHaveAccess) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
+        }
+
+        Optional<Habit> habit = habitRepository.findById(habitId);
+
+        System.out.println(habit.get().getDaysOfWeek());
+        System.out.println(habit.get().getTimesPerWeek());
+        System.out.println(habit.get().getTimesPerMonth());
+
+        return reportClient.getReportStats(
+                habitId,
+                habit.get().getFrequencyType(),
+                habit.get().getDaysOfWeek().isEmpty() ? null : habit.get().getDaysOfWeek(),
+                habit.get().getTimesPerWeek(),
+                habit.get().getTimesPerMonth(),
+                habit.get().getCreatedAt().toLocalDate()
+        ).getBody();
     }
 
 }
