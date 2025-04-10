@@ -35,17 +35,17 @@ public class HabitApplication {
 		return args -> {
 
 			// Юзер с ID=1 подписан на привычку с ID=1 (создана юзером user2)
-			SubscriptionCache subscriptionCache = SubscriptionCache.builder()
-					.id(
-							SubscriptionCacheId.builder()
-									.habitId(1L)
-									.subscriberId(1L)
-									.build()
-					)
-					.creatorLogin("user2")
-					.build();
-
-			subscriptionCacheRepository.save(subscriptionCache);
+//			SubscriptionCache subscriptionCache = SubscriptionCache.builder()
+//					.id(
+//							SubscriptionCacheId.builder()
+//									.habitId(1L)
+//									.subscriberId(1L)
+//									.build()
+//					)
+//					.creatorLogin("user2")
+//					.build();
+//
+//			subscriptionCacheRepository.save(subscriptionCache);
 
 //			Habit habit1 = Habit.builder()
 //					.userId(1L)

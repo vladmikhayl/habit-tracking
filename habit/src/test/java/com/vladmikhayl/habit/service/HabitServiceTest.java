@@ -4,9 +4,13 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
+import com.vladmikhayl.habit.entity.SubscriptionCacheId;
 import com.vladmikhayl.habit.repository.HabitRepository;
+import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
+import com.vladmikhayl.habit.service.feign.ReportClient;
 import com.vladmikhayl.habit.service.kafka.HabitEventProducer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,6 +41,12 @@ class HabitServiceTest {
 
     @Mock
     private HabitEventProducer habitEventProducer;
+
+    @Mock
+    private ReportClient reportClient;
+
+    @Mock
+    private SubscriptionCacheRepository subscriptionCacheRepository;
 
     @InjectMocks
     private HabitService underTest;
@@ -447,6 +459,150 @@ class HabitServiceTest {
                 .hasMessageContaining("This user doesn't have a habit with this id");
 
         verify(habitEventProducer, never()).sendHabitDeletedEvent(any());
+    }
+
+    @Test
+    void canGetReportsInfoForWeeklyOnDaysWhenUserIsCreator() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = LocalDateTime.of(2025, 4, 10, 12, 40);
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(true);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(reportClient.getReportStats(
+                habitId,
+                FrequencyType.WEEKLY_ON_DAYS,
+                Set.of(DayOfWeek.MONDAY),
+                null,
+                null,
+                createdAt.toLocalDate()
+        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder().build()));
+
+        ReportStatsResponse response = underTest.getReportsInfo(habitId, userIdStr);
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void canGetReportsInfoForWeeklyXTimesWhenUserIsCreator() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = LocalDateTime.of(2025, 4, 10, 12, 40);
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(true);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+                .daysOfWeek(Set.of())
+                .timesPerWeek(3)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(reportClient.getReportStats(
+                habitId,
+                FrequencyType.WEEKLY_X_TIMES,
+                null,
+                3,
+                null,
+                createdAt.toLocalDate()
+        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder().build()));
+
+        ReportStatsResponse response = underTest.getReportsInfo(habitId, userIdStr);
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void canGetReportsInfoForMonthlyXTimesWhenUserIsSubscriber() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = LocalDateTime.of(2025, 4, 10, 12, 40);
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(true);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .frequencyType(FrequencyType.MONTHLY_X_TIMES)
+                .daysOfWeek(Set.of())
+                .timesPerWeek(null)
+                .timesPerMonth(10)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(reportClient.getReportStats(
+                habitId,
+                FrequencyType.MONTHLY_X_TIMES,
+                null,
+                null,
+                10,
+                createdAt.toLocalDate()
+        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder().build()));
+
+        ReportStatsResponse response = underTest.getReportsInfo(habitId, userIdStr);
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void failGetReportsInfoWhenUserIsNotCreatorAndIsNotSubscriber() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.getReportsInfo(habitId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have access to this habit");
+
+        verify(reportClient, never()).getReportStats(any(), any(), any(), any(), any(), any());
     }
 
 }

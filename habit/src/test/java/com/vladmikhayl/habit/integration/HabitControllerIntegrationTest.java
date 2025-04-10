@@ -1,17 +1,26 @@
 package com.vladmikhayl.habit.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vladmikhayl.habit.FeignClientTestConfig;
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
+import com.vladmikhayl.habit.entity.SubscriptionCache;
+import com.vladmikhayl.habit.entity.SubscriptionCacheId;
 import com.vladmikhayl.habit.repository.HabitRepository;
+import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
+import com.vladmikhayl.habit.service.feign.ReportClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -22,10 +31,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,6 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
 // чтобы создалась встроенная Кафка, которая не будет отправлять сообщения на реальные микросервисы
 @EmbeddedKafka(partitions = 1, topics = {"habit-created"})
+@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин HabitClient
 @AutoConfigureMockMvc
 public class HabitControllerIntegrationTest {
 
@@ -49,6 +63,12 @@ public class HabitControllerIntegrationTest {
 
     @Autowired
     private HabitRepository habitRepository;
+
+    @Autowired
+    private ReportClient reportClient;
+
+    @Autowired
+    private SubscriptionCacheRepository subscriptionCacheRepository;
 
     @Autowired
     private static ObjectMapper objectMapper;
@@ -622,6 +642,141 @@ public class HabitControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("This user doesn't have a habit with this id"));
 
         assertThat(habitRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetReportsInfoForWeeklyOnDaysWhenUserIsCreator() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        Habit habit = Habit.builder()
+                .userId(userId)
+                .name("Название")
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .build();
+
+        habitRepository.save(habit);
+
+        Mockito.when(reportClient.getReportStats(
+                eq(1L),
+                eq(FrequencyType.WEEKLY_ON_DAYS),
+                eq(Set.of(DayOfWeek.MONDAY)),
+                eq(null),
+                eq(null),
+                any()
+        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder()
+                .completionsInTotal(1)
+                .completionsPercent(100)
+                .serialDays(1)
+                .completedDays(List.of(LocalDate.of(2025, 4, 10)))
+                .uncompletedDays(List.of())
+                .build()));
+
+        mockMvc.perform(get("/api/v1/habits/1/reports-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value("1"))
+                .andExpect(jsonPath("$.completionsPercent").value("100"))
+                .andExpect(jsonPath("$.serialDays").value("1"))
+                .andExpect(jsonPath("$.completionsInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").doesNotExist())
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.uncompletedDays").isArray());
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetReportsInfoForMonthlyXTimesWhenUserIsSubscriber() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        Habit habit = Habit.builder()
+                .userId(12L)
+                .name("Название")
+                .frequencyType(FrequencyType.MONTHLY_X_TIMES)
+                .timesPerMonth(10)
+                .build();
+
+        habitRepository.save(habit);
+
+        SubscriptionCache subscriptionCache = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user12")
+                .build();
+
+        subscriptionCacheRepository.save(subscriptionCache);
+
+        Mockito.when(reportClient.getReportStats(
+                eq(1L),
+                eq(FrequencyType.MONTHLY_X_TIMES),
+                eq(null),
+                eq(null),
+                eq(10),
+                any()
+        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder()
+                .completionsInTotal(1)
+                .completionsInPeriod(1)
+                .completionsPlannedInPeriod(10)
+                .completedDays(List.of(LocalDate.of(2025, 4, 10)))
+                .build()));
+
+        mockMvc.perform(get("/api/v1/habits/1/reports-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionsInTotal").value("1"))
+                .andExpect(jsonPath("$.completionsPercent").doesNotExist())
+                .andExpect(jsonPath("$.serialDays").doesNotExist())
+                .andExpect(jsonPath("$.completionsInPeriod").value("1"))
+                .andExpect(jsonPath("$.completionsPlannedInPeriod").value("10"))
+                .andExpect(jsonPath("$.completedDays").isArray())
+                .andExpect(jsonPath("$.uncompletedDays").doesNotExist());
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetReportsInfoWhenUserIsNotCreatorAndIsNotSubscriber() throws Exception {
+        String userIdStr = "10";
+
+        Habit habit = Habit.builder()
+                .userId(12L)
+                .name("Название")
+                .frequencyType(FrequencyType.MONTHLY_X_TIMES)
+                .timesPerMonth(10)
+                .build();
+
+        habitRepository.save(habit);
+
+        // На привычку с ID=1 подписан другой юзер
+        SubscriptionCache subscriptionCache = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(11L)
+                        .build())
+                .creatorLogin("user12")
+                .build();
+
+        subscriptionCacheRepository.save(subscriptionCache);
+
+        mockMvc.perform(get("/api/v1/habits/1/reports-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetReportsInfoWhenThatHabitDoesNotExist() throws Exception {
+        String userIdStr = "10";
+
+        mockMvc.perform(get("/api/v1/habits/1/reports-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
     }
 
 }

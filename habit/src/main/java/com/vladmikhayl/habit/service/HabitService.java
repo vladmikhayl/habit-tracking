@@ -19,7 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.DayOfWeek;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -149,14 +151,12 @@ public class HabitService {
 
         Optional<Habit> habit = habitRepository.findById(habitId);
 
-        System.out.println(habit.get().getDaysOfWeek());
-        System.out.println(habit.get().getTimesPerWeek());
-        System.out.println(habit.get().getTimesPerMonth());
+        Set<DayOfWeek> daysOfWeek = habit.get().getDaysOfWeek();
 
         return reportClient.getReportStats(
                 habitId,
                 habit.get().getFrequencyType(),
-                habit.get().getDaysOfWeek().isEmpty() ? null : habit.get().getDaysOfWeek(),
+                daysOfWeek == null || daysOfWeek.isEmpty() ? null : daysOfWeek,
                 habit.get().getTimesPerWeek(),
                 habit.get().getTimesPerMonth(),
                 habit.get().getCreatedAt().toLocalDate()
