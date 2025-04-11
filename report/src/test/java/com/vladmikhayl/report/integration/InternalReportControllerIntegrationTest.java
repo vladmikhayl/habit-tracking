@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class InternalReportControllerIntegrationTest {
 
-    // При тестировании метода getReportStats() предполагается, что сегодня 7 апреля 2025
+    // При тестировании метода getReportsInfo() предполагается, что сегодня 7 апреля 2025
     // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
     private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 7);
 
@@ -298,7 +298,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // WEEKLY ON DAYS во все дни, создана сегодня, не выполнена ни разу
-    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedTodayWithZeroCompletions() throws Exception {
+    void testReportsInfoForWeeklyOnDaysEveryDayThatCreatedTodayWithZeroCompletions() throws Exception {
         mockMvc.perform(get("/internal/reports/10/reports-info")
                         .param("frequencyType", "WEEKLY_ON_DAYS")
                         .param("daysOfWeek", "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY")
@@ -316,7 +316,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // WEEKLY ON DAYS в сегодняшний и вчерашний день, создана вчера, выполнена сегодня
-    void testReportStatsForWeeklyOnDaysOnTodayAndYesterdayThatCreatedYesterdayWithOneCompletion() throws Exception {
+    void testReportsInfoForWeeklyOnDaysOnTodayAndYesterdayThatCreatedYesterdayWithOneCompletion() throws Exception {
         Long habitId = 10L;
 
         Report existingReport = Report.builder()
@@ -349,7 +349,7 @@ public class InternalReportControllerIntegrationTest {
     @Test
         // WEEKLY ON DAYS только в сегодняшний день, создана месяц назад, выполнена 3 раза
         // (из них 2 в эту серию, причем сегодня еще не выполнена)
-    void testReportStatsForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithThreeCompletions() throws Exception {
+    void testReportsInfoForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithThreeCompletions() throws Exception {
         Long habitId = 10L;
 
         Report existingReport1 = Report.builder()
@@ -403,7 +403,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // WEEKLY ON DAYS во все дни, создана полгода назад, выполнена всегда кроме вчера и сегодня
-    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedSixMonthsAgoWithAllCompletionsExceptTwo() throws Exception {
+    void testReportsInfoForWeeklyOnDaysEveryDayThatCreatedSixMonthsAgoWithAllCompletionsExceptTwo() throws Exception {
         Long habitId = 10L;
 
         for (int i = 2; i <= 180; i++) {
@@ -440,7 +440,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // WEEKLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
-    void testReportStatsForWeeklyXTimesOneTimeThatCreatedTodayWithZeroCompletions() throws Exception {
+    void testReportsInfoForWeeklyXTimesOneTimeThatCreatedTodayWithZeroCompletions() throws Exception {
         mockMvc.perform(get("/internal/reports/10/reports-info")
                         .param("frequencyType", "WEEKLY_X_TIMES")
                         .param("timesPerWeek", "1")
@@ -457,7 +457,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // WEEKLY X TIMES 5 раз, создана месяц назад, выполнена 3 раза (из них на этой неделе 1)
-    void testReportStatsForWeeklyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() throws Exception {
+    void testReportsInfoForWeeklyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() throws Exception {
         Long habitId = 10L;
 
         Report existingReport1 = Report.builder()
@@ -507,7 +507,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // WEEKLY X TIMES 7 раз, создана полгода назад, выполнена всегда кроме вчера и сегодня
-    void testReportStatsForWeeklyXTimesSevenTimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() throws Exception {
+    void testReportsInfoForWeeklyXTimesSevenTimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() throws Exception {
         Long habitId = 10L;
 
         for (int i = 2; i <= 180; i++) {
@@ -540,7 +540,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // MONTHLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
-    void testReportStatsForMonthlyXTimesOneTimeThatCreatedTodayWithZeroCompletions() throws Exception {
+    void testReportsInfoForMonthlyXTimesOneTimeThatCreatedTodayWithZeroCompletions() throws Exception {
         mockMvc.perform(get("/internal/reports/10/reports-info")
                         .param("frequencyType", "MONTHLY_X_TIMES")
                         .param("timesPerMonth", "1")
@@ -557,7 +557,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // MONTHLY X TIMES 5 раз, создана месяц назад, выполнена 3 раза (и все в этом месяце)
-    void testReportStatsForMonthlyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() throws Exception {
+    void testReportsInfoForMonthlyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() throws Exception {
         Long habitId = 10L;
 
         Report existingReport1 = Report.builder()
@@ -607,7 +607,7 @@ public class InternalReportControllerIntegrationTest {
     }
 
     @Test // MONTHLY X TIMES 31 раз, создана полгода назад, выполнена всегда кроме вчера и сегодня
-    void testReportStatsForMonthlyXTimes31TimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() throws Exception {
+    void testReportsInfoForMonthlyXTimes31TimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() throws Exception {
         Long habitId = 10L;
 
         for (int i = 2; i <= 180; i++) {

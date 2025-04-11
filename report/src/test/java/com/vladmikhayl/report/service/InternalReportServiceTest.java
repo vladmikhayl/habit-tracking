@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class InternalReportServiceTest {
 
-    // При тестировании метода getReportStats() предполагается, что сегодня 6 апреля 2025
+    // При тестировании метода getReportsInfo() предполагается, что сегодня 6 апреля 2025
     // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
     private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 6);
 
@@ -167,7 +167,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS во все дни, создана сегодня, не выполнена ни разу
-    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedTodayWithZeroCompletions() {
+    void testReportsInfoForWeeklyOnDaysEveryDayThatCreatedTodayWithZeroCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -204,7 +204,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS только во вчерашний день, создана сегодня, не выполнена ни разу
-    void testReportStatsForWeeklyOnDaysOnYesterdayThatCreatedTodayWithZeroCompletions() {
+    void testReportsInfoForWeeklyOnDaysOnYesterdayThatCreatedTodayWithZeroCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -235,7 +235,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS в сегодняшний и вчерашний день, создана сегодня, выполнена сегодня
-    void testReportStatsForWeeklyOnDaysOnTodayAndYesterdayThatCreatedTodayWithOneCompletion() {
+    void testReportsInfoForWeeklyOnDaysOnTodayAndYesterdayThatCreatedTodayWithOneCompletion() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -279,7 +279,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS в сегодняшний и вчерашний день, создана вчера, выполнена сегодня
-    void testReportStatsForWeeklyOnDaysOnTodayAndYesterdayThatCreatedYesterdayWithOneCompletion() {
+    void testReportsInfoForWeeklyOnDaysOnTodayAndYesterdayThatCreatedYesterdayWithOneCompletion() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -325,7 +325,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS в сегодняшний и вчерашний день, создана позавчера, выполнена сегодня и вчера
-    void testReportStatsForWeeklyOnDaysOnTodayAndYesterdayThatCreatedTwoDaysAgoWithTwoCompletions() {
+    void testReportsInfoForWeeklyOnDaysOnTodayAndYesterdayThatCreatedTwoDaysAgoWithTwoCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -373,7 +373,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS только в сегодняшний день, создана месяц назад, не выполнена ни разу
-    void testReportStatsForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithZeroCompletions() {
+    void testReportsInfoForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithZeroCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -414,7 +414,7 @@ class InternalReportServiceTest {
     @Test
         // WEEKLY ON DAYS только в сегодняшний день, создана месяц назад, выполнена 3 раза
         // (из них 2 в эту серию, причем сегодня еще не выполнена)
-    void testReportStatsForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithThreeCompletions() {
+    void testReportsInfoForWeeklyOnDaysOnTodayThatCreatedMonthAgoWithThreeCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -470,7 +470,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS во все дни, создана месяц назад, выполнена всегда
-    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedMonthAgoWithAllCompletions() {
+    void testReportsInfoForWeeklyOnDaysEveryDayThatCreatedMonthAgoWithAllCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -523,7 +523,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY ON DAYS во все дни, создана полгода назад, выполнена всегда кроме вчера и сегодня
-    void testReportStatsForWeeklyOnDaysEveryDayThatCreatedSixMonthsAgoWithAllCompletionsExceptTwo() {
+    void testReportsInfoForWeeklyOnDaysEveryDayThatCreatedSixMonthsAgoWithAllCompletionsExceptTwo() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_ON_DAYS;
         Set<DayOfWeek> daysOfWeek = Set.of(
@@ -579,7 +579,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
-    void testReportStatsForWeeklyXTimesOneTimeThatCreatedTodayWithZeroCompletions() {
+    void testReportsInfoForWeeklyXTimesOneTimeThatCreatedTodayWithZeroCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
         int timesPerWeek = 1;
@@ -614,7 +614,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY X TIMES 1 раз, создана сегодня, выполнена сегодня
-    void testReportStatsForWeeklyXTimesOneTimeThatCreatedTodayWithOneCompletion() {
+    void testReportsInfoForWeeklyXTimesOneTimeThatCreatedTodayWithOneCompletion() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
         int timesPerWeek = 1;
@@ -655,7 +655,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY X TIMES 5 раз, создана месяц назад, выполнена 3 раза (из них на этой неделе 1)
-    void testReportStatsForWeeklyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() {
+    void testReportsInfoForWeeklyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
         int timesPerWeek = 5;
@@ -704,7 +704,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY X TIMES 7 раз, создана месяц назад, выполнена всегда
-    void testReportStatsForWeeklyXTimesSevenTimesThatCreatedMonthAgoWithAllCompletions() {
+    void testReportsInfoForWeeklyXTimesSevenTimesThatCreatedMonthAgoWithAllCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
         int timesPerWeek = 7;
@@ -748,7 +748,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY X TIMES 7 раз, создана полгода назад, выполнена всегда кроме вчера и сегодня
-    void testReportStatsForWeeklyXTimesSevenTimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() {
+    void testReportsInfoForWeeklyXTimesSevenTimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
         int timesPerWeek = 7;
@@ -794,7 +794,7 @@ class InternalReportServiceTest {
     }
 
     @Test // WEEKLY X TIMES 1 раз, создана две недели назад, выполнена на этой неделе 5 раз
-    void testReportStatsForWeeklyXTimesOneTimeThatCreatedTwoWeeksAgoWithFiveCompletionsOnThisWeek() {
+    void testReportsInfoForWeeklyXTimesOneTimeThatCreatedTwoWeeksAgoWithFiveCompletionsOnThisWeek() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.WEEKLY_X_TIMES;
         int timesPerWeek = 1;
@@ -853,7 +853,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 1 раз, создана сегодня, не выполнена ни разу
-    void testReportStatsForMonthlyXTimesOneTimeThatCreatedTodayWithZeroCompletions() {
+    void testReportsInfoForMonthlyXTimesOneTimeThatCreatedTodayWithZeroCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 1;
@@ -890,7 +890,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 1 раз, создана сегодня, выполнена сегодня
-    void testReportStatsForMonthlyXTimesOneTimeThatCreatedTodayWithOneCompletion() {
+    void testReportsInfoForMonthlyXTimesOneTimeThatCreatedTodayWithOneCompletion() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 1;
@@ -933,7 +933,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 5 раз, создана месяц назад, выполнена 3 раза (и все в этом месяце)
-    void testReportStatsForMonthlyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() {
+    void testReportsInfoForMonthlyXTimesFiveTimesThatCreatedMonthAgoWithThreeCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 5;
@@ -984,7 +984,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 30 раз, создана 29 дней назад, выполнена всегда
-    void testReportStatsForMonthlyXTimes30TimesThatCreated29DaysAgoWithAllCompletions() {
+    void testReportsInfoForMonthlyXTimes30TimesThatCreated29DaysAgoWithAllCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 30;
@@ -1030,7 +1030,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 31 раз, создана 29 дней назад, выполнена всегда
-    void testReportStatsForMonthlyXTimes31TimesThatCreated29DaysAgoWithAllCompletions() {
+    void testReportsInfoForMonthlyXTimes31TimesThatCreated29DaysAgoWithAllCompletions() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 31;
@@ -1076,7 +1076,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 31 раз, создана полгода назад, выполнена всегда кроме вчера и сегодня
-    void testReportStatsForMonthlyXTimes31TimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() {
+    void testReportsInfoForMonthlyXTimes31TimesThatCreatedHalfYearAgoWithAllCompletionsExceptTwo() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 31;
@@ -1124,7 +1124,7 @@ class InternalReportServiceTest {
     }
 
     @Test // MONTHLY X TIMES 1 раз, создана две недели назад, выполнена в этом месяце 5 раз (и еще 1 раз в прошлом месяце)
-    void testReportStatsForMonthlyXTimesOneTimeThatCreatedTwoWeeksAgoWithFiveCompletionsOnThisMonth() {
+    void testReportsInfoForMonthlyXTimesOneTimeThatCreatedTwoWeeksAgoWithFiveCompletionsOnThisMonth() {
         Long habitId = 10L;
         FrequencyType frequencyType = FrequencyType.MONTHLY_X_TIMES;
         int timesPerMonth = 1;
