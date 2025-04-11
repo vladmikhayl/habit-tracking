@@ -1,7 +1,7 @@
 package com.vladmikhayl.report.controller;
 
 import com.vladmikhayl.report.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.report.dto.response.ReportStatsResponse;
+import com.vladmikhayl.report.dto.response.ReportsInfoResponse;
 import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.service.InternalReportService;
@@ -52,7 +52,7 @@ public class InternalReportController {
     }
 
     @GetMapping("/{habitId}/reports-info")
-    public ResponseEntity<ReportStatsResponse> getReportsInfo(
+    public ResponseEntity<ReportsInfoResponse> getReportsInfo(
             @PathVariable Long habitId,
             @RequestParam FrequencyType frequencyType,
             @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,
@@ -60,7 +60,7 @@ public class InternalReportController {
             @RequestParam(required = false) Integer timesPerMonth,
             @RequestParam LocalDate createdAt
     ) {
-        ReportStatsResponse response = internalReportService.getReportsInfo(
+        ReportsInfoResponse response = internalReportService.getReportsInfo(
                 habitId, frequencyType, daysOfWeek, timesPerWeek, timesPerMonth, createdAt
         );
         return ResponseEntity.ok(response);

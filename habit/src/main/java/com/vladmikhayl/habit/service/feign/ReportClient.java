@@ -1,7 +1,7 @@
 package com.vladmikhayl.habit.service.feign;
 
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
+import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Profile;
@@ -20,7 +20,7 @@ import java.util.Set;
 public interface ReportClient {
 
     @GetMapping("/internal/reports/{habitId}/reports-info")
-    ResponseEntity<ReportStatsResponse> getReportsInfo(
+    ResponseEntity<ReportsInfoResponse> getReportsInfo(
             @PathVariable Long habitId,
             @RequestParam FrequencyType frequencyType,
             @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,

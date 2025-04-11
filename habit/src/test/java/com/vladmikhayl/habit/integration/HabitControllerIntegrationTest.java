@@ -5,7 +5,7 @@ import com.vladmikhayl.habit.FeignClientTestConfig;
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
+import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.entity.SubscriptionCache;
@@ -667,7 +667,7 @@ public class HabitControllerIntegrationTest {
                 eq(null),
                 eq(null),
                 any()
-        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder()
+        )).thenReturn(ResponseEntity.ok(ReportsInfoResponse.builder()
                 .completionsInTotal(1)
                 .completionsPercent(100)
                 .serialDays(1)
@@ -720,7 +720,7 @@ public class HabitControllerIntegrationTest {
                 eq(null),
                 eq(10),
                 any()
-        )).thenReturn(ResponseEntity.ok(ReportStatsResponse.builder()
+        )).thenReturn(ResponseEntity.ok(ReportsInfoResponse.builder()
                 .completionsInTotal(1)
                 .completionsInPeriod(1)
                 .completionsPlannedInPeriod(10)

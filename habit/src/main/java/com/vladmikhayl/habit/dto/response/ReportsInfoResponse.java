@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @Builder
 @Schema(description = "Информация о конкретной привычке, связанная с ее выполнением и отчетами о ней")
-public class ReportStatsResponse {
+public class ReportsInfoResponse {
 
     // Для всех привычек
     @Schema(description = "Сколько раз была выполнена привычка за все время", example = "17")
