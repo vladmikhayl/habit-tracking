@@ -4,6 +4,7 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -602,6 +604,78 @@ class HabitServiceTest {
                 .hasMessageContaining("This user doesn't have access to this habit");
 
         verify(reportClient, never()).getReportsInfo(any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void canGetReportAtDayWhenUserIsCreator() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDate date = LocalDate.of(2025, 4, 10);
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(true);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        when(reportClient.getReportAtDay(habitId,date))
+                .thenReturn(ResponseEntity.ok(ReportFullInfoResponse.builder().build()));
+
+        ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date, userIdStr);
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void canGetReportAtDayWhenUserIsSubscriber() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDate date = LocalDate.of(2025, 4, 10);
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(true);
+
+        when(reportClient.getReportAtDay(habitId,date))
+                .thenReturn(ResponseEntity.ok(ReportFullInfoResponse.builder().build()));
+
+        ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date, userIdStr);
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void failGetReportAtDayWhenUserIsNotCreatorAndIsNotSubscriber() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDate date = LocalDate.of(2025, 4, 10);
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.getReportAtDay(habitId, date, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have access to this habit");
+
+        verify(reportClient, never()).getReportAtDay(any(), any());
     }
 
 }

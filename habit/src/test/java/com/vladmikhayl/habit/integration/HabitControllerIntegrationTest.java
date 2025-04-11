@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.habit.FeignClientTestConfig;
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
@@ -692,6 +693,7 @@ public class HabitControllerIntegrationTest {
         String userIdStr = "10";
         Long userId = 10L;
 
+        // Привычку с ID=1 создал другой юзер
         Habit habit = Habit.builder()
                 .userId(12L)
                 .name("Название")
@@ -742,6 +744,7 @@ public class HabitControllerIntegrationTest {
     void failGetReportsInfoWhenUserIsNotCreatorAndIsNotSubscriber() throws Exception {
         String userIdStr = "10";
 
+        // Привычку с ID=1 создал другой юзер
         Habit habit = Habit.builder()
                 .userId(12L)
                 .name("Название")
@@ -774,6 +777,124 @@ public class HabitControllerIntegrationTest {
         String userIdStr = "10";
 
         mockMvc.perform(get("/api/v1/habits/1/reports-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetReportAtDayWhenUserIsCreator() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+        LocalDate date = LocalDate.of(2025, 4, 11);
+
+        Habit habit = Habit.builder()
+                .userId(userId)
+                .name("Название")
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .build();
+
+        habitRepository.save(habit);
+
+        Mockito.when(reportClient.getReportAtDay(1L, date)).thenReturn(ResponseEntity.ok(
+                ReportFullInfoResponse.builder()
+                        .isCompleted(false)
+                        .completionTime(null)
+                        .photoUrl(null)
+                        .build()
+        ));
+
+        mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completed").value("false"))
+                .andExpect(jsonPath("$.completionTime").doesNotExist())
+                .andExpect(jsonPath("$.photoUrl").doesNotExist());
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetReportAtDayWhenUserIsSubscriber() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+        LocalDate date = LocalDate.of(2025, 4, 11);
+
+        // Привычку с ID=1 создал другой юзер
+        Habit habit = Habit.builder()
+                .userId(12L)
+                .name("Название")
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .build();
+
+        habitRepository.save(habit);
+
+        SubscriptionCache subscriptionCache = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user12")
+                .build();
+
+        subscriptionCacheRepository.save(subscriptionCache);
+
+        Mockito.when(reportClient.getReportAtDay(1L, date)).thenReturn(ResponseEntity.ok(
+                ReportFullInfoResponse.builder()
+                        .isCompleted(false)
+                        .completionTime(null)
+                        .photoUrl(null)
+                        .build()
+        ));
+
+        mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completed").value("false"))
+                .andExpect(jsonPath("$.completionTime").doesNotExist())
+                .andExpect(jsonPath("$.photoUrl").doesNotExist());
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetReportAtDayWhenUserIsNotCreatorAndIsNotSubscriber() throws Exception {
+        String userIdStr = "10";
+
+        // Привычку с ID=1 создал другой юзер
+        Habit habit = Habit.builder()
+                .userId(12L)
+                .name("Название")
+                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .build();
+
+        habitRepository.save(habit);
+
+        // На привычку с ID=1 подписан другой юзер
+        SubscriptionCache subscriptionCache = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(11L)
+                        .build())
+                .creatorLogin("user12")
+                .build();
+
+        subscriptionCacheRepository.save(subscriptionCache);
+
+        mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetReportAtDayWhenThatHabitDoesNotExist() throws Exception {
+        String userIdStr = "10";
+
+        mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
