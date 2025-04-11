@@ -2,6 +2,7 @@ package com.vladmikhayl.habit.controller;
 
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,9 +14,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/habits")
@@ -86,6 +90,23 @@ public class HabitController {
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         ReportStatsResponse response = habitService.getReportsInfo(habitId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("{habitId}/get-report/at-day/{date}")
+    @Operation(summary = "Просмотреть отчет о выполнении указанной привычки в конкретный день")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем или подписчиком на нее)", content = @Content)
+    })
+    public ResponseEntity<ReportFullInfoResponse> getReportAtDay(
+            @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
+            @PathVariable @Parameter(description = "За какую дату нужно вернуть отчет", example = "2025-04-11")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        ReportFullInfoResponse response = habitService.getReportAtDay(habitId, date, userId);
         return ResponseEntity.ok(response);
     }
 

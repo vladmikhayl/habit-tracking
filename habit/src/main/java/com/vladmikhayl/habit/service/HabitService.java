@@ -4,6 +4,7 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportStatsResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -134,16 +136,7 @@ public class HabitService {
     public ReportStatsResponse getReportsInfo(Long habitId, String userId) {
         Long userIdLong = parseUserId(userId);
 
-        boolean isUserCreator = habitRepository.existsByIdAndUserId(habitId, userIdLong);
-
-        boolean isUserSubscriber = subscriptionCacheRepository.existsById(
-                SubscriptionCacheId.builder()
-                        .habitId(habitId)
-                        .subscriberId(userIdLong)
-                        .build()
-        );
-
-        boolean doesUserHaveAccess = isUserCreator || isUserSubscriber;
+        boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);
 
         if (!doesUserHaveAccess) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
@@ -161,6 +154,31 @@ public class HabitService {
                 habit.get().getTimesPerMonth(),
                 habit.get().getCreatedAt().toLocalDate()
         ).getBody();
+    }
+
+    public ReportFullInfoResponse getReportAtDay(Long habitId, LocalDate date, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);
+
+        if (!doesUserHaveAccess) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
+        }
+
+        return reportClient.getReportAtDay(habitId, date).getBody();
+    }
+
+    private boolean isUserEitherHabitCreatorOrSubscriber(Long habitId, Long userId) {
+        boolean isUserCreator = habitRepository.existsByIdAndUserId(habitId, userId);
+
+        boolean isUserSubscriber = subscriptionCacheRepository.existsById(
+                SubscriptionCacheId.builder()
+                        .habitId(habitId)
+                        .subscriberId(userId)
+                        .build()
+        );
+
+        return isUserCreator || isUserSubscriber;
     }
 
 }

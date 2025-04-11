@@ -1,6 +1,5 @@
 package com.vladmikhayl.report.dto.response;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import lombok.Builder;
 import lombok.Data;
 
