@@ -6,7 +6,7 @@ import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
+import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.entity.SubscriptionCacheId;
@@ -179,7 +179,7 @@ public class HabitService {
                 .build();
     }
 
-    public ReportsInfoResponse getReportsInfo(Long habitId, String userId) {
+    public HabitReportsInfoResponse getReportsInfo(Long habitId, String userId) {
         Long userIdLong = parseUserId(userId);
 
         boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);

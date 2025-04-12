@@ -1,7 +1,7 @@
 package com.vladmikhayl.report.service;
 
 import com.vladmikhayl.report.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.report.dto.response.ReportsInfoResponse;
+import com.vladmikhayl.report.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.entity.Report;
@@ -73,7 +73,7 @@ public class InternalReportService {
         return reportRepository.countByHabitIdAndDateBetween(habitId, startDate, endDate);
     }
 
-    public ReportsInfoResponse getReportsInfo(
+    public HabitReportsInfoResponse getReportsInfo(
             Long habitId,
             FrequencyType frequencyType,
             Set<DayOfWeek> daysOfWeek,
@@ -133,7 +133,7 @@ public class InternalReportService {
             }
         }
 
-        return ReportsInfoResponse.builder()
+        return HabitReportsInfoResponse.builder()
                 .completionsInTotal(completionsInTotal)
                 .completionsPercent(completionsPercent)
                 .serialDays(serialDays)

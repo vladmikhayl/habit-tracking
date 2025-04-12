@@ -4,7 +4,7 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
+import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -103,11 +103,11 @@ public class HabitController {
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
                     "(он не является ее создателем или принятым подписчиком на нее)", content = @Content)
     })
-    public ResponseEntity<ReportsInfoResponse> getReportsInfo(
+    public ResponseEntity<HabitReportsInfoResponse> getReportsInfo(
             @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
-        ReportsInfoResponse response = habitService.getReportsInfo(habitId, userId);
+        HabitReportsInfoResponse response = habitService.getReportsInfo(habitId, userId);
         return ResponseEntity.ok(response);
     }
 

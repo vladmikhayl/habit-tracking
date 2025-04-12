@@ -1,7 +1,7 @@
 package com.vladmikhayl.report.service;
 
 import com.vladmikhayl.report.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.report.dto.response.ReportsInfoResponse;
+import com.vladmikhayl.report.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.entity.Report;
@@ -185,7 +185,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(List.of());
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -216,7 +216,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(List.of());
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -258,7 +258,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -302,7 +302,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -351,7 +351,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -387,7 +387,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(List.of());
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -444,7 +444,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -501,7 +501,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -554,7 +554,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 daysOfWeek,
@@ -595,7 +595,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(List.of());
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -634,7 +634,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -681,7 +681,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -726,7 +726,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -772,7 +772,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -828,7 +828,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -871,7 +871,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(List.of());
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -912,7 +912,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -961,7 +961,7 @@ class InternalReportServiceTest {
                         .build()
         ));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -1008,7 +1008,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -1054,7 +1054,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -1102,7 +1102,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,
@@ -1161,7 +1161,7 @@ class InternalReportServiceTest {
 
         when(reportRepository.findAllByHabitId(habitId)).thenReturn(reports);
 
-        ReportsInfoResponse response = underTest.getReportsInfo(
+        HabitReportsInfoResponse response = underTest.getReportsInfo(
                 habitId,
                 frequencyType,
                 null,

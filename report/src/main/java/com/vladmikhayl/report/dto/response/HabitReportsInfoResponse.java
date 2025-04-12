@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class ReportsInfoResponse {
+public class HabitReportsInfoResponse {
 
     // Для всех привычек
     private int completionsInTotal;

@@ -5,7 +5,7 @@ import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
+import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -495,9 +495,9 @@ class HabitServiceTest {
                 null,
                 null,
                 createdAt.toLocalDate()
-        )).thenReturn(ResponseEntity.ok(ReportsInfoResponse.builder().build()));
+        )).thenReturn(ResponseEntity.ok(HabitReportsInfoResponse.builder().build()));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(habitId, userIdStr);
+        HabitReportsInfoResponse response = underTest.getReportsInfo(habitId, userIdStr);
 
         assertThat(response).isNotNull();
     }
@@ -535,9 +535,9 @@ class HabitServiceTest {
                 3,
                 null,
                 createdAt.toLocalDate()
-        )).thenReturn(ResponseEntity.ok(ReportsInfoResponse.builder().build()));
+        )).thenReturn(ResponseEntity.ok(HabitReportsInfoResponse.builder().build()));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(habitId, userIdStr);
+        HabitReportsInfoResponse response = underTest.getReportsInfo(habitId, userIdStr);
 
         assertThat(response).isNotNull();
     }
@@ -575,9 +575,9 @@ class HabitServiceTest {
                 null,
                 10,
                 createdAt.toLocalDate()
-        )).thenReturn(ResponseEntity.ok(ReportsInfoResponse.builder().build()));
+        )).thenReturn(ResponseEntity.ok(HabitReportsInfoResponse.builder().build()));
 
-        ReportsInfoResponse response = underTest.getReportsInfo(habitId, userIdStr);
+        HabitReportsInfoResponse response = underTest.getReportsInfo(habitId, userIdStr);
 
         assertThat(response).isNotNull();
     }
