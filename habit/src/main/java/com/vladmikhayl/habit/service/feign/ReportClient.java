@@ -3,6 +3,7 @@ package com.vladmikhayl.habit.service.feign;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
+import com.vladmikhayl.habit.entity.Period;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Profile;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,6 +33,19 @@ public interface ReportClient {
     @GetMapping("/internal/reports/get-report/of-habit/{habitId}/at-day/{date}")
     ResponseEntity<ReportFullInfoResponse> getReportAtDay(
             @PathVariable Long habitId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    );
+
+    @GetMapping("/internal/reports/{habitId}/is-completed/at-day/{date}")
+    ResponseEntity<Boolean> isCompletedAtDay(
+            @PathVariable Long habitId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    );
+
+    @GetMapping("/internal/reports/{habitId}/completion-count/{period}/at/{date}")
+    ResponseEntity<Integer> countCompletionsInPeriod(
+            @PathVariable Long habitId,
+            @PathVariable Period period,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     );
 

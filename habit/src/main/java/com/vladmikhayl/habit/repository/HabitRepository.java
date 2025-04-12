@@ -16,4 +16,6 @@ public interface HabitRepository extends JpaRepository<Habit, Long> {
 
     boolean existsByIdAndUserId(Long id, Long userId);
 
+    List<Habit> findAllByUserId(Long userId);
+
 }

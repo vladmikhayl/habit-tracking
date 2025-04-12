@@ -3,6 +3,7 @@ package com.vladmikhayl.habit.controller;
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
+import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.service.HabitService;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/habits")
@@ -125,6 +127,21 @@ public class HabitController {
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         ReportFullInfoResponse response = habitService.getReportAtDay(habitId, date, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("all-user-habits/at-day/{date}")
+    @Operation(summary = "Просмотреть список всех привычек пользователя (сделавшего этот запрос), " +
+            "которые являются текущими в конкретный день")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация")
+    })
+    public ResponseEntity<List<HabitShortInfoResponse>> getAllUserHabitsAtDay(
+            @PathVariable @Parameter(description = "За какую дату нужно вернуть привычки", example = "2025-04-11")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        List<HabitShortInfoResponse> response = habitService.getAllUserHabitsAtDay(date, userId);
         return ResponseEntity.ok(response);
     }
 
