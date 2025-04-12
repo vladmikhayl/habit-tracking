@@ -35,7 +35,8 @@ public class ReportController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Успешное создание"),
-            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к созданию отчетов к этой привычке в этот день"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к созданию отчетов к этой привычке в этот день " +
+                    "(либо он не является создателем этой привычки, либо эта привычка не является текущей в переданный день)"),
             @ApiResponse(responseCode = "409", description = "Эта привычка уже отмечена выполненной в этот день")
     })
     public ResponseEntity<Void> createReport(
@@ -54,7 +55,8 @@ public class ReportController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное изменение"),
-            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этому отчету")
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этому отчету " +
+                    "(он не является его создателем)")
     })
     public ResponseEntity<Void> changeReportPhoto(
             @PathVariable @Parameter(description = "ID изменяемого отчета", example = "1") Long reportId,
@@ -72,7 +74,8 @@ public class ReportController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное удаление"),
-            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этому отчету")
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этому отчету " +
+                    "(он не является его создателем)")
     })
     public ResponseEntity<Void> deleteReport(
             @PathVariable @Parameter(description = "ID удаляемого отчета", example = "1") Long reportId,

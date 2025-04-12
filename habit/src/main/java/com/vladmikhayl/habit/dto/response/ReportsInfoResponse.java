@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-@Schema(description = "Информация о конкретной привычке, связанная с ее выполнением и отчетами о ней")
+@Schema(description = "Подробная информация о конкретной привычке, связанная с ее выполнением и отчетами о ней")
 public class ReportsInfoResponse {
 
     // Для всех привычек

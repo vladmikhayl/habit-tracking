@@ -5,4 +5,7 @@ import com.vladmikhayl.habit.entity.SubscriptionCacheId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SubscriptionCacheRepository extends JpaRepository<SubscriptionCache, SubscriptionCacheId> {
+
+    int countById_HabitId(Long habitId);
+
 }

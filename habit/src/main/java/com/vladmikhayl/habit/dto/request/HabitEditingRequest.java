@@ -32,7 +32,11 @@ public class HabitEditingRequest {
 
     @Min(value = 0, message = "Duration must be at least 1 day, if it is provided")
     @Max(value = 730, message = "Duration must not exceed 730 days")
-    @Schema(description = "Новая длительность привычки в днях", example = "60")
+    @Schema(
+            description = "Новая длительность привычки в днях (чтобы указать, что привычка теперь вообще не должна " +
+                    "иметь фиксированную длительность, нужно указать 0)",
+            example = "60"
+    )
     private Integer durationDays;
 
     @AssertTrue(message = "Name cannot be blank")

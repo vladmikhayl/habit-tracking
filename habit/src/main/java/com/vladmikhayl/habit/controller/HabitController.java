@@ -2,6 +2,7 @@ package com.vladmikhayl.habit.controller;
 
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
 import com.vladmikhayl.habit.service.HabitService;
@@ -52,7 +53,8 @@ public class HabitController {
     @Operation(summary = "Изменить существующую привычку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное изменение"),
-            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем)"),
             @ApiResponse(responseCode = "409", description = "У пользователя уже есть привычка с таким названием")
     })
     public ResponseEntity<Void> editHabit(
@@ -68,7 +70,8 @@ public class HabitController {
     @Operation(summary = "Удалить существующую привычку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешное удаление"),
-            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке")
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем)")
     })
     public ResponseEntity<Void> deleteHabit(
             @PathVariable @Parameter(description = "ID удаляемой привычки", example = "1") Long habitId,
@@ -78,12 +81,27 @@ public class HabitController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/{habitId}/reports-info")
-    @Operation(summary = "Просмотреть о конкретной привычке информацию, связанную с ее выполнением и отчетами о ней")
+    @GetMapping("/{habitId}/general-info")
+    @Operation(summary = "Просмотреть подробную информацию об общем состоянии конкретной привычки")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
-                    "(он не является ее создателем или подписчиком на нее)", content = @Content)
+                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content)
+    })
+    public ResponseEntity<HabitGeneralInfoResponse> getGeneralInfo(
+            @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        HabitGeneralInfoResponse response = habitService.getGeneralInfo(habitId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{habitId}/reports-info")
+    @Operation(summary = "Просмотреть о конкретной привычке подробную информацию, связанную с выполнением этой привычки и отчетами о ней")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content)
     })
     public ResponseEntity<ReportsInfoResponse> getReportsInfo(
             @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
@@ -94,11 +112,11 @@ public class HabitController {
     }
 
     @GetMapping("{habitId}/get-report/at-day/{date}")
-    @Operation(summary = "Просмотреть отчет о выполнении указанной привычки в конкретный день")
+    @Operation(summary = "Просмотреть отчет о выполнении указанной привычки за конкретный день")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
-                    "(он не является ее создателем или подписчиком на нее)", content = @Content)
+                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content)
     })
     public ResponseEntity<ReportFullInfoResponse> getReportAtDay(
             @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,

@@ -4,6 +4,7 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
 
@@ -131,6 +133,50 @@ public class HabitService {
                 .habitId(habitId)
                 .build();
         habitEventProducer.sendHabitDeletedEvent(event);
+    }
+
+    public HabitGeneralInfoResponse getGeneralInfo(Long habitId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);
+
+        if (!doesUserHaveAccess) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
+        }
+
+        Habit habit = habitRepository.findById(habitId).get();
+
+        int subscribersCount = subscriptionCacheRepository.countById_HabitId(habitId);
+
+        Integer howManyDaysLeft = null;
+
+        if (habit.getDurationDays() != null) {
+            // Сколько полных дней прошло с момента создания привычки (то есть исключая текущий день)
+            int howManyFullDaysPassed = (int) ChronoUnit.DAYS.between(
+                    habit.getCreatedAt().toLocalDate(),
+                    LocalDate.now()
+            );
+
+            howManyDaysLeft = habit.getDurationDays() - howManyFullDaysPassed;
+        }
+
+        Set<DayOfWeek> daysOfWeek = habit.getDaysOfWeek();
+
+        return HabitGeneralInfoResponse.builder()
+                .id(habit.getId())
+                .name(habit.getName())
+                .description(habit.getDescription())
+                .isPhotoAllowed(habit.isPhotoAllowed())
+                .isHarmful(habit.isHarmful())
+                .durationDays(habit.getDurationDays())
+                .howManyDaysLeft(howManyDaysLeft)
+                .frequencyType(habit.getFrequencyType())
+                .daysOfWeek(daysOfWeek == null || daysOfWeek.isEmpty() ? null : daysOfWeek)
+                .timesPerWeek(habit.getTimesPerWeek())
+                .timesPerMonth(habit.getTimesPerMonth())
+                .createdAt(habit.getCreatedAt())
+                .subscribersCount(subscribersCount)
+                .build();
     }
 
     public ReportsInfoResponse getReportsInfo(Long habitId, String userId) {
