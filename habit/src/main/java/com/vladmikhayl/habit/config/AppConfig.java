@@ -1,4 +1,4 @@
-package com.vladmikhayl.report.config;
+package com.vladmikhayl.habit.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

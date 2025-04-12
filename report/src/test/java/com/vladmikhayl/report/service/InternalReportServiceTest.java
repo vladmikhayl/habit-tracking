@@ -43,6 +43,7 @@ class InternalReportServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Указываем, что при вызове LocalDate.now(clock) в методах сервиса, нужно возвращать TODAY_DATE
         Instant fixedInstant = TODAY_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant();
         lenient().when(clock.instant()).thenReturn(fixedInstant);
         lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());

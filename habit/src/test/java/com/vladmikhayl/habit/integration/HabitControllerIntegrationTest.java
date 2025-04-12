@@ -6,10 +6,7 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
-import com.vladmikhayl.habit.entity.FrequencyType;
-import com.vladmikhayl.habit.entity.Habit;
-import com.vladmikhayl.habit.entity.SubscriptionCache;
-import com.vladmikhayl.habit.entity.SubscriptionCacheId;
+import com.vladmikhayl.habit.entity.*;
 import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
 import com.vladmikhayl.habit.service.feign.ReportClient;
@@ -19,7 +16,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -31,15 +31,16 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.vladmikhayl.habit.entity.FrequencyType.MONTHLY_X_TIMES;
+import static com.vladmikhayl.habit.entity.FrequencyType.WEEKLY_ON_DAYS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,6 +60,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class HabitControllerIntegrationTest {
 
+
+    // При тестировании метода getGeneralInfo() предполагается, что сегодня 12 апреля 2025
+    // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
+    private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 12);
+
+    @TestConfiguration
+    static class FixedClockConfig {
+        @Bean
+        @Primary
+        // Создаем бин для времени с TODAY_DATE и указываем, что именно он должен использоваться для времени
+        // (так как у Спринга будет 2 бина: этот и из AppConfig)
+        public Clock fixedClock() {
+            return Clock.fixed(
+                    TODAY_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+                    ZoneId.systemDefault()
+            );
+        }
+    }
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -70,6 +90,9 @@ public class HabitControllerIntegrationTest {
 
     @Autowired
     private SubscriptionCacheRepository subscriptionCacheRepository;
+
+    @Autowired
+    private HabitWithoutAutoCreationTimeRepository habitWithoutAutoCreationTimeRepository;
 
     @Autowired
     private static ObjectMapper objectMapper;
@@ -895,6 +918,217 @@ public class HabitControllerIntegrationTest {
         String userIdStr = "10";
 
         mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetGeneralInfoWhenUserIsCreatorWithoutDuration() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.atStartOfDay();
+
+        HabitWithoutAutoCreationTime existingHabit = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .durationDays(null)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit);
+
+        mockMvc.perform(get("/api/v1/habits/1/general-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("1"))
+                .andExpect(jsonPath("$.name").value("Название"))
+                .andExpect(jsonPath("$.description").doesNotExist())
+                .andExpect(jsonPath("$.isPhotoAllowed").value("false"))
+                .andExpect(jsonPath("$.isHarmful").value("false"))
+                .andExpect(jsonPath("$.durationDays").doesNotExist())
+                .andExpect(jsonPath("$.howManyDaysLeft").doesNotExist())
+                .andExpect(jsonPath("$.frequencyType").value("WEEKLY_ON_DAYS"))
+                .andExpect(jsonPath("$.daysOfWeek").isArray())
+                .andExpect(jsonPath("$.timesPerWeek").doesNotExist())
+                .andExpect(jsonPath("$.timesPerMonth").doesNotExist())
+                .andExpect(jsonPath("$.createdAt", containsString(createdAt.toString())))
+                .andExpect(jsonPath("$.subscribersCount").value(0));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetGeneralInfoWhenUserIsCreatorWithDurationWhenHabitIsCreatedToday() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.atStartOfDay();
+
+        HabitWithoutAutoCreationTime existingHabit = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .durationDays(3)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit);
+
+        subscriptionCacheRepository.save(
+                SubscriptionCache.builder()
+                        .id(SubscriptionCacheId.builder()
+                                .habitId(1L)
+                                .subscriberId(11L)
+                                .build())
+                        .creatorLogin("user10")
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/v1/habits/1/general-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("1"))
+                .andExpect(jsonPath("$.name").value("Название"))
+                .andExpect(jsonPath("$.description").doesNotExist())
+                .andExpect(jsonPath("$.isPhotoAllowed").value("false"))
+                .andExpect(jsonPath("$.isHarmful").value("false"))
+                .andExpect(jsonPath("$.durationDays").value(3))
+                .andExpect(jsonPath("$.howManyDaysLeft").value(3))
+                .andExpect(jsonPath("$.frequencyType").value("WEEKLY_ON_DAYS"))
+                .andExpect(jsonPath("$.daysOfWeek").isArray())
+                .andExpect(jsonPath("$.timesPerWeek").doesNotExist())
+                .andExpect(jsonPath("$.timesPerMonth").doesNotExist())
+                .andExpect(jsonPath("$.createdAt", containsString(createdAt.toString())))
+                .andExpect(jsonPath("$.subscribersCount").value(1));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetGeneralInfoWhenUserIsSubscriberWithDurationWhenHabitIsExpired() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.minusDays(4).atStartOfDay();
+
+        // Привычку с ID=1 создал другой юзер
+        HabitWithoutAutoCreationTime existingHabit = HabitWithoutAutoCreationTime.builder()
+                .userId(13L)
+                .name("Название")
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(2)
+                .durationDays(3)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit);
+
+        // На привычку с ID=1 подписан текущий юзер
+        subscriptionCacheRepository.save(
+                SubscriptionCache.builder()
+                        .id(SubscriptionCacheId.builder()
+                                .habitId(1L)
+                                .subscriberId(userId)
+                                .build())
+                        .creatorLogin("user13")
+                        .build()
+        );
+
+        // На другую привычку (с ID=2) подписан текущий юзер
+        subscriptionCacheRepository.save(
+                SubscriptionCache.builder()
+                        .id(SubscriptionCacheId.builder()
+                                .habitId(2L)
+                                .subscriberId(userId)
+                                .build())
+                        .creatorLogin("user13")
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/v1/habits/1/general-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("1"))
+                .andExpect(jsonPath("$.name").value("Название"))
+                .andExpect(jsonPath("$.description").doesNotExist())
+                .andExpect(jsonPath("$.isPhotoAllowed").value("false"))
+                .andExpect(jsonPath("$.isHarmful").value("false"))
+                .andExpect(jsonPath("$.durationDays").value(3))
+                .andExpect(jsonPath("$.howManyDaysLeft").value(-1))
+                .andExpect(jsonPath("$.frequencyType").value("MONTHLY_X_TIMES"))
+                .andExpect(jsonPath("$.daysOfWeek").doesNotExist())
+                .andExpect(jsonPath("$.timesPerWeek").doesNotExist())
+                .andExpect(jsonPath("$.timesPerMonth").value(2))
+                .andExpect(jsonPath("$.createdAt", containsString(createdAt.toString())))
+                .andExpect(jsonPath("$.subscribersCount").value(1));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetGeneralInfoWhenUserIsNotCreatorAndIsNotSubscriber() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.atStartOfDay();
+
+        // Привычку с ID=1 создал другой юзер
+        HabitWithoutAutoCreationTime existingHabit = HabitWithoutAutoCreationTime.builder()
+                .userId(13L)
+                .name("Название")
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(2)
+                .durationDays(3)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit);
+
+        // На привычку с ID=1 подписан другой юзер
+        subscriptionCacheRepository.save(
+                SubscriptionCache.builder()
+                        .id(SubscriptionCacheId.builder()
+                                .habitId(1L)
+                                .subscriberId(11L)
+                                .build())
+                        .creatorLogin("user13")
+                        .build()
+        );
+
+        // На другую привычку (с ID=2) подписан текущий юзер
+        subscriptionCacheRepository.save(
+                SubscriptionCache.builder()
+                        .id(SubscriptionCacheId.builder()
+                                .habitId(2L)
+                                .subscriberId(userId)
+                                .build())
+                        .creatorLogin("user13")
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/v1/habits/1/general-info")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetGeneralInfoWhenThatHabitDoesNotExist() throws Exception {
+        String userIdStr = "10";
+
+        mockMvc.perform(get("/api/v1/habits/1/general-info")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));

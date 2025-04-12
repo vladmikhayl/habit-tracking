@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +39,8 @@ public class HabitService {
     private final SubscriptionCacheRepository subscriptionCacheRepository;
 
     private final ReportClient reportClient;
+
+    private final Clock clock;
 
     private Long parseUserId(String userId) {
         try {
@@ -154,7 +157,7 @@ public class HabitService {
             // Сколько полных дней прошло с момента создания привычки (то есть исключая текущий день)
             int howManyFullDaysPassed = (int) ChronoUnit.DAYS.between(
                     habit.getCreatedAt().toLocalDate(),
-                    LocalDate.now()
+                    LocalDate.now(clock)
             );
 
             howManyDaysLeft = habit.getDurationDays() - howManyFullDaysPassed;

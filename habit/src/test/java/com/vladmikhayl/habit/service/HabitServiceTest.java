@@ -4,6 +4,7 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
@@ -12,6 +13,7 @@ import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
 import com.vladmikhayl.habit.service.feign.ReportClient;
 import com.vladmikhayl.habit.service.kafka.HabitEventProducer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -24,18 +26,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.vladmikhayl.habit.entity.FrequencyType.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HabitServiceTest {
+
+    // При тестировании метода getGeneralInfo() предполагается, что сегодня 12 апреля 2025
+    // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
+    private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 12);
 
     @Mock
     private HabitRepository habitRepository;
@@ -49,8 +54,19 @@ class HabitServiceTest {
     @Mock
     private SubscriptionCacheRepository subscriptionCacheRepository;
 
+    @Mock
+    private Clock clock;
+
     @InjectMocks
     private HabitService underTest;
+
+    @BeforeEach
+    void setUp() {
+        // Указываем, что при вызове LocalDate.now(clock) в методах сервиса, нужно возвращать TODAY_DATE
+        Instant fixedInstant = TODAY_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        lenient().when(clock.instant()).thenReturn(fixedInstant);
+        lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+    }
 
     @Test
     void canCreateHabitWithMinInfo() {
@@ -117,7 +133,7 @@ class HabitServiceTest {
                 .isPhotoAllowed(true)
                 .isHarmful(false)
                 .durationDays(60)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
                 .timesPerWeek(null)
                 .timesPerMonth(null)
@@ -145,7 +161,7 @@ class HabitServiceTest {
                 .isPhotoAllowed(true)
                 .isHarmful(false)
                 .durationDays(60)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
                 .timesPerWeek(null)
                 .timesPerMonth(null)
@@ -174,7 +190,7 @@ class HabitServiceTest {
                 .isPhotoAllowed(false)
                 .isHarmful(false)
                 .durationDays(null)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
                 .timesPerWeek(null)
                 .timesPerMonth(null)
@@ -201,7 +217,7 @@ class HabitServiceTest {
                 .description("Старое описание привычки")
                 .isHarmful(false)
                 .durationDays(null)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
                 .build();
 
@@ -479,7 +495,7 @@ class HabitServiceTest {
 
         Habit existingHabit = Habit.builder()
                 .id(habitId)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+                .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
                 .timesPerWeek(null)
                 .timesPerMonth(null)
@@ -490,7 +506,7 @@ class HabitServiceTest {
 
         when(reportClient.getReportsInfo(
                 habitId,
-                FrequencyType.WEEKLY_ON_DAYS,
+                WEEKLY_ON_DAYS,
                 Set.of(DayOfWeek.MONDAY),
                 null,
                 null,
@@ -676,6 +692,200 @@ class HabitServiceTest {
                 .hasMessageContaining("This user doesn't have access to this habit");
 
         verify(reportClient, never()).getReportAtDay(any(), any());
+    }
+
+    @Test
+    void canGetGeneralInfoWhenUserIsCreatorWithoutDuration() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = TODAY_DATE.atStartOfDay();
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(true);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .userId(userId)
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .durationDays(null)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(subscriptionCacheRepository.countById_HabitId(habitId)).thenReturn(3);
+
+        HabitGeneralInfoResponse response = underTest.getGeneralInfo(habitId, userIdStr);
+
+        assertThat(response.getId()).isEqualTo(52L);
+        assertThat(response.getDurationDays()).isNull();
+        assertThat(response.getHowManyDaysLeft()).isNull();
+        assertThat(response.getFrequencyType()).isEqualTo(WEEKLY_ON_DAYS);
+        assertThat(response.getDaysOfWeek()).isEqualTo(Set.of(DayOfWeek.MONDAY));
+        assertThat(response.getTimesPerWeek()).isNull();
+        assertThat(response.getTimesPerMonth()).isNull();
+        assertThat(response.getSubscribersCount()).isEqualTo(3);
+        assertThat(response.getCreatedAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    void canGetGeneralInfoWhenUserIsCreatorWithDurationWhenHabitIsCreatedToday() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = TODAY_DATE.atStartOfDay();
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(true);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .userId(userId)
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .durationDays(10)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(subscriptionCacheRepository.countById_HabitId(habitId)).thenReturn(0);
+
+        HabitGeneralInfoResponse response = underTest.getGeneralInfo(habitId, userIdStr);
+
+        assertThat(response.getId()).isEqualTo(52L);
+        assertThat(response.getDurationDays()).isEqualTo(10);
+        assertThat(response.getHowManyDaysLeft()).isEqualTo(10);
+        assertThat(response.getFrequencyType()).isEqualTo(WEEKLY_ON_DAYS);
+        assertThat(response.getDaysOfWeek()).isEqualTo(Set.of(DayOfWeek.MONDAY));
+        assertThat(response.getTimesPerWeek()).isNull();
+        assertThat(response.getTimesPerMonth()).isNull();
+        assertThat(response.getSubscribersCount()).isEqualTo(0);
+        assertThat(response.getCreatedAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    void canGetGeneralInfoWhenUserIsSubscriberWithDurationWhenTodayIsLastDay() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = TODAY_DATE.minusDays(2).atStartOfDay();
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(true);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .userId(userId)
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(1)
+                .timesPerMonth(null)
+                .durationDays(3)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(subscriptionCacheRepository.countById_HabitId(habitId)).thenReturn(10);
+
+        HabitGeneralInfoResponse response = underTest.getGeneralInfo(habitId, userIdStr);
+
+        assertThat(response.getId()).isEqualTo(52L);
+        assertThat(response.getDurationDays()).isEqualTo(3);
+        assertThat(response.getHowManyDaysLeft()).isEqualTo(1);
+        assertThat(response.getFrequencyType()).isEqualTo(WEEKLY_X_TIMES);
+        assertThat(response.getDaysOfWeek()).isNull();
+        assertThat(response.getTimesPerWeek()).isEqualTo(1);
+        assertThat(response.getTimesPerMonth()).isNull();
+        assertThat(response.getSubscribersCount()).isEqualTo(10);
+        assertThat(response.getCreatedAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    void canGetGeneralInfoWhenUserIsSubscriberWithDurationWhenHabitIsExpired() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        LocalDateTime createdAt = TODAY_DATE.minusDays(4).atStartOfDay();
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(true);
+
+        Habit existingHabit = Habit.builder()
+                .id(habitId)
+                .userId(userId)
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(2)
+                .durationDays(3)
+                .createdAt(createdAt)
+                .build();
+
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
+
+        when(subscriptionCacheRepository.countById_HabitId(habitId)).thenReturn(10);
+
+        HabitGeneralInfoResponse response = underTest.getGeneralInfo(habitId, userIdStr);
+
+        assertThat(response.getId()).isEqualTo(52L);
+        assertThat(response.getDurationDays()).isEqualTo(3);
+        assertThat(response.getHowManyDaysLeft()).isEqualTo(-1);
+        assertThat(response.getFrequencyType()).isEqualTo(MONTHLY_X_TIMES);
+        assertThat(response.getDaysOfWeek()).isNull();
+        assertThat(response.getTimesPerWeek()).isNull();
+        assertThat(response.getTimesPerMonth()).isEqualTo(2);
+        assertThat(response.getSubscribersCount()).isEqualTo(10);
+        assertThat(response.getCreatedAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    void failGetGeneralInfoWhenUserIsNotCreatorAndIsNotSubscriber() {
+        String userIdStr = "10";
+        Long userId = 10L;
+        Long habitId = 52L;
+
+        when(habitRepository.existsByIdAndUserId(habitId, userId)).thenReturn(false);
+
+        when(subscriptionCacheRepository.existsById(argThat(id ->
+                id.getHabitId().equals(habitId) &&
+                        id.getSubscriberId().equals(userId)
+        ))).thenReturn(false);
+
+        assertThatThrownBy(() -> underTest.getGeneralInfo(habitId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("This user doesn't have access to this habit");
     }
 
 }

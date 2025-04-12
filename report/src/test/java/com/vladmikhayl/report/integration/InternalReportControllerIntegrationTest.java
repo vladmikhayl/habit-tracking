@@ -54,7 +54,8 @@ public class InternalReportControllerIntegrationTest {
     static class FixedClockConfig {
         @Bean
         @Primary
-        // указываем, что именно этот бин должен использоваться для времени (так как у Спринга будет 2 бина: этот и из AppConfig)
+        // Создаем бин для времени с TODAY_DATE и указываем, что именно он должен использоваться для времени
+        // (так как у Спринга будет 2 бина: этот и из AppConfig)
         public Clock fixedClock() {
             return Clock.fixed(
                     TODAY_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(),
