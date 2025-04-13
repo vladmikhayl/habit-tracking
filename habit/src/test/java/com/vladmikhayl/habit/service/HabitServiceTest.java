@@ -5,10 +5,12 @@ import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
 import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
+import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Habit;
+import com.vladmikhayl.habit.entity.Period;
 import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
 import com.vladmikhayl.habit.service.feign.ReportClient;
@@ -19,14 +21,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.*;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,7 +43,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class HabitServiceTest {
 
-    // При тестировании метода getGeneralInfo() предполагается, что сегодня 12 апреля 2025
+    // При тестировании методов getGeneralInfo() и getAllUserHabitsAtDay() предполагается, что сегодня 12 апреля 2025
     // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
     private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 12);
 
@@ -57,6 +62,11 @@ class HabitServiceTest {
     @Mock
     private Clock clock;
 
+    // Этот InternalHabitService (он внедрится в HabitService) будет не моком,
+    // а реально выполняющим логику сервисом с моком HabitRepository
+    @Spy
+    private InternalHabitService internalHabitService = new InternalHabitService(habitRepository);
+
     @InjectMocks
     private HabitService underTest;
 
@@ -66,6 +76,10 @@ class HabitServiceTest {
         Instant fixedInstant = TODAY_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant();
         lenient().when(clock.instant()).thenReturn(fixedInstant);
         lenient().when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        // Вручную внедряем мок класса HabitRepository в internalHabitService
+        // (так как по умолчанию в это поле кладется не мок репозитория, а null)
+        ReflectionTestUtils.setField(internalHabitService, "habitRepository", habitRepository);
     }
 
     @Test
@@ -886,6 +900,221 @@ class HabitServiceTest {
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
                 .hasMessageContaining("This user doesn't have access to this habit");
+    }
+
+    @Test
+    void testGetAllUserHabitsAtDayWhenThereAreNoHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        when(habitRepository.findAllByUserId(userId)).thenReturn(List.of());
+
+        List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+    }
+
+    @Test
+    void testGetAllUserHabitsAtDayWhenThereAreNoCurrentHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как неподходящий день недели)
+        Habit existingHabit1 = Habit.builder()
+                .id(1L)
+                .userId(userId)
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как истекла длительность)
+        Habit existingHabit2 = Habit.builder()
+                .id(2L)
+                .userId(userId)
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(3)
+                .timesPerMonth(null)
+                .durationDays(1)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        when(habitRepository.findAllByUserId(userId)).thenReturn(List.of(existingHabit1, existingHabit2));
+
+        when(habitRepository.findByIdAndUserId(1L, userId)).thenReturn(Optional.of(existingHabit1));
+
+        when(habitRepository.findByIdAndUserId(2L, userId)).thenReturn(Optional.of(existingHabit2));
+
+        List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+    }
+
+    @Test
+    void testGetAllUserHabitsAtDayWhenThereIsOneCurrentHabit() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как неподходящий день недели)
+        Habit existingHabit1 = Habit.builder()
+                .id(1L)
+                .userId(userId)
+                .name("Название 1")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit2 = Habit.builder()
+                .id(2L)
+                .userId(userId)
+                .name("Название 2")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.SATURDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        when(habitRepository.findAllByUserId(userId)).thenReturn(List.of(existingHabit1, existingHabit2));
+
+        when(habitRepository.findByIdAndUserId(1L, userId)).thenReturn(Optional.of(existingHabit1));
+
+        when(habitRepository.findByIdAndUserId(2L, userId)).thenReturn(Optional.of(existingHabit2));
+
+        when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(3);
+
+        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+
+        List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                HabitShortInfoResponse.builder()
+                        .name("Название 2")
+                        .isCompleted(true)
+                        .subscribersCount(3)
+                        .frequencyType(WEEKLY_ON_DAYS)
+                        .completionsInPeriod(null)
+                        .completionsPlannedInPeriod(null)
+                        .build()
+        ));
+    }
+
+    @Test
+    void testGetAllUserHabitsAtDayWhenThereAreMultipleCurrentHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как неподходящий день недели)
+        Habit existingHabit1 = Habit.builder()
+                .id(1L)
+                .userId(userId)
+                .name("Название 1")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit2 = Habit.builder()
+                .id(2L)
+                .userId(userId)
+                .name("Название 2")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.SATURDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit3 = Habit.builder()
+                .id(3L)
+                .userId(userId)
+                .name("Название 3")
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(2)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit4 = Habit.builder()
+                .id(4L)
+                .userId(userId)
+                .name("Название 4")
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(10)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        when(habitRepository.findAllByUserId(userId)).thenReturn(List.of(
+                existingHabit1, existingHabit2, existingHabit3, existingHabit4
+        ));
+
+        when(habitRepository.findByIdAndUserId(1L, userId)).thenReturn(Optional.of(existingHabit1));
+
+        when(habitRepository.findByIdAndUserId(2L, userId)).thenReturn(Optional.of(existingHabit2));
+
+        when(habitRepository.findByIdAndUserId(3L, userId)).thenReturn(Optional.of(existingHabit3));
+
+        when(habitRepository.findByIdAndUserId(4L, userId)).thenReturn(Optional.of(existingHabit4));
+
+        when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(3);
+
+        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+
+        when(subscriptionCacheRepository.countById_HabitId(3L)).thenReturn(0);
+
+        when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+
+        when(reportClient.countCompletionsInPeriod(3L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
+
+        when(subscriptionCacheRepository.countById_HabitId(4L)).thenReturn(10);
+
+        when(reportClient.isCompletedAtDay(4L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+
+        when(reportClient.countCompletionsInPeriod(4L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
+
+        List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                HabitShortInfoResponse.builder()
+                        .name("Название 2")
+                        .isCompleted(true)
+                        .subscribersCount(3)
+                        .frequencyType(WEEKLY_ON_DAYS)
+                        .completionsInPeriod(null)
+                        .completionsPlannedInPeriod(null)
+                        .build(),
+                HabitShortInfoResponse.builder()
+                        .name("Название 3")
+                        .isCompleted(false)
+                        .subscribersCount(0)
+                        .frequencyType(WEEKLY_X_TIMES)
+                        .completionsInPeriod(0)
+                        .completionsPlannedInPeriod(2)
+                        .build(),
+                HabitShortInfoResponse.builder()
+                        .name("Название 4")
+                        .isCompleted(true)
+                        .subscribersCount(10)
+                        .frequencyType(MONTHLY_X_TIMES)
+                        .completionsInPeriod(3)
+                        .completionsPlannedInPeriod(10)
+                        .build()
+        ));
     }
 
 }

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.habit.FeignClientTestConfig;
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
+import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.entity.*;
+import com.vladmikhayl.habit.entity.Period;
 import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
 import com.vladmikhayl.habit.service.feign.ReportClient;
@@ -36,14 +38,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.vladmikhayl.habit.entity.FrequencyType.MONTHLY_X_TIMES;
-import static com.vladmikhayl.habit.entity.FrequencyType.WEEKLY_ON_DAYS;
+import static com.vladmikhayl.habit.entity.FrequencyType.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test") // чтобы CommandLineRunner в коде Application не выполнялся
@@ -1132,6 +1132,249 @@ public class HabitControllerIntegrationTest {
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void testGetAllUserHabitsAtDayWhenThereAreNoHabitsOfThatUser() throws Exception {
+        String userIdStr = "10";
+
+        LocalDateTime createdAt = TODAY_DATE.atStartOfDay();
+
+        // Эту привычку создал другой юзер
+        HabitWithoutAutoCreationTime existingHabit = HabitWithoutAutoCreationTime.builder()
+                .userId(11L)
+                .name("Название 1")
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(5)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit);
+
+        mockMvc.perform(get("/api/v1/habits/all-user-habits/at-day/2025-04-12")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void testGetAllUserHabitsAtDayWhenThereAreNoCurrentHabitsOfThatUser() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.minusDays(3).atStartOfDay();
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как неподходящий день недели)
+        HabitWithoutAutoCreationTime existingHabit1 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 1")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit1);
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как истекла длительность)
+        HabitWithoutAutoCreationTime existingHabit2 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 2")
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(3)
+                .timesPerMonth(null)
+                .durationDays(1)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit2);
+
+        mockMvc.perform(get("/api/v1/habits/all-user-habits/at-day/2025-04-12")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void testGetAllUserHabitsAtDayWhenThereAreCurrentWeeklyOnDaysHabits() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.minusDays(3).atStartOfDay();
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как неподходящий день недели)
+        HabitWithoutAutoCreationTime existingHabit1 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 1")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit1);
+
+        // Эта привычка будет текущей в TODAY_DATE (на эту привычку не будет подписчиков)
+        HabitWithoutAutoCreationTime existingHabit2 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 2")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.SATURDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit2);
+
+        // Эта привычка будет текущей в TODAY_DATE (на эту привычку будут подписчики)
+        HabitWithoutAutoCreationTime existingHabit3 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 3")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit3);
+
+        // Подписка на привычку existingHabit3
+        SubscriptionCache subscription = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(3L)
+                        .subscriberId(11L)
+                        .build())
+                .creatorLogin("user10")
+                .build();
+
+        subscriptionCacheRepository.save(subscription);
+
+        Mockito.when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+
+        Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+
+        List<HabitShortInfoResponse> expectedList = List.of(
+                HabitShortInfoResponse.builder()
+                        .name("Название 2")
+                        .isCompleted(false)
+                        .subscribersCount(0)
+                        .frequencyType(WEEKLY_ON_DAYS)
+                        .completionsInPeriod(null)
+                        .completionsPlannedInPeriod(null)
+                        .build(),
+                HabitShortInfoResponse.builder()
+                        .name("Название 3")
+                        .isCompleted(true)
+                        .subscribersCount(1)
+                        .frequencyType(WEEKLY_ON_DAYS)
+                        .completionsInPeriod(null)
+                        .completionsPlannedInPeriod(null)
+                        .build()
+        );
+
+        String expectedJson = objectMapper.writeValueAsString(expectedList);
+
+        mockMvc.perform(get("/api/v1/habits/all-user-habits/at-day/2025-04-12")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void testGetAllUserHabitsAtDayWhenThereAreCurrentWeeklyXTimesAndMonthlyXTimesHabits() throws Exception {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        LocalDateTime createdAt = TODAY_DATE.minusDays(3).atStartOfDay();
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как истекла длительность)
+        HabitWithoutAutoCreationTime existingHabit1 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 1")
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(7)
+                .timesPerMonth(null)
+                .durationDays(3)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit1);
+
+        // Эта привычка будет текущей в TODAY_DATE
+        HabitWithoutAutoCreationTime existingHabit2 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 2")
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(1)
+                .timesPerMonth(null)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit2);
+
+        // Эта привычка будет текущей в TODAY_DATE
+        HabitWithoutAutoCreationTime existingHabit3 = HabitWithoutAutoCreationTime.builder()
+                .userId(userId)
+                .name("Название 3")
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(5)
+                .createdAt(createdAt)
+                .build();
+
+        habitWithoutAutoCreationTimeRepository.save(existingHabit3);
+
+        Mockito.when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+
+        Mockito.when(reportClient.countCompletionsInPeriod(2L, Period.WEEK, TODAY_DATE))
+                .thenReturn(ResponseEntity.ok(0));
+
+        Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+
+        Mockito.when(reportClient.countCompletionsInPeriod(3L, Period.MONTH, TODAY_DATE))
+                .thenReturn(ResponseEntity.ok(2));
+
+        List<HabitShortInfoResponse> expectedList = List.of(
+                HabitShortInfoResponse.builder()
+                        .name("Название 2")
+                        .isCompleted(false)
+                        .subscribersCount(0)
+                        .frequencyType(WEEKLY_X_TIMES)
+                        .completionsInPeriod(0)
+                        .completionsPlannedInPeriod(1)
+                        .build(),
+                HabitShortInfoResponse.builder()
+                        .name("Название 3")
+                        .isCompleted(true)
+                        .subscribersCount(0)
+                        .frequencyType(MONTHLY_X_TIMES)
+                        .completionsInPeriod(2)
+                        .completionsPlannedInPeriod(5)
+                        .build()
+        );
+
+        String expectedJson = objectMapper.writeValueAsString(expectedList);
+
+        mockMvc.perform(get("/api/v1/habits/all-user-habits/at-day/2025-04-12")
+                        .header("X-User-Id", userIdStr))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
     }
 
 }
