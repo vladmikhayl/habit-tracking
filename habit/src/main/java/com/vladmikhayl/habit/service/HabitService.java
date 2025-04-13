@@ -4,14 +4,8 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
-import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
-import com.vladmikhayl.habit.entity.FrequencyType;
-import com.vladmikhayl.habit.entity.Habit;
-import com.vladmikhayl.habit.entity.Period;
-import com.vladmikhayl.habit.entity.SubscriptionCacheId;
+import com.vladmikhayl.habit.dto.response.*;
+import com.vladmikhayl.habit.entity.*;
 import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
 import com.vladmikhayl.habit.service.feign.ReportClient;
@@ -274,6 +268,68 @@ public class HabitService {
         }
 
         return currentUserHabitsAtDay;
+    }
+
+    public List<SubscribedHabitShortInfoResponse> getAllUserSubscribedHabitsAtDay(LocalDate date, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        List<Long> allUserSubscribedHabitsIds = subscriptionCacheRepository
+                .findAllById_SubscriberId(userIdLong).stream()
+                .map(subscriptionCache -> subscriptionCache.getId().getHabitId())
+                .toList();
+
+        List<Habit> allUserSubscribedHabits = habitRepository.findAllByIdIn(allUserSubscribedHabitsIds);
+
+        List<SubscribedHabitShortInfoResponse> currentUserSubscribedHabitsAtDay = new ArrayList<>();
+
+        for (Habit habit : allUserSubscribedHabits) {
+
+            Long habitId = habit.getId();
+            Long creatorId = habit.getUserId();
+
+            if (internalHabitService.isCurrent(habitId, creatorId, date)) {
+
+                String creatorLogin = subscriptionCacheRepository.findAllById_HabitId(habitId).get(0).getCreatorLogin();
+
+                FrequencyType frequencyType = habit.getFrequencyType();
+
+                int subscribersCount = subscriptionCacheRepository.countById_HabitId(habitId);
+
+                boolean isCompleted = reportClient.isCompletedAtDay(habitId, date).getBody();
+
+                Integer completionsInPeriod = null;
+
+                if (frequencyType == FrequencyType.WEEKLY_X_TIMES) {
+                    completionsInPeriod = reportClient.countCompletionsInPeriod(habitId, Period.WEEK, date).getBody();
+                }
+
+                if (frequencyType == FrequencyType.MONTHLY_X_TIMES) {
+                    completionsInPeriod = reportClient.countCompletionsInPeriod(habitId, Period.MONTH, date).getBody();
+                }
+
+                Integer completionsPlannedInPeriod = null;
+
+                if (frequencyType == FrequencyType.WEEKLY_X_TIMES) {
+                    completionsPlannedInPeriod = habit.getTimesPerWeek();
+                }
+
+                if (frequencyType == FrequencyType.MONTHLY_X_TIMES) {
+                    completionsPlannedInPeriod = habit.getTimesPerMonth();
+                }
+
+                currentUserSubscribedHabitsAtDay.add(SubscribedHabitShortInfoResponse.builder()
+                        .creatorLogin(creatorLogin)
+                        .name(habit.getName())
+                        .isCompleted(isCompleted)
+                        .subscribersCount(subscribersCount)
+                        .frequencyType(frequencyType)
+                        .completionsInPeriod(completionsInPeriod)
+                        .completionsPlannedInPeriod(completionsPlannedInPeriod)
+                        .build());
+            }
+        }
+
+        return currentUserSubscribedHabitsAtDay;
     }
 
     private boolean isUserEitherHabitCreatorOrSubscriber(Long habitId, Long userId) {

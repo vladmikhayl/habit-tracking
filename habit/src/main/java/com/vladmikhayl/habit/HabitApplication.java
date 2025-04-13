@@ -34,8 +34,8 @@ public class HabitApplication {
 	) {
 		return args -> {
 
-			// Юзер с ID=1 подписан на привычку с ID=1 (создана юзером user2)
-//			SubscriptionCache subscriptionCache = SubscriptionCache.builder()
+//			// Юзер с ID=1 подписан на привычки с ID=1 (создана юзером user2)
+//			SubscriptionCache subscriptionCache1 = SubscriptionCache.builder()
 //					.id(
 //							SubscriptionCacheId.builder()
 //									.habitId(1L)
@@ -45,7 +45,20 @@ public class HabitApplication {
 //					.creatorLogin("user2")
 //					.build();
 //
-//			subscriptionCacheRepository.save(subscriptionCache);
+//			subscriptionCacheRepository.save(subscriptionCache1);
+//
+//			// Юзер с ID=1 подписан на привычку с ID=3 (создана юзером user2)
+//			SubscriptionCache subscriptionCache3 = SubscriptionCache.builder()
+//					.id(
+//							SubscriptionCacheId.builder()
+//									.habitId(3L)
+//									.subscriberId(1L)
+//									.build()
+//					)
+//					.creatorLogin("user2")
+//					.build();
+//
+//			subscriptionCacheRepository.save(subscriptionCache3);
 
 //			Habit habit1 = Habit.builder()
 //					.userId(1L)

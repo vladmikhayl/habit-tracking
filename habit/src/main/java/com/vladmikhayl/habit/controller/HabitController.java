@@ -2,10 +2,7 @@ package com.vladmikhayl.habit.controller;
 
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
-import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
+import com.vladmikhayl.habit.dto.response.*;
 import com.vladmikhayl.habit.service.HabitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -142,6 +139,21 @@ public class HabitController {
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         List<HabitShortInfoResponse> response = habitService.getAllUserHabitsAtDay(date, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("all-user-subscribed-habits/at-day/{date}")
+    @Operation(summary = "Просмотреть список всех привычек, на которые подписан и принят пользователь " +
+            "(сделавший этот запрос) и которые являются текущими в конкретный день")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация")
+    })
+    public ResponseEntity<List<SubscribedHabitShortInfoResponse>> getAllUserSubscribedHabitsAtDay(
+            @PathVariable @Parameter(description = "За какую дату нужно вернуть привычки", example = "2025-04-11")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        List<SubscribedHabitShortInfoResponse> response = habitService.getAllUserSubscribedHabitsAtDay(date, userId);
         return ResponseEntity.ok(response);
     }
 

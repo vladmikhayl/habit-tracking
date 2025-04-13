@@ -18,4 +18,6 @@ public interface HabitRepository extends JpaRepository<Habit, Long> {
 
     List<Habit> findAllByUserId(Long userId);
 
+    List<Habit> findAllByIdIn(List<Long> ids);
+
 }
