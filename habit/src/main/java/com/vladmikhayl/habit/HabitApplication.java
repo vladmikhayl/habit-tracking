@@ -34,7 +34,7 @@ public class HabitApplication {
 	) {
 		return args -> {
 
-//			// Юзер с ID=1 подписан на привычки с ID=1 (создана юзером user2)
+//			// Юзер с ID=1 подписан на привычку с ID=1 (создана юзером user2)
 //			SubscriptionCache subscriptionCache1 = SubscriptionCache.builder()
 //					.id(
 //							SubscriptionCacheId.builder()
