@@ -4,12 +4,8 @@ import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
 import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
-import com.vladmikhayl.habit.dto.response.HabitGeneralInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
-import com.vladmikhayl.habit.entity.FrequencyType;
-import com.vladmikhayl.habit.entity.Habit;
+import com.vladmikhayl.habit.dto.response.*;
+import com.vladmikhayl.habit.entity.*;
 import com.vladmikhayl.habit.entity.Period;
 import com.vladmikhayl.habit.repository.HabitRepository;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
@@ -1115,6 +1111,249 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(10)
                         .build()
         ));
+    }
+
+    @Test
+    void testGetAllUserSubscribedHabitsAtDayWhenThereAreNoSubscribedHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        when(subscriptionCacheRepository.findAllById_SubscriberId(userId)).thenReturn(List.of());
+
+        when(habitRepository.findAllByIdIn(List.of())).thenReturn(List.of());
+
+        List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+
+        verifyNoMoreInteractions(habitRepository, subscriptionCacheRepository);
+    }
+
+    @Test
+    void testGetAllUserSubscribedHabitsAtDayWhenThereAreNoCurrentSubscribedHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        // Текущий юзер подписан на привычку 1, которая не является текущий в TODAY_DATE
+        SubscriptionCache existingSubscription = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user2")
+                .build();
+
+        when(subscriptionCacheRepository.findAllById_SubscriberId(userId)).thenReturn(List.of(existingSubscription));
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как неподходящий день недели)
+        Habit existingHabit = Habit.builder()
+                .id(1L)
+                .userId(2L)
+                .name("Название 1")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.FRIDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        when(habitRepository.findAllByIdIn(List.of(1L))).thenReturn(List.of(existingHabit));
+
+        when(habitRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.of(existingHabit));
+
+        List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+
+        verifyNoMoreInteractions(habitRepository, subscriptionCacheRepository);
+    }
+
+    @Test
+    void testGetAllUserSubscribedHabitsAtDayWhenThereAreCurrentWeeklyOnDaysSubscribedHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        // Текущий юзер подписан на привычку 1, которая не является текущий в TODAY_DATE
+        SubscriptionCache existingSubscription1 = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user2")
+                .build();
+
+        // Текущий юзер подписан на привычку 2, которая является текущий в TODAY_DATE
+        SubscriptionCache existingSubscription2 = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(2L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user3")
+                .build();
+
+        when(subscriptionCacheRepository.findAllById_SubscriberId(userId)).thenReturn(List.of(
+                existingSubscription1, existingSubscription2
+        ));
+
+        // Эта привычка не будет текущей в TODAY_DATE (так как истекла длительность)
+        Habit existingHabit1 = Habit.builder()
+                .id(1L)
+                .userId(2L)
+                .name("Название 1")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.SATURDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .durationDays(1)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit2 = Habit.builder()
+                .id(2L)
+                .userId(3L)
+                .name("Название 2")
+                .frequencyType(WEEKLY_ON_DAYS)
+                .daysOfWeek(Set.of(DayOfWeek.SATURDAY))
+                .timesPerWeek(null)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        when(habitRepository.findAllByIdIn(List.of(1L, 2L))).thenReturn(List.of(
+                existingHabit1, existingHabit2
+        ));
+
+        when(habitRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.of(existingHabit1));
+
+        when(habitRepository.findByIdAndUserId(2L, 3L)).thenReturn(Optional.of(existingHabit2));
+
+        when(subscriptionCacheRepository.findAllById_HabitId(2L)).thenReturn(List.of(existingSubscription2));
+
+        when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(1);
+
+        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+
+        List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                SubscribedHabitShortInfoResponse.builder()
+                        .creatorLogin("user3")
+                        .name("Название 2")
+                        .isCompleted(false)
+                        .subscribersCount(1)
+                        .frequencyType(WEEKLY_ON_DAYS)
+                        .completionsInPeriod(null)
+                        .completionsPlannedInPeriod(null)
+                        .build()
+        ));
+
+        verifyNoMoreInteractions(habitRepository, subscriptionCacheRepository, reportClient);
+    }
+
+    @Test
+    void testGetAllUserSubscribedHabitsAtDayWhenThereAreCurrentWeeklyXTimesAndMonthlyXTimesSubscribedHabits() {
+        String userIdStr = "10";
+        Long userId = 10L;
+
+        // Текущий юзер подписан на привычку 1, которая является текущий в TODAY_DATE
+        SubscriptionCache existingSubscription1 = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(1L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user2")
+                .build();
+
+        // Текущий юзер подписан на привычку 2, которая является текущий в TODAY_DATE
+        SubscriptionCache existingSubscription2 = SubscriptionCache.builder()
+                .id(SubscriptionCacheId.builder()
+                        .habitId(2L)
+                        .subscriberId(userId)
+                        .build())
+                .creatorLogin("user2")
+                .build();
+
+        when(subscriptionCacheRepository.findAllById_SubscriberId(userId)).thenReturn(List.of(
+                existingSubscription1, existingSubscription2
+        ));
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit1 = Habit.builder()
+                .id(1L)
+                .userId(2L)
+                .name("Название 1")
+                .frequencyType(WEEKLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(5)
+                .timesPerMonth(null)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        // Эта привычка будет текущей в TODAY_DATE
+        Habit existingHabit2 = Habit.builder()
+                .id(2L)
+                .userId(2L)
+                .name("Название 2")
+                .frequencyType(MONTHLY_X_TIMES)
+                .daysOfWeek(null)
+                .timesPerWeek(null)
+                .timesPerMonth(10)
+                .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
+                .build();
+
+        when(habitRepository.findAllByIdIn(List.of(1L, 2L))).thenReturn(List.of(
+                existingHabit1, existingHabit2
+        ));
+
+        // Стабы для привычки 1
+
+        when(habitRepository.findByIdAndUserId(1L, 2L)).thenReturn(Optional.of(existingHabit1));
+
+        when(subscriptionCacheRepository.findAllById_HabitId(1L)).thenReturn(List.of(existingSubscription1));
+
+        when(subscriptionCacheRepository.countById_HabitId(1L)).thenReturn(1);
+
+        when(reportClient.isCompletedAtDay(1L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+
+        when(reportClient.countCompletionsInPeriod(1L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
+
+        // Стабы для привычки 2
+
+        when(habitRepository.findByIdAndUserId(2L, 2L)).thenReturn(Optional.of(existingHabit2));
+
+        when(subscriptionCacheRepository.findAllById_HabitId(2L)).thenReturn(List.of(existingSubscription2));
+
+        when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(1);
+
+        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+
+        when(reportClient.countCompletionsInPeriod(2L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
+
+        List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                SubscribedHabitShortInfoResponse.builder()
+                        .creatorLogin("user2")
+                        .name("Название 1")
+                        .isCompleted(false)
+                        .subscribersCount(1)
+                        .frequencyType(WEEKLY_X_TIMES)
+                        .completionsInPeriod(0)
+                        .completionsPlannedInPeriod(5)
+                        .build(),
+                SubscribedHabitShortInfoResponse.builder()
+                        .creatorLogin("user2")
+                        .name("Название 2")
+                        .isCompleted(true)
+                        .subscribersCount(1)
+                        .frequencyType(MONTHLY_X_TIMES)
+                        .completionsInPeriod(3)
+                        .completionsPlannedInPeriod(10)
+                        .build()
+        ));
+
+        verifyNoMoreInteractions(habitRepository, subscriptionCacheRepository, reportClient);
     }
 
 }
