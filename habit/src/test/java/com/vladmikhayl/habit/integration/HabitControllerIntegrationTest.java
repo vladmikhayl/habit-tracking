@@ -61,7 +61,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class HabitControllerIntegrationTest {
 
 
-    // При тестировании метода getGeneralInfo() предполагается, что сегодня 12 апреля 2025
+    // При тестировании методов getGeneralInfo() и getAllUserHabitsAtDay() предполагается, что сегодня 12 апреля 2025
     // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
     private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 12);
 
