@@ -1,3 +1,4 @@
 CREATE DATABASE habits;
 CREATE DATABASE users;
 CREATE DATABASE reports;
+CREATE DATABASE subscriptions;
