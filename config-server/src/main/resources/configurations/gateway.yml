@@ -71,6 +71,12 @@ spring:
           filters:
             - RewritePath=/report/v3/api-docs, /v3/api-docs
 
+        # if the request path is /api/v1/subscriptions/**, it is redirected to subscription microservice
+        - id: subscription
+          uri: lb://subscription
+          predicates:
+            - Path=/api/v1/subscriptions/**
+
 springdoc:
   api-docs:
     enabled: true
