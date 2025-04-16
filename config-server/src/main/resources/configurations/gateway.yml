@@ -77,6 +77,14 @@ spring:
           predicates:
             - Path=/api/v1/subscriptions/**
 
+        # redirection for swagger requests for subscription microservice
+        - id: subscription-swagger
+          uri: lb://subscription
+          predicates:
+            - Path=/subscription/v3/api-docs
+          filters:
+            - RewritePath=/subscription/v3/api-docs, /v3/api-docs
+
 springdoc:
   api-docs:
     enabled: true
@@ -88,3 +96,5 @@ springdoc:
         url: /habit/v3/api-docs
       - name: Report API
         url: /report/v3/api-docs
+      - name: Subscription API
+        url: /subscription/v3/api-docs
