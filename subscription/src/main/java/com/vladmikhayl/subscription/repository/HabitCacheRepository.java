@@ -9,4 +9,6 @@ public interface HabitCacheRepository extends JpaRepository<HabitCache, Long> {
 
     Optional<HabitCache> findByHabitId(Long habitId);
 
+    void deleteByHabitId(Long habitId);
+
 }

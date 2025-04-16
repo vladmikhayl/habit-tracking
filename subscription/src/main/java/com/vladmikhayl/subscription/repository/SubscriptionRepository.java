@@ -7,4 +7,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     boolean existsByHabitIdAndSubscriberId(Long habitId, Long subscriberId);
 
+    void deleteByHabitId(Long habitId);
+
 }

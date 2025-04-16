@@ -21,12 +21,12 @@ public class SubscriptionApplication {
 			HabitCacheRepository habitCacheRepository
 	) {
 		return args -> {
-			// У юзера 5 есть привычка 1
-			HabitCache habitCache = HabitCache.builder()
-					.habitId(1L)
-					.creatorId(5L)
-					.build();
-			habitCacheRepository.save(habitCache);
+//			// У юзера 5 есть привычка 1
+//			HabitCache habitCache = HabitCache.builder()
+//					.habitId(1L)
+//					.creatorId(5L)
+//					.build();
+//			habitCacheRepository.save(habitCache);
 		};
 	}
 
