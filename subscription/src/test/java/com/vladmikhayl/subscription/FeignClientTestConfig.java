@@ -11,7 +11,7 @@ public class FeignClientTestConfig {
     // Это бин, который создает замоканный AuthClient, который будет использоваться в интеграционных тестах
     // (вместо бина с реальным Feign-клиентом)
     @Bean
-    public AuthClient habitClient() {
+    public AuthClient authClient() {
         return Mockito.mock(AuthClient.class);
     }
 

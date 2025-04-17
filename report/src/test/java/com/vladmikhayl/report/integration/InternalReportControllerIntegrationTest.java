@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.config.enabled=false"
 })
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
-@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин HabitClient
+@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин Feign-клиента
 @AutoConfigureMockMvc
 public class InternalReportControllerIntegrationTest {
 

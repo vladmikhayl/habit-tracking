@@ -1,5 +1,6 @@
 package com.vladmikhayl.subscription.integration;
 
+import com.vladmikhayl.subscription.FeignClientTestConfig;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.config.enabled=false"
 })
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
+@Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин Feign-клиента
 @AutoConfigureMockMvc
 public class SubscriptionControllerIntegrationTest {
 
