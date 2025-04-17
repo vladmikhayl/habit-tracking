@@ -34,10 +34,27 @@ public class SubscriptionController {
     })
     public ResponseEntity<Void> sendSubscriptionRequest(
             @PathVariable @Parameter(description = "ID привычки", example = "7") Long habitId,
-            @RequestHeader("X-User-Id") @Parameter(hidden = true)  String userId
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         subscriptionService.sendSubscriptionRequest(habitId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/{subscriptionId}/accept")
+    @Operation(summary = "Принять заявку на подписку")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Заявка принята"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой заявке " +
+                    "(он не является создателем привычки, на которую отправлена эта заявка)"),
+            @ApiResponse(responseCode = "404", description = "Такой заявки не существует"),
+            @ApiResponse(responseCode = "409", description = "Эта заявка уже принята")
+    })
+    public ResponseEntity<Void> acceptSubscriptionRequest(
+            @PathVariable @Parameter(description = "ID заявки", example = "10") Long subscriptionId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        subscriptionService.acceptSubscriptionRequest(subscriptionId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

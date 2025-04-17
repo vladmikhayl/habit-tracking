@@ -20,4 +20,4 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   app:
     jwtSecret: BSyus78W73UHhqpIOJS9Jjd03928u3rdh9UIHD89wh9dw
-    jwtExpirationMs: 86400000
+    jwtExpirationMs: 8640000000
