@@ -6,6 +6,7 @@ import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
 import com.vladmikhayl.subscription.service.feign.AuthClient;
 import com.vladmikhayl.subscription.service.kafka.SubscriptionEventProducer;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -85,7 +86,12 @@ public class SubscriptionService {
 
         subscription.setAccepted(true);
 
-        String habitCreatorLogin = authClient.getUserLogin(habitCreatorId).getBody();
+        String habitCreatorLogin;
+        try {
+            habitCreatorLogin = authClient.getUserLogin(habitCreatorId).getBody();
+        } catch (FeignException.NotFound e) {
+            throw new EntityNotFoundException("Cannot get habit creator's login because user not found");
+        }
 
         // Отправка события о появлении принятой подписки всем, кто подписан на accepted-subscription-created
         AcceptedSubscriptionCreatedEvent event = AcceptedSubscriptionCreatedEvent.builder()

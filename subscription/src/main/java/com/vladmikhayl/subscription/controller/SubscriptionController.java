@@ -46,7 +46,8 @@ public class SubscriptionController {
             @ApiResponse(responseCode = "200", description = "Заявка принята"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой заявке " +
                     "(он не является создателем привычки, на которую отправлена эта заявка)"),
-            @ApiResponse(responseCode = "404", description = "Такой заявки не существует"),
+            @ApiResponse(responseCode = "404", description = "Либо такой заявки не существует, " +
+                    "либо не найден создавший привычку пользователь"),
             @ApiResponse(responseCode = "409", description = "Эта заявка уже принята")
     })
     public ResponseEntity<Void> acceptSubscriptionRequest(
