@@ -1,9 +1,12 @@
 package com.vladmikhayl.subscription.service;
 
+import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
+import com.vladmikhayl.subscription.service.feign.AuthClient;
+import com.vladmikhayl.subscription.service.kafka.SubscriptionEventProducer;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,14 +16,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SubscriptionServiceTest {
@@ -30,6 +33,12 @@ class SubscriptionServiceTest {
 
     @Mock
     private HabitCacheRepository habitCacheRepository;
+
+    @Mock
+    private AuthClient authClient;
+
+    @Mock
+    private SubscriptionEventProducer subscriptionEventProducer;
 
     @InjectMocks
     private SubscriptionService underTest;
@@ -112,6 +121,112 @@ class SubscriptionServiceTest {
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                 })
                 .hasMessageContaining("It is impossible to subscribe to your own habit");
+    }
+
+    @Test
+    void canAcceptSubscriptionRequestWhenThatRequestIsForHabitOfCurrentUser() {
+        Long subscriptionId = 46L;
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .id(subscriptionId)
+                .habitId(habitId)
+                .subscriberId(50L)
+                .isAccepted(false)
+                .build();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(7L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(authClient.getUserLogin(7L)).thenReturn(ResponseEntity.ok("user7"));
+
+        underTest.acceptSubscriptionRequest(subscriptionId, userIdStr);
+
+        assertThat(subscription.isAccepted()).isTrue();
+
+        ArgumentCaptor<AcceptedSubscriptionCreatedEvent> acceptedSubscriptionEventArgumentCaptor =
+                ArgumentCaptor.forClass(AcceptedSubscriptionCreatedEvent.class);
+
+        verify(subscriptionEventProducer).sendAcceptedSubscriptionCreatedEvent(acceptedSubscriptionEventArgumentCaptor.capture());
+
+        AcceptedSubscriptionCreatedEvent event = acceptedSubscriptionEventArgumentCaptor.getValue();
+
+        assertThat(event.habitId()).isEqualTo(habitId);
+        assertThat(event.subscriberId()).isEqualTo(50L);
+        assertThat(event.habitCreatorLogin()).isEqualTo("user7");
+    }
+
+    @Test
+    void failAcceptSubscriptionRequestWhenThatRequestDoesNotExist() {
+        Long subscriptionId = 46L;
+        String userIdStr = "7";
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.acceptSubscriptionRequest(subscriptionId, userIdStr))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Subscription request not found");
+
+        verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
+    }
+
+    @Test
+    void failAcceptSubscriptionRequestWhenThatRequestIsAlreadyAccepted() {
+        Long subscriptionId = 46L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .id(subscriptionId)
+                .isAccepted(true)
+                .build();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        assertThatThrownBy(() -> underTest.acceptSubscriptionRequest(subscriptionId, userIdStr))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessage("Subscription request has already been accepted");
+
+        verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
+    }
+
+    @Test
+    void failAcceptSubscriptionRequestWhenThatRequestIsNotForHabitOfCurrentUser() {
+        Long subscriptionId = 46L;
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .id(subscriptionId)
+                .habitId(habitId)
+                .subscriberId(50L)
+                .isAccepted(false)
+                .build();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        assertThatThrownBy(() -> underTest.acceptSubscriptionRequest(subscriptionId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("The user is not the creator of the habit that the subscription request is for");
+
+        verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
     }
 
 }

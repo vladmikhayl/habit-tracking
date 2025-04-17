@@ -5,12 +5,16 @@ import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
+import com.vladmikhayl.subscription.service.feign.AuthClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -35,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.config.enabled=false"
 })
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
+// чтобы создалась встроенная Кафка, которая не будет отправлять сообщения на реальные микросервисы
+@EmbeddedKafka(partitions = 1, topics = {"accepted-subscription-created"}) // TODO: добавить топик
 @Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин Feign-клиента
 @AutoConfigureMockMvc
 public class SubscriptionControllerIntegrationTest {
@@ -47,6 +53,9 @@ public class SubscriptionControllerIntegrationTest {
 
     @Autowired
     private HabitCacheRepository habitCacheRepository;
+
+    @Autowired
+    private AuthClient authClient;
 
     @BeforeAll
     public static void setUp() {
@@ -177,6 +186,104 @@ public class SubscriptionControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("It is impossible to subscribe to your own habit"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canAcceptSubscriptionRequestWhenThatRequestIsForHabitOfCurrentUser() throws Exception {
+        Long habitId = 15L;
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(5L)
+                .habitId(habitId)
+                .isAccepted(false)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(currentUserId)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        Mockito.when(authClient.getUserLogin(currentUserId)).thenReturn(ResponseEntity.ok("user7"));
+
+        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk());
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
+
+        Subscription subscription = subscriptionRepository.findById(1L).get();
+
+        assertThat(subscription.getHabitId()).isEqualTo(habitId);
+        assertThat(subscription.getSubscriberId()).isEqualTo(5L);
+        assertThat(subscription.isAccepted()).isTrue();
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failAcceptSubscriptionRequestWhenThatRequestIsAlreadyAccepted() throws Exception {
+        Long habitId = 15L;
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(5L)
+                .habitId(habitId)
+                .isAccepted(false)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(currentUserId)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        Mockito.when(authClient.getUserLogin(currentUserId)).thenReturn(ResponseEntity.ok("user7"));
+
+        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Subscription request has already been accepted"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failAcceptSubscriptionRequestWhenThatRequestIsNotForHabitOfCurrentUser() throws Exception {
+        Long habitId = 15L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(5L)
+                .habitId(habitId)
+                .isAccepted(false)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("The user is not the creator of the habit that the subscription request is for"));
     }
 
 }
