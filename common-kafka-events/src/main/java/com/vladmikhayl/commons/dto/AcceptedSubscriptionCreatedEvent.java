@@ -1,4 +1,4 @@
-package com.vladmikhayl.subscription.dto.event;
+package com.vladmikhayl.commons.dto;
 
 import lombok.Builder;
 

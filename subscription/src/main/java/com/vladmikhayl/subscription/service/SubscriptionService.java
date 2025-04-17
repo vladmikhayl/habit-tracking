@@ -1,6 +1,6 @@
 package com.vladmikhayl.subscription.service;
 
-import com.vladmikhayl.subscription.dto.event.AcceptedSubscriptionCreatedEvent;
+import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
@@ -90,7 +90,7 @@ public class SubscriptionService {
         // Отправка события о появлении принятой подписки всем, кто подписан на accepted-subscription-created
         AcceptedSubscriptionCreatedEvent event = AcceptedSubscriptionCreatedEvent.builder()
                 .habitId(subscription.getHabitId())
-                .subscriberId(userIdLong)
+                .subscriberId(subscription.getSubscriberId())
                 .habitCreatorLogin(habitCreatorLogin)
                 .build();
         subscriptionEventProducer.sendAcceptedSubscriptionCreatedEvent(event);

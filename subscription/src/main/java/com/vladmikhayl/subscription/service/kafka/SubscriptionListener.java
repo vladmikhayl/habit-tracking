@@ -1,7 +1,7 @@
 package com.vladmikhayl.subscription.service.kafka;
 
-import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
-import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.commons.dto.HabitCreatedEvent;
+import com.vladmikhayl.commons.dto.HabitDeletedEvent;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;

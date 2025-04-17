@@ -97,12 +97,12 @@
 			<artifactId>spring-kafka</artifactId>
 			<version>3.3.4</version>
 		</dependency>
-        <dependency>
-            <groupId>com.vladmikhayl</groupId>
-            <artifactId>habit</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
+		<dependency>
+			<groupId>com.vladmikhayl</groupId>
+			<artifactId>common-kafka-events</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

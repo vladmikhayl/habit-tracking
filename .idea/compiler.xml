@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="config-server" />
+        <module name="common-kafka-events" />
         <module name="discovery" />
       </profile>
       <profile name="Annotation profile for subscription" enabled="true">

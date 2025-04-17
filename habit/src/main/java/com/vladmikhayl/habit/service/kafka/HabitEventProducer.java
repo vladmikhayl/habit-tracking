@@ -1,7 +1,7 @@
 package com.vladmikhayl.habit.service.kafka;
 
-import com.vladmikhayl.habit.dto.event.HabitCreatedEvent;
-import com.vladmikhayl.habit.dto.event.HabitDeletedEvent;
+import com.vladmikhayl.commons.dto.HabitCreatedEvent;
+import com.vladmikhayl.commons.dto.HabitDeletedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

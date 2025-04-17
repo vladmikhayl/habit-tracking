@@ -1,6 +1,6 @@
 package com.vladmikhayl.subscription.service.kafka;
 
-import com.vladmikhayl.subscription.dto.event.AcceptedSubscriptionCreatedEvent;
+import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
