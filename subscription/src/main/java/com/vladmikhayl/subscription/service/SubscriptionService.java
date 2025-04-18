@@ -1,6 +1,7 @@
 package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
+import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
@@ -121,6 +122,24 @@ public class SubscriptionService {
         }
 
         subscriptionRepository.delete(subscription);
+    }
+
+    public void unsubscribe(Long habitId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        Subscription subscription = subscriptionRepository.findByHabitIdAndSubscriberId(habitId, userIdLong)
+                .orElseThrow(() -> new EntityNotFoundException("Subscription (or subscription request) not found"));
+
+        subscriptionRepository.delete(subscription);
+
+        if (subscription.isAccepted()) {
+            // Отправка события об удалении принятой подписки всем, кто подписан на accepted-subscription-deleted
+            AcceptedSubscriptionDeletedEvent event = AcceptedSubscriptionDeletedEvent.builder()
+                    .habitId(subscription.getHabitId())
+                    .subscriberId(subscription.getSubscriberId())
+                    .build();
+            subscriptionEventProducer.sendAcceptedSubscriptionDeletedEvent(event);
+        }
     }
 
 }

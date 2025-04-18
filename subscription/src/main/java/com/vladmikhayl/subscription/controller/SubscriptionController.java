@@ -73,4 +73,18 @@ public class SubscriptionController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @DeleteMapping("/{habitId}/unsubscribe")
+    @Operation(summary = "Отписаться от указанной привычки (или удалить заявку на нее)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Подписка/заявка удалена"),
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность")
+    })
+    public ResponseEntity<Void> unsubscribe(
+            @PathVariable @Parameter(description = "ID привычки", example = "7") Long habitId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        subscriptionService.unsubscribe(habitId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

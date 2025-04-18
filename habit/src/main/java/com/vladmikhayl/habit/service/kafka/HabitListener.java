@@ -1,6 +1,7 @@
 package com.vladmikhayl.habit.service.kafka;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
+import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.habit.entity.SubscriptionCache;
 import com.vladmikhayl.habit.entity.SubscriptionCacheId;
 import com.vladmikhayl.habit.repository.SubscriptionCacheRepository;
@@ -34,6 +35,24 @@ public class HabitListener {
 
         System.out.println(
                 "В таблицу subscriptions_cache добавлена подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
+        );
+    }
+
+    @KafkaListener(topics = "accepted-subscription-deleted", groupId = "habit-group")
+    public void listen(AcceptedSubscriptionDeletedEvent event) {
+        System.out.println(
+                "Получено событие: удалена принятая подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
+        );
+
+        subscriptionCacheRepository.deleteById(
+                SubscriptionCacheId.builder()
+                        .habitId(event.habitId())
+                        .subscriberId(event.subscriberId())
+                        .build()
+        );
+
+        System.out.println(
+                "Из таблицы subscriptions_cache удалена подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
         );
     }
 

@@ -380,4 +380,75 @@ public class SubscriptionControllerIntegrationTest {
         assertThat(subscriptionRepository.count()).isEqualTo(1);
     }
 
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canUnsubscribeWithAcceptedSubscription() throws Exception {
+        Long habitId = 15L;
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(currentUserId)
+                .habitId(habitId)
+                .isAccepted(true)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(10L)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/subscriptions/15/unsubscribe")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk());
+
+        assertThat(subscriptionRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failUnsubscribeWhenThatSubscriptionBelongsToAnotherUser() throws Exception {
+        Long habitId = 15L;
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        // Подписка другого юзера на нужную привычку
+        Subscription existingSubscription1 = Subscription.builder()
+                .subscriberId(8L)
+                .habitId(habitId)
+                .isAccepted(false)
+                .build();
+        subscriptionRepository.save(existingSubscription1);
+
+        // Подписка текущего юзера на другую привычку
+        Subscription existingSubscription2 = Subscription.builder()
+                .subscriberId(currentUserId)
+                .habitId(16L)
+                .isAccepted(false)
+                .build();
+        subscriptionRepository.save(existingSubscription2);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(10L)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        assertThat(subscriptionRepository.count()).isEqualTo(2);
+
+        mockMvc.perform(delete("/api/v1/subscriptions/15/unsubscribe")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Subscription (or subscription request) not found"));
+
+        assertThat(subscriptionRepository.count()).isEqualTo(2);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
+import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -151,12 +152,12 @@ class SubscriptionServiceTest {
 
         assertThat(subscription.isAccepted()).isTrue();
 
-        ArgumentCaptor<AcceptedSubscriptionCreatedEvent> acceptedSubscriptionEventArgumentCaptor =
+        ArgumentCaptor<AcceptedSubscriptionCreatedEvent> eventArgumentCaptor =
                 ArgumentCaptor.forClass(AcceptedSubscriptionCreatedEvent.class);
 
-        verify(subscriptionEventProducer).sendAcceptedSubscriptionCreatedEvent(acceptedSubscriptionEventArgumentCaptor.capture());
+        verify(subscriptionEventProducer).sendAcceptedSubscriptionCreatedEvent(eventArgumentCaptor.capture());
 
-        AcceptedSubscriptionCreatedEvent event = acceptedSubscriptionEventArgumentCaptor.getValue();
+        AcceptedSubscriptionCreatedEvent event = eventArgumentCaptor.getValue();
 
         assertThat(event.habitId()).isEqualTo(habitId);
         assertThat(event.subscriberId()).isEqualTo(50L);
@@ -340,6 +341,87 @@ class SubscriptionServiceTest {
                 .hasMessageContaining("Subscription request is already accepted");
 
         verify(subscriptionRepository, never()).delete(any());
+    }
+
+    @Test
+    void canUnsubscribeWithNotAcceptedSubscription() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .habitId(habitId)
+                .subscriberId(userId)
+                .isAccepted(false)
+                .build();
+
+        when(subscriptionRepository.findByHabitIdAndSubscriberId(habitId, userId)).thenReturn(Optional.of(subscription));
+
+        underTest.unsubscribe(habitId, userIdStr);
+
+        ArgumentCaptor<Subscription> subscriptionArgumentCaptor = ArgumentCaptor.forClass(Subscription.class);
+
+        verify(subscriptionRepository).delete(subscriptionArgumentCaptor.capture());
+
+        Subscription deletedSubscription = subscriptionArgumentCaptor.getValue();
+
+        assertThat(deletedSubscription.getHabitId()).isEqualTo(habitId);
+        assertThat(deletedSubscription.getSubscriberId()).isEqualTo(userId);
+
+        verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionDeletedEvent(any());
+    }
+
+    @Test
+    void canUnsubscribeWithAcceptedSubscription() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .habitId(habitId)
+                .subscriberId(userId)
+                .isAccepted(true)
+                .build();
+
+        when(subscriptionRepository.findByHabitIdAndSubscriberId(habitId, userId)).thenReturn(Optional.of(subscription));
+
+        underTest.unsubscribe(habitId, userIdStr);
+
+        ArgumentCaptor<Subscription> subscriptionArgumentCaptor = ArgumentCaptor.forClass(Subscription.class);
+
+        verify(subscriptionRepository).delete(subscriptionArgumentCaptor.capture());
+
+        Subscription deletedSubscription = subscriptionArgumentCaptor.getValue();
+
+        assertThat(deletedSubscription.getHabitId()).isEqualTo(habitId);
+        assertThat(deletedSubscription.getSubscriberId()).isEqualTo(userId);
+
+        ArgumentCaptor<AcceptedSubscriptionDeletedEvent> eventArgumentCaptor =
+                ArgumentCaptor.forClass(AcceptedSubscriptionDeletedEvent.class);
+
+        verify(subscriptionEventProducer).sendAcceptedSubscriptionDeletedEvent(eventArgumentCaptor.capture());
+
+        AcceptedSubscriptionDeletedEvent event = eventArgumentCaptor.getValue();
+
+        assertThat(event.habitId()).isEqualTo(habitId);
+        assertThat(event.subscriberId()).isEqualTo(userId);
+    }
+
+    @Test
+    void failUnsubscribeWhenUserDoesNotHaveThatSubscription() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        when(subscriptionRepository.findByHabitIdAndSubscriberId(habitId, userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.unsubscribe(habitId, userIdStr))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Subscription (or subscription request) not found");
+
+        verify(subscriptionRepository, never()).delete(any());
+
+        verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionDeletedEvent(any());
     }
 
 }
