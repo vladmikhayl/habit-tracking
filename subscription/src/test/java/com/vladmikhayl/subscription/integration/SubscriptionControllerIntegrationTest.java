@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -212,7 +212,7 @@ public class SubscriptionControllerIntegrationTest {
 
         Mockito.when(authClient.getUserLogin(currentUserId)).thenReturn(ResponseEntity.ok("user7"));
 
-        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+        mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isOk());
 
@@ -249,11 +249,11 @@ public class SubscriptionControllerIntegrationTest {
 
         Mockito.when(authClient.getUserLogin(currentUserId)).thenReturn(ResponseEntity.ok("user7"));
 
-        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+        mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+        mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("Subscription request has already been accepted"));
@@ -280,10 +280,104 @@ public class SubscriptionControllerIntegrationTest {
 
         habitCacheRepository.save(existingHabitCache);
 
-        mockMvc.perform(post("/api/v1/subscriptions/1/accept")
+        mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("The user is not the creator of the habit that the subscription request is for"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canDenySubscriptionRequestWhenThatRequestIsForHabitOfCurrentUser() throws Exception {
+        Long habitId = 15L;
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(5L)
+                .habitId(habitId)
+                .isAccepted(false)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(currentUserId)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/subscriptions/1/deny")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk());
+
+        assertThat(subscriptionRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failDenySubscriptionRequestWhenThatRequestIsAlreadyAccepted() throws Exception {
+        Long habitId = 15L;
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(5L)
+                .habitId(habitId)
+                .isAccepted(true)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(currentUserId)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/subscriptions/1/deny")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Subscription request is already accepted"));
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failDenySubscriptionRequestWhenThatRequestIsNotForHabitOfCurrentUser() throws Exception {
+        Long habitId = 15L;
+        String currentUserIdStr = "7";
+
+        Subscription existingSubscription = Subscription.builder()
+                .subscriberId(5L)
+                .habitId(habitId)
+                .isAccepted(false)
+                .build();
+
+        subscriptionRepository.save(existingSubscription);
+
+        HabitCache existingHabitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+
+        habitCacheRepository.save(existingHabitCache);
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
+
+        mockMvc.perform(delete("/api/v1/subscriptions/1/deny")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("The user is not the creator of the habit that the subscription request is for"));
+
+        assertThat(subscriptionRepository.count()).isEqualTo(1);
     }
 
 }

@@ -29,7 +29,7 @@ public class SubscriptionController {
     @Operation(summary = "Отправить заявку на подписку на указанную привычку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Заявка создана"),
-            @ApiResponse(responseCode = "404", description = "Такой привычки не существует"),
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность"),
             @ApiResponse(responseCode = "409", description = "У пользователя уже есть подписка/заявка на эту привычку")
     })
     public ResponseEntity<Void> sendSubscriptionRequest(
@@ -40,14 +40,13 @@ public class SubscriptionController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("/{subscriptionId}/accept")
+    @PutMapping("/{subscriptionId}/accept")
     @Operation(summary = "Принять заявку на подписку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Заявка принята"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой заявке " +
                     "(он не является создателем привычки, на которую отправлена эта заявка)"),
-            @ApiResponse(responseCode = "404", description = "Либо такой заявки не существует, " +
-                    "либо не найден создавший привычку пользователь"),
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность"),
             @ApiResponse(responseCode = "409", description = "Эта заявка уже принята")
     })
     public ResponseEntity<Void> acceptSubscriptionRequest(
@@ -55,6 +54,22 @@ public class SubscriptionController {
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         subscriptionService.acceptSubscriptionRequest(subscriptionId, userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @DeleteMapping("/{subscriptionId}/deny")
+    @Operation(summary = "Отклонить заявку на подписку")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Заявка отклонена"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой заявке " +
+                    "(он не является создателем привычки, на которую отправлена эта заявка)"),
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность")
+    })
+    public ResponseEntity<Void> denySubscriptionRequest(
+            @PathVariable @Parameter(description = "ID заявки", example = "10") Long subscriptionId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        subscriptionService.denySubscriptionRequest(subscriptionId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

@@ -102,4 +102,25 @@ public class SubscriptionService {
         subscriptionEventProducer.sendAcceptedSubscriptionCreatedEvent(event);
     }
 
+    public void denySubscriptionRequest(Long subscriptionId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        Subscription subscription = subscriptionRepository.findById(subscriptionId)
+                .orElseThrow(() -> new EntityNotFoundException("Subscription request not found"));
+
+        Long habitCreatorId = habitCacheRepository.findByHabitId(subscription.getHabitId())
+                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .getCreatorId();
+
+        if (!userIdLong.equals(habitCreatorId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The user is not the creator of the habit that the subscription request is for");
+        }
+
+        if (subscription.isAccepted()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Subscription request is already accepted");
+        }
+
+        subscriptionRepository.delete(subscription);
+    }
+
 }

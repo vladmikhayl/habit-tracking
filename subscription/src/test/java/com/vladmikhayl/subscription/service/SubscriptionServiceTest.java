@@ -229,4 +229,117 @@ class SubscriptionServiceTest {
         verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
     }
 
+    @Test
+    void canDenySubscriptionRequestWhenThatRequestIsForHabitOfCurrentUser() {
+        Long subscriptionId = 46L;
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .id(subscriptionId)
+                .habitId(habitId)
+                .subscriberId(50L)
+                .isAccepted(false)
+                .build();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(7L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        underTest.denySubscriptionRequest(subscriptionId, userIdStr);
+
+        ArgumentCaptor<Subscription> subscriptionArgumentCaptor = ArgumentCaptor.forClass(Subscription.class);
+
+        verify(subscriptionRepository).delete(subscriptionArgumentCaptor.capture());
+
+        Subscription deletedSubscription = subscriptionArgumentCaptor.getValue();
+
+        assertThat(deletedSubscription.getId()).isEqualTo(subscriptionId);
+    }
+
+    @Test
+    void failDenySubscriptionRequestWhenThatRequestDoesNotExist() {
+        Long subscriptionId = 46L;
+        String userIdStr = "7";
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.denySubscriptionRequest(subscriptionId, userIdStr))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Subscription request not found");
+
+        verify(subscriptionRepository, never()).delete(any());
+    }
+
+    @Test
+    void failDenySubscriptionRequestWhenThatRequestIsNotForHabitOfCurrentUser() {
+        Long subscriptionId = 46L;
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .id(subscriptionId)
+                .habitId(habitId)
+                .subscriberId(50L)
+                .isAccepted(false)
+                .build();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        assertThatThrownBy(() -> underTest.denySubscriptionRequest(subscriptionId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("The user is not the creator of the habit that the subscription request is for");
+
+        verify(subscriptionRepository, never()).delete(any());
+    }
+
+    @Test
+    void failDenySubscriptionRequestWhenThatRequestIsAlreadyAccepted() {
+        Long subscriptionId = 46L;
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        Subscription subscription = Subscription.builder()
+                .id(subscriptionId)
+                .habitId(habitId)
+                .subscriberId(50L)
+                .isAccepted(true)
+                .build();
+
+        when(subscriptionRepository.findById(subscriptionId)).thenReturn(Optional.of(subscription));
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(7L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        assertThatThrownBy(() -> underTest.denySubscriptionRequest(subscriptionId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                })
+                .hasMessageContaining("Subscription request is already accepted");
+
+        verify(subscriptionRepository, never()).delete(any());
+    }
+
 }
