@@ -1,8 +1,10 @@
 package com.vladmikhayl.subscription.controller;
 
+import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
 import com.vladmikhayl.subscription.service.SubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,14 +14,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/subscriptions")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT (для Сваггера)
 @Tag(name = "Подписки на привычки", description = "Эндпоинты для работы с подписками на привычки")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
-        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT")
+        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT", content = @Content)
 })
 public class SubscriptionController {
 
@@ -85,6 +89,19 @@ public class SubscriptionController {
     ) {
         subscriptionService.unsubscribe(habitId, userId);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/get-user-unprocessed-requests")
+    @Operation(summary = "Просмотреть заявки пользователя (сделавшего этот запрос), " +
+            "которые еще не были обработаны (приняты или отклонены)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация")
+    })
+    public ResponseEntity<UserUnprocessedRequestsResponse> getUserUnprocessedRequests(
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        UserUnprocessedRequestsResponse response = subscriptionService.getUserUnprocessedRequests(userId);
+        return ResponseEntity.ok(response);
     }
 
 }

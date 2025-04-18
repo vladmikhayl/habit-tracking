@@ -2,6 +2,7 @@ package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
+import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -20,10 +21,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -422,6 +425,60 @@ class SubscriptionServiceTest {
         verify(subscriptionRepository, never()).delete(any());
 
         verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionDeletedEvent(any());
+    }
+
+    @Test
+    void testGetUserUnprocessedRequestsWithSomeUnprocessedRequests() {
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        List<Subscription> userSubscriptions = List.of(
+                Subscription.builder()
+                        .habitId(10L)
+                        .subscriberId(userId)
+                        .isAccepted(true)
+                        .build(),
+                Subscription.builder()
+                        .habitId(11L)
+                        .subscriberId(userId)
+                        .isAccepted(false)
+                        .build(),
+                Subscription.builder()
+                        .habitId(12L)
+                        .subscriberId(userId)
+                        .isAccepted(false)
+                        .build()
+        );
+
+        when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
+
+        UserUnprocessedRequestsResponse response = underTest.getUserUnprocessedRequests(userIdStr);
+
+        assertThat(response.getHabitIds()).isEqualTo(
+                List.of(11L, 12L)
+        );
+    }
+
+    @Test
+    void testGetUserUnprocessedRequestsWithoutUnprocessedRequests() {
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        List<Subscription> userSubscriptions = List.of(
+                Subscription.builder()
+                        .habitId(10L)
+                        .subscriberId(userId)
+                        .isAccepted(true)
+                        .build()
+        );
+
+        when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
+
+        UserUnprocessedRequestsResponse response = underTest.getUserUnprocessedRequests(userIdStr);
+
+        assertThat(response.getHabitIds()).isEqualTo(
+                List.of()
+        );
     }
 
 }

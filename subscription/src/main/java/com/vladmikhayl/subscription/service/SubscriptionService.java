@@ -2,6 +2,7 @@ package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
+import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
@@ -16,7 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -140,6 +144,19 @@ public class SubscriptionService {
                     .build();
             subscriptionEventProducer.sendAcceptedSubscriptionDeletedEvent(event);
         }
+    }
+
+    public UserUnprocessedRequestsResponse getUserUnprocessedRequests(String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        List<Long> habitIds = subscriptionRepository.findAllBySubscriberId(userIdLong).stream()
+                .filter(subscription -> !subscription.isAccepted())
+                .map(Subscription::getHabitId)
+                .toList();
+
+        return UserUnprocessedRequestsResponse.builder()
+                .habitIds(habitIds)
+                .build();
     }
 
 }

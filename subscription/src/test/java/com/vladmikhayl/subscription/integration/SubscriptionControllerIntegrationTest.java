@@ -1,6 +1,8 @@
 package com.vladmikhayl.subscription.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.subscription.FeignClientTestConfig;
+import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -23,12 +25,12 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @ActiveProfiles("test") // чтобы CommandLineRunner в коде Application не выполнялся
@@ -57,8 +59,13 @@ public class SubscriptionControllerIntegrationTest {
     @Autowired
     private AuthClient authClient;
 
+    @Autowired
+    private static ObjectMapper objectMapper;
+
     @BeforeAll
     public static void setUp() {
+        objectMapper = new ObjectMapper();
+
         // Явным образом получаем контейнер Postgres (если он еще не создавался, то в этот момент создастся его синглтон)
         TestPostgresContainer.getInstance();
     }
@@ -449,6 +456,73 @@ public class SubscriptionControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Subscription (or subscription request) not found"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(2);
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void testGetUserUnprocessedRequestsWithSomeUnprocessedRequests() throws Exception {
+        Long currentUserId = 7L;
+        String currentUserIdStr = "7";
+
+        // Необработанная заявка от текущего юзера
+        Subscription subscription1 = Subscription.builder()
+                .subscriberId(currentUserId)
+                .habitId(10L)
+                .isAccepted(false)
+                .build();
+        subscriptionRepository.save(subscription1);
+
+        // Необработанная заявка от текущего юзера
+        Subscription subscription2 = Subscription.builder()
+                .subscriberId(currentUserId)
+                .habitId(11L)
+                .isAccepted(false)
+                .build();
+        subscriptionRepository.save(subscription2);
+
+        // Обработанная заявка от текущего юзера
+        Subscription subscription3 = Subscription.builder()
+                .subscriberId(currentUserId)
+                .habitId(12L)
+                .isAccepted(true)
+                .build();
+        subscriptionRepository.save(subscription3);
+
+        // Необработанная заявка от другого юзера
+        Subscription subscription4 = Subscription.builder()
+                .subscriberId(8L)
+                .habitId(12L)
+                .isAccepted(false)
+                .build();
+        subscriptionRepository.save(subscription4);
+
+        String expectedJson = objectMapper.writeValueAsString(
+                UserUnprocessedRequestsResponse.builder()
+                        .habitIds(List.of(10L, 11L))
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/v1/subscriptions/get-user-unprocessed-requests")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void testGetUserUnprocessedRequestsWithoutUnprocessedRequests() throws Exception {
+        String currentUserIdStr = "7";
+
+        String expectedJson = objectMapper.writeValueAsString(
+                UserUnprocessedRequestsResponse.builder()
+                        .habitIds(List.of())
+                        .build()
+        );
+
+        mockMvc.perform(get("/api/v1/subscriptions/get-user-unprocessed-requests")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
     }
 
 }
