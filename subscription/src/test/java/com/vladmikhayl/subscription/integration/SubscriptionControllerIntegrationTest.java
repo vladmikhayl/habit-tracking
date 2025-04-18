@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @Transactional // чтобы после каждого теста все изменения, сделанные в БД, откатывались обратно
 // чтобы создалась встроенная Кафка, которая не будет отправлять сообщения на реальные микросервисы
-@EmbeddedKafka(partitions = 1, topics = {"accepted-subscription-created"}) // TODO: добавить топик
+@EmbeddedKafka(partitions = 1, topics = {"accepted-subscription-created", "accepted-subscription-deleted"})
 @Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин Feign-клиента
 @AutoConfigureMockMvc
 public class SubscriptionControllerIntegrationTest {
