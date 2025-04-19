@@ -9,7 +9,7 @@ import lombok.Data;
 @Schema(description = "Еще не обработанная заявка на подписку, отправленная конкретным пользователем")
 public class UnprocessedRequestForSubscriberResponse {
 
-    @Schema(description = "ID привычки, на которую еще не обработана заявка")
+    @Schema(description = "ID привычки, на которую еще не обработана заявка", example = "10")
     private Long habitId;
 
 }
