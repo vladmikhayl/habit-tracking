@@ -2,6 +2,7 @@ package com.vladmikhayl.subscription.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.subscription.FeignClientTestConfig;
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
@@ -642,6 +643,122 @@ public class SubscriptionControllerIntegrationTest {
         );
 
         mockMvc.perform(get("/api/v1/subscriptions/15/get-habit-unprocessed-requests")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void failGetHabitAcceptedSubscriptionsWhenHabitBelongsToAnotherUser() throws Exception {
+        String currentUserIdStr = "7";
+        Long habitId = 15L;
+
+        // Привычка другого юзера
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+        habitCacheRepository.save(habitCache);
+
+        mockMvc.perform(get("/api/v1/subscriptions/15/get-habit-accepted-subscriptions")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("The habit doesn't belong to that user"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetHabitAcceptedSubscriptionsWithZeroRequests() throws Exception {
+        String currentUserIdStr = "7";
+        Long currentUserId = 7L;
+        Long habitId = 15L;
+
+        // Искомая привычка текущего юзера
+        HabitCache habitCache1 = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(currentUserId)
+                .build();
+        habitCacheRepository.save(habitCache1);
+
+        // Другая привычка текущего юзера
+        HabitCache habitCache2 = HabitCache.builder()
+                .habitId(16L)
+                .creatorId(currentUserId)
+                .build();
+        habitCacheRepository.save(habitCache2);
+
+        // Подписка на другую привычку
+        Subscription subscription = Subscription.builder()
+                .habitId(16L)
+                .subscriberId(10L)
+                .isAccepted(true)
+                .build();
+        subscriptionRepository.save(subscription);
+
+        String expectedJson = objectMapper.writeValueAsString(
+                List.of()
+        );
+
+        mockMvc.perform(get("/api/v1/subscriptions/15/get-habit-accepted-subscriptions")
+                        .header("X-User-Id", currentUserIdStr))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE subscription_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canGetHabitAcceptedSubscriptionsWithSomeRequests() throws Exception {
+        String currentUserIdStr = "7";
+        Long currentUserId = 7L;
+        Long habitId = 15L;
+
+        // Искомая привычка текущего юзера
+        HabitCache habitCache1 = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(currentUserId)
+                .build();
+        habitCacheRepository.save(habitCache1);
+
+        // Принятая подписка на нужную привычку
+        Subscription subscription1 = Subscription.builder()
+                .habitId(habitId)
+                .subscriberId(10L)
+                .isAccepted(true)
+                .build();
+        subscriptionRepository.save(subscription1);
+
+        // Принятая подписка на нужную привычку
+        Subscription subscription2 = Subscription.builder()
+                .habitId(habitId)
+                .subscriberId(11L)
+                .isAccepted(true)
+                .build();
+        subscriptionRepository.save(subscription2);
+
+        // Необработанная подписка на нужную привычку
+        Subscription subscription3 = Subscription.builder()
+                .habitId(habitId)
+                .subscriberId(12L)
+                .isAccepted(false)
+                .build();
+        subscriptionRepository.save(subscription3);
+
+        Mockito.when(authClient.getUserLogin(10L)).thenReturn(ResponseEntity.ok("user10"));
+        Mockito.when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
+
+        String expectedJson = objectMapper.writeValueAsString(
+                List.of(
+                        AcceptedSubscriptionForCreatorResponse.builder()
+                                .subscriberLogin("user10")
+                                .build(),
+                        AcceptedSubscriptionForCreatorResponse.builder()
+                                .subscriberLogin("user11")
+                                .build()
+                )
+        );
+
+        mockMvc.perform(get("/api/v1/subscriptions/15/get-habit-accepted-subscriptions")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedJson));

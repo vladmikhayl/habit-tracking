@@ -2,6 +2,7 @@ package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
@@ -610,6 +611,131 @@ class SubscriptionServiceTest {
         when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
 
         assertThatThrownBy(() -> underTest.getHabitUnprocessedRequests(habitId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("The habit doesn't belong to that user");
+    }
+
+    @Test
+    void canGetHabitAcceptedSubscriptionsWithZeroRequests() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(userId)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(subscriptionRepository.findAllByHabitId(habitId)).thenReturn(List.of());
+
+        List<AcceptedSubscriptionForCreatorResponse> response = underTest.getHabitAcceptedSubscriptions(habitId, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+    }
+
+    @Test
+    void canGetHabitAcceptedSubscriptionsWithZeroAcceptedRequests() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(userId)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(subscriptionRepository.findAllByHabitId(habitId)).thenReturn(List.of(
+                Subscription.builder()
+                        .habitId(habitId)
+                        .subscriberId(10L)
+                        .isAccepted(false)
+                        .build()
+        ));
+
+        List<AcceptedSubscriptionForCreatorResponse> response = underTest.getHabitAcceptedSubscriptions(habitId, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+    }
+
+    @Test
+    void canGetHabitAcceptedSubscriptionsWithSomeAcceptedRequests() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(userId)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(subscriptionRepository.findAllByHabitId(habitId)).thenReturn(List.of(
+                Subscription.builder()
+                        .habitId(habitId)
+                        .subscriberId(10L)
+                        .isAccepted(false)
+                        .build(),
+                Subscription.builder()
+                        .habitId(habitId)
+                        .subscriberId(11L)
+                        .isAccepted(true)
+                        .build(),
+                Subscription.builder()
+                        .habitId(habitId)
+                        .subscriberId(12L)
+                        .isAccepted(true)
+                        .build()
+        ));
+
+        when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
+        when(authClient.getUserLogin(12L)).thenReturn(ResponseEntity.ok("user12"));
+
+        List<AcceptedSubscriptionForCreatorResponse> response = underTest.getHabitAcceptedSubscriptions(habitId, userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                AcceptedSubscriptionForCreatorResponse.builder()
+                        .subscriberLogin("user11")
+                        .build(),
+                AcceptedSubscriptionForCreatorResponse.builder()
+                        .subscriberLogin("user12")
+                        .build()
+        ));
+    }
+
+    @Test
+    void failGetHabitAcceptedSubscriptionsWhenHabitNotFound() {
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.getHabitAcceptedSubscriptions(habitId, userIdStr))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Habit not found");
+    }
+
+    @Test
+    void failGetHabitAcceptedSubscriptionsWhenHabitBelongsToAnotherUser() {
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        assertThatThrownBy(() -> underTest.getHabitAcceptedSubscriptions(habitId, userIdStr))
                 .isInstanceOf(ResponseStatusException.class)
                 .satisfies(ex -> {
                     ResponseStatusException e = (ResponseStatusException) ex;

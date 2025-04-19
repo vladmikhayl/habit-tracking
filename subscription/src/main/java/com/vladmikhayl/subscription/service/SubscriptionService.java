@@ -2,6 +2,7 @@ package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.Subscription;
@@ -169,6 +170,29 @@ public class SubscriptionService {
                 .map(subscription ->
                         UnprocessedRequestForCreatorResponse.builder()
                                 .subscriptionId(subscription.getId())
+                                .subscriberLogin(
+                                        getLoginOrThrow(subscription.getSubscriberId(), "Cannot get subscriber's login because user not found")
+                                )
+                                .build()
+                )
+                .toList();
+    }
+
+    public List<AcceptedSubscriptionForCreatorResponse> getHabitAcceptedSubscriptions(Long habitId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        Long habitCreatorId = habitCacheRepository.findByHabitId(habitId)
+                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .getCreatorId();
+
+        if (!Objects.equals(habitCreatorId, userIdLong)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The habit doesn't belong to that user");
+        }
+
+        return subscriptionRepository.findAllByHabitId(habitId).stream()
+                .filter(Subscription::isAccepted)
+                .map(subscription ->
+                        AcceptedSubscriptionForCreatorResponse.builder()
                                 .subscriberLogin(
                                         getLoginOrThrow(subscription.getSubscriberId(), "Cannot get subscriber's login because user not found")
                                 )

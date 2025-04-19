@@ -1,5 +1,6 @@
 package com.vladmikhayl.subscription.controller;
 
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.service.SubscriptionService;
@@ -118,6 +119,24 @@ public class SubscriptionController {
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
         List<UnprocessedRequestForCreatorResponse> response = subscriptionService.getHabitUnprocessedRequests(habitId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    // TODO: get-user-accepted-subscriptions (+добавить в тз)
+
+    @GetMapping("/{habitId}/get-habit-accepted-subscriptions")
+    @Operation(summary = "Просмотреть принятых подписчиков на указанную привычку")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность", content = @Content)
+    })
+    public ResponseEntity<List<AcceptedSubscriptionForCreatorResponse>> getHabitAcceptedSubscriptions(
+            @PathVariable @Parameter(description = "ID привычки", example = "7") Long habitId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        List<AcceptedSubscriptionForCreatorResponse> response = subscriptionService.getHabitAcceptedSubscriptions(habitId, userId);
         return ResponseEntity.ok(response);
     }
 
