@@ -149,6 +149,7 @@ public class SubscriptionService {
                 .map(subscription ->
                         UnprocessedRequestForSubscriberResponse.builder()
                                 .habitId(subscription.getHabitId())
+                                .habitName(getHabitName(subscription.getHabitId()))
                                 .build()
                 )
                 .toList();
@@ -207,6 +208,12 @@ public class SubscriptionService {
         } catch (FeignException.NotFound e) {
             throw new EntityNotFoundException(message);
         }
+    }
+
+    private String getHabitName(Long habitId) {
+        return habitCacheRepository.findByHabitId(habitId)
+                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .getHabitName();
     }
 
 }

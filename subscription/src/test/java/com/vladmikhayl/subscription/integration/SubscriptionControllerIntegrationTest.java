@@ -466,6 +466,27 @@ public class SubscriptionControllerIntegrationTest {
         Long currentUserId = 7L;
         String currentUserIdStr = "7";
 
+        // Привычка 10
+        HabitCache habitCache1 = HabitCache.builder()
+                .habitId(10L)
+                .habitName("Название 10")
+                .build();
+        habitCacheRepository.save(habitCache1);
+
+        // Привычка 11
+        HabitCache habitCache2 = HabitCache.builder()
+                .habitId(11L)
+                .habitName("Название 11")
+                .build();
+        habitCacheRepository.save(habitCache2);
+
+        // Привычка 12
+        HabitCache habitCache3 = HabitCache.builder()
+                .habitId(12L)
+                .habitName("Название 12")
+                .build();
+        habitCacheRepository.save(habitCache3);
+
         // Необработанная заявка от текущего юзера
         Subscription subscription1 = Subscription.builder()
                 .subscriberId(currentUserId)
@@ -502,9 +523,11 @@ public class SubscriptionControllerIntegrationTest {
                 List.of(
                         UnprocessedRequestForSubscriberResponse.builder()
                                 .habitId(10L)
+                                .habitName("Название 10")
                                 .build(),
                         UnprocessedRequestForSubscriberResponse.builder()
                                 .habitId(11L)
+                                .habitName("Название 11")
                                 .build()
                 )
         );

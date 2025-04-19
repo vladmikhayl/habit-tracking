@@ -26,6 +26,7 @@ public class SubscriptionListener {
                 HabitCache.builder()
                         .creatorId(event.userId())
                         .habitId(event.habitId())
+                        .habitName(event.habitName())
                         .build()
         );
 

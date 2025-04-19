@@ -80,6 +80,7 @@ public class HabitService {
                 .habitId(savedHabit.getId())
                 .userId(savedHabit.getUserId())
                 .isPhotoAllowed(savedHabit.isPhotoAllowed())
+                .habitName(savedHabit.getName())
                 .build();
         habitEventProducer.sendHabitCreatedEvent(event);
     }

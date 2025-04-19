@@ -453,15 +453,31 @@ class SubscriptionServiceTest {
 
         when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
 
+        when(habitCacheRepository.findByHabitId(11L)).thenReturn(Optional.of(
+                HabitCache.builder()
+                        .habitId(11L)
+                        .habitName("Название 11")
+                        .build()
+        ));
+
+        when(habitCacheRepository.findByHabitId(12L)).thenReturn(Optional.of(
+                HabitCache.builder()
+                        .habitId(12L)
+                        .habitName("Название 12")
+                        .build()
+        ));
+
         List<UnprocessedRequestForSubscriberResponse> response = underTest.getUserUnprocessedRequests(userIdStr);
 
         assertThat(response).isEqualTo(
                 List.of(
                         UnprocessedRequestForSubscriberResponse.builder()
                                 .habitId(11L)
+                                .habitName("Название 11")
                                 .build(),
                         UnprocessedRequestForSubscriberResponse.builder()
                                 .habitId(12L)
+                                .habitName("Название 12")
                                 .build()
                 )
         );

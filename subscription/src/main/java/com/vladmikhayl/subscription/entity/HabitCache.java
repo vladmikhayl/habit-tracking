@@ -21,4 +21,6 @@ public class HabitCache {
 
     private Long creatorId;
 
+    private String habitName;
+
 }

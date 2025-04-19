@@ -97,7 +97,13 @@ class HabitServiceTest {
 
         when(habitRepository.existsByUserIdAndName(userId, request.getName())).thenReturn(false);
 
-        when(habitRepository.save(any(Habit.class))).thenReturn(Habit.builder().id(30L).build());
+        when(habitRepository.save(any(Habit.class))).thenReturn(
+                Habit.builder()
+                        .id(30L)
+                        .isPhotoAllowed(false)
+                        .name("Чистить зубы 2 раза в день")
+                        .build()
+        );
 
         underTest.createHabit(request, userIdStr);
 
@@ -133,6 +139,8 @@ class HabitServiceTest {
         HabitCreatedEvent habitCreatedEventCaptured = habitCreatedEventArgumentCaptor.getValue();
 
         assertThat(habitCreatedEventCaptured.habitId()).isEqualTo(30L);
+        assertThat(habitCreatedEventCaptured.isPhotoAllowed()).isEqualTo(false);
+        assertThat(habitCreatedEventCaptured.habitName()).isEqualTo(request.getName());
     }
 
     @Test
@@ -154,7 +162,13 @@ class HabitServiceTest {
 
         when(habitRepository.existsByUserIdAndName(userId, request.getName())).thenReturn(false);
 
-        when(habitRepository.save(any(Habit.class))).thenReturn(Habit.builder().id(30L).build());
+        when(habitRepository.save(any(Habit.class))).thenReturn(
+                Habit.builder()
+                        .id(30L)
+                        .isPhotoAllowed(true)
+                        .name("Чистить зубы 2 раза в день")
+                        .build()
+        );
 
         underTest.createHabit(request, userIdStr);
 
@@ -190,6 +204,8 @@ class HabitServiceTest {
         HabitCreatedEvent habitCreatedEventCaptured = habitCreatedEventArgumentCaptor.getValue();
 
         assertThat(habitCreatedEventCaptured.habitId()).isEqualTo(30L);
+        assertThat(habitCreatedEventCaptured.isPhotoAllowed()).isEqualTo(true);
+        assertThat(habitCreatedEventCaptured.habitName()).isEqualTo(request.getName());
     }
 
     @Test
