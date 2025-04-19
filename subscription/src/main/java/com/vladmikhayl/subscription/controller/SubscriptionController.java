@@ -1,6 +1,7 @@
 package com.vladmikhayl.subscription.controller;
 
-import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
 import com.vladmikhayl.subscription.service.SubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -97,10 +98,26 @@ public class SubscriptionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация")
     })
-    public ResponseEntity<UserUnprocessedRequestsResponse> getUserUnprocessedRequests(
+    public ResponseEntity<UnprocessedRequestsForSubscriberResponse> getUserUnprocessedRequests(
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
-        UserUnprocessedRequestsResponse response = subscriptionService.getUserUnprocessedRequests(userId);
+        UnprocessedRequestsForSubscriberResponse response = subscriptionService.getUserUnprocessedRequests(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{habitId}/get-habit-unprocessed-requests")
+    @Operation(summary = "Просмотреть заявки на указанную привычку, которые еще не были обработаны (приняты или отклонены)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
+                    "(он не является ее создателем)", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность", content = @Content)
+    })
+    public ResponseEntity<List<UnprocessedRequestForCreatorResponse>> getHabitUnprocessedRequests(
+            @PathVariable @Parameter(description = "ID привычки", example = "7") Long habitId,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        List<UnprocessedRequestForCreatorResponse> response = subscriptionService.getHabitUnprocessedRequests(habitId, userId);
         return ResponseEntity.ok(response);
     }
 

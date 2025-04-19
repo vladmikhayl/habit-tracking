@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Builder
 @Schema(description = "Список еще не обработанных заявок на подписку, которые отправил конкретный пользователь")
-public class UserUnprocessedRequestsResponse {
+public class UnprocessedRequestsForSubscriberResponse {
 
     @Schema(description = "ID привычек, на которые еще не обработана заявка")
     private List<Long> habitIds;

@@ -2,7 +2,8 @@ package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
-import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -26,7 +27,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -452,7 +452,7 @@ class SubscriptionServiceTest {
 
         when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
 
-        UserUnprocessedRequestsResponse response = underTest.getUserUnprocessedRequests(userIdStr);
+        UnprocessedRequestsForSubscriberResponse response = underTest.getUserUnprocessedRequests(userIdStr);
 
         assertThat(response.getHabitIds()).isEqualTo(
                 List.of(11L, 12L)
@@ -474,11 +474,141 @@ class SubscriptionServiceTest {
 
         when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
 
-        UserUnprocessedRequestsResponse response = underTest.getUserUnprocessedRequests(userIdStr);
+        UnprocessedRequestsForSubscriberResponse response = underTest.getUserUnprocessedRequests(userIdStr);
 
         assertThat(response.getHabitIds()).isEqualTo(
                 List.of()
         );
+    }
+
+    @Test
+    void canGetHabitUnprocessedRequestsWithZeroRequests() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(userId)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(subscriptionRepository.findAllByHabitId(habitId)).thenReturn(List.of());
+
+        List<UnprocessedRequestForCreatorResponse> response = underTest.getHabitUnprocessedRequests(habitId, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+    }
+
+    @Test
+    void canGetHabitUnprocessedRequestsWithZeroUnprocessedRequests() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(userId)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(subscriptionRepository.findAllByHabitId(habitId)).thenReturn(List.of(
+                Subscription.builder()
+                        .habitId(habitId)
+                        .subscriberId(10L)
+                        .isAccepted(true)
+                        .build()
+        ));
+
+        List<UnprocessedRequestForCreatorResponse> response = underTest.getHabitUnprocessedRequests(habitId, userIdStr);
+
+        assertThat(response).isEqualTo(List.of());
+    }
+
+    @Test
+    void canGetHabitUnprocessedRequestsWithSomeUnprocessedRequests() {
+        Long habitId = 15L;
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(userId)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        when(subscriptionRepository.findAllByHabitId(habitId)).thenReturn(List.of(
+                Subscription.builder()
+                        .id(50L)
+                        .habitId(habitId)
+                        .subscriberId(10L)
+                        .isAccepted(true)
+                        .build(),
+                Subscription.builder()
+                        .id(51L)
+                        .habitId(habitId)
+                        .subscriberId(11L)
+                        .isAccepted(false)
+                        .build(),
+                Subscription.builder()
+                        .id(52L)
+                        .habitId(habitId)
+                        .subscriberId(12L)
+                        .isAccepted(false)
+                        .build()
+        ));
+
+        when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
+        when(authClient.getUserLogin(12L)).thenReturn(ResponseEntity.ok("user12"));
+
+        List<UnprocessedRequestForCreatorResponse> response = underTest.getHabitUnprocessedRequests(habitId, userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                UnprocessedRequestForCreatorResponse.builder()
+                        .subscriptionId(51L)
+                        .subscriberLogin("user11")
+                        .build(),
+                UnprocessedRequestForCreatorResponse.builder()
+                        .subscriptionId(52L)
+                        .subscriberLogin("user12")
+                        .build()
+        ));
+    }
+
+    @Test
+    void failGetHabitUnprocessedRequestsWhenHabitNotFound() {
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.getHabitUnprocessedRequests(habitId, userIdStr))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Habit not found");
+    }
+
+    @Test
+    void failGetHabitUnprocessedRequestsWhenHabitBelongsToAnotherUser() {
+        Long habitId = 15L;
+        String userIdStr = "7";
+
+        HabitCache habitCache = HabitCache.builder()
+                .habitId(habitId)
+                .creatorId(8L)
+                .build();
+
+        when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
+
+        assertThatThrownBy(() -> underTest.getHabitUnprocessedRequests(habitId, userIdStr))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(ex -> {
+                    ResponseStatusException e = (ResponseStatusException) ex;
+                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+                })
+                .hasMessageContaining("The habit doesn't belong to that user");
     }
 
 }

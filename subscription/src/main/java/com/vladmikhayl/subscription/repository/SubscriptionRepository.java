@@ -16,4 +16,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     List<Subscription> findAllBySubscriberId(Long subscriberId);
 
+    List<Subscription> findAllByHabitId(Long habitId);
+
 }

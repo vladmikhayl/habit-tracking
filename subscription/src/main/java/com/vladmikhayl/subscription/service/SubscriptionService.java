@@ -2,7 +2,8 @@ package com.vladmikhayl.subscription.service;
 
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
-import com.vladmikhayl.subscription.dto.response.UserUnprocessedRequestsResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
@@ -20,7 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -91,12 +91,7 @@ public class SubscriptionService {
 
         subscription.setAccepted(true);
 
-        String habitCreatorLogin;
-        try {
-            habitCreatorLogin = authClient.getUserLogin(habitCreatorId).getBody();
-        } catch (FeignException.NotFound e) {
-            throw new EntityNotFoundException("Cannot get habit creator's login because user not found");
-        }
+        String habitCreatorLogin = getLoginOrThrow(habitCreatorId, "Cannot get habit creator's login because user not found");
 
         // Отправка события о появлении принятой подписки всем, кто подписан на accepted-subscription-created
         AcceptedSubscriptionCreatedEvent event = AcceptedSubscriptionCreatedEvent.builder()
@@ -146,7 +141,7 @@ public class SubscriptionService {
         }
     }
 
-    public UserUnprocessedRequestsResponse getUserUnprocessedRequests(String userId) {
+    public UnprocessedRequestsForSubscriberResponse getUserUnprocessedRequests(String userId) {
         Long userIdLong = parseUserId(userId);
 
         List<Long> habitIds = subscriptionRepository.findAllBySubscriberId(userIdLong).stream()
@@ -154,9 +149,41 @@ public class SubscriptionService {
                 .map(Subscription::getHabitId)
                 .toList();
 
-        return UserUnprocessedRequestsResponse.builder()
+        return UnprocessedRequestsForSubscriberResponse.builder()
                 .habitIds(habitIds)
                 .build();
+    }
+
+    public List<UnprocessedRequestForCreatorResponse> getHabitUnprocessedRequests(Long habitId, String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        Long habitCreatorId = habitCacheRepository.findByHabitId(habitId)
+                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .getCreatorId();
+
+        if (!Objects.equals(habitCreatorId, userIdLong)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The habit doesn't belong to that user");
+        }
+
+        return subscriptionRepository.findAllByHabitId(habitId).stream()
+                .filter(subscription -> !subscription.isAccepted())
+                .map(subscription ->
+                        UnprocessedRequestForCreatorResponse.builder()
+                                .subscriptionId(subscription.getId())
+                                .subscriberLogin(
+                                        getLoginOrThrow(subscription.getSubscriberId(), "Cannot get subscriber's login because user not found")
+                                )
+                                .build()
+                )
+                .toList();
+    }
+
+    private String getLoginOrThrow(Long userId, String message) {
+        try {
+            return authClient.getUserLogin(userId).getBody();
+        } catch (FeignException.NotFound e) {
+            throw new EntityNotFoundException(message);
+        }
     }
 
 }
