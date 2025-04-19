@@ -3,6 +3,7 @@ package com.vladmikhayl.subscription.service;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForSubscriberResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.Subscription;
@@ -174,6 +175,20 @@ public class SubscriptionService {
                                 .subscriberLogin(
                                         getLoginOrThrow(subscription.getSubscriberId(), "Cannot get subscriber's login because user not found")
                                 )
+                                .build()
+                )
+                .toList();
+    }
+
+    public List<AcceptedSubscriptionForSubscriberResponse> getUserAcceptedSubscriptions(String userId) {
+        Long userIdLong = parseUserId(userId);
+
+        return subscriptionRepository.findAllBySubscriberId(userIdLong).stream()
+                .filter(Subscription::isAccepted)
+                .map(subscription ->
+                        AcceptedSubscriptionForSubscriberResponse.builder()
+                                .habitId(subscription.getHabitId())
+                                .habitName(getHabitName(subscription.getHabitId()))
                                 .build()
                 )
                 .toList();

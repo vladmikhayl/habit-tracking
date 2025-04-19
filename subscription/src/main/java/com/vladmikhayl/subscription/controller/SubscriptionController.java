@@ -1,6 +1,7 @@
 package com.vladmikhayl.subscription.controller;
 
 import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForSubscriberResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.service.SubscriptionService;
@@ -122,7 +123,17 @@ public class SubscriptionController {
         return ResponseEntity.ok(response);
     }
 
-    // TODO: get-user-accepted-subscriptions (+добавить в тз)
+    @GetMapping("/get-user-accepted-subscriptions")
+    @Operation(summary = "Просмотреть принятые подписки пользователя (сделавшего этот запрос)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация")
+    })
+    public ResponseEntity<List<AcceptedSubscriptionForSubscriberResponse>> getUserAcceptedSubscriptions(
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        List<AcceptedSubscriptionForSubscriberResponse> response = subscriptionService.getUserAcceptedSubscriptions(userId);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{habitId}/get-habit-accepted-subscriptions")
     @Operation(summary = "Просмотреть принятых подписчиков на указанную привычку")

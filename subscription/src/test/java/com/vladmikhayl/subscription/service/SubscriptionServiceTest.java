@@ -3,6 +3,7 @@ package com.vladmikhayl.subscription.service;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForCreatorResponse;
+import com.vladmikhayl.subscription.dto.response.AcceptedSubscriptionForSubscriberResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
@@ -633,6 +634,81 @@ class SubscriptionServiceTest {
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
                 .hasMessageContaining("The habit doesn't belong to that user");
+    }
+
+    @Test
+    void testGetUserAcceptedSubscriptionsWithoutAcceptedRequests() {
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        List<Subscription> userSubscriptions = List.of(
+                Subscription.builder()
+                        .habitId(10L)
+                        .subscriberId(userId)
+                        .isAccepted(false)
+                        .build()
+        );
+
+        when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
+
+        List<AcceptedSubscriptionForSubscriberResponse> response = underTest.getUserAcceptedSubscriptions(userIdStr);
+
+        assertThat(response).isEqualTo(
+                List.of()
+        );
+    }
+
+    @Test
+    void testGetUserAcceptedSubscriptionsWithSomeAcceptedRequests() {
+        Long userId = 7L;
+        String userIdStr = "7";
+
+        List<Subscription> userSubscriptions = List.of(
+                Subscription.builder()
+                        .habitId(10L)
+                        .subscriberId(userId)
+                        .isAccepted(false)
+                        .build(),
+                Subscription.builder()
+                        .habitId(11L)
+                        .subscriberId(userId)
+                        .isAccepted(true)
+                        .build(),
+                Subscription.builder()
+                        .habitId(12L)
+                        .subscriberId(userId)
+                        .isAccepted(true)
+                        .build()
+        );
+
+        when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
+
+        when(habitCacheRepository.findByHabitId(11L)).thenReturn(Optional.of(
+                HabitCache.builder()
+                        .habitId(11L)
+                        .habitName("Название 11")
+                        .build()
+        ));
+
+        when(habitCacheRepository.findByHabitId(12L)).thenReturn(Optional.of(
+                HabitCache.builder()
+                        .habitId(12L)
+                        .habitName("Название 12")
+                        .build()
+        ));
+
+        List<AcceptedSubscriptionForSubscriberResponse> response = underTest.getUserAcceptedSubscriptions(userIdStr);
+
+        assertThat(response).isEqualTo(List.of(
+                AcceptedSubscriptionForSubscriberResponse.builder()
+                        .habitId(11L)
+                        .habitName("Название 11")
+                        .build(),
+                AcceptedSubscriptionForSubscriberResponse.builder()
+                        .habitId(12L)
+                        .habitName("Название 12")
+                        .build()
+        ));
     }
 
     @Test
