@@ -3,7 +3,7 @@ package com.vladmikhayl.subscription.service;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
-import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -452,10 +452,17 @@ class SubscriptionServiceTest {
 
         when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
 
-        UnprocessedRequestsForSubscriberResponse response = underTest.getUserUnprocessedRequests(userIdStr);
+        List<UnprocessedRequestForSubscriberResponse> response = underTest.getUserUnprocessedRequests(userIdStr);
 
-        assertThat(response.getHabitIds()).isEqualTo(
-                List.of(11L, 12L)
+        assertThat(response).isEqualTo(
+                List.of(
+                        UnprocessedRequestForSubscriberResponse.builder()
+                                .habitId(11L)
+                                .build(),
+                        UnprocessedRequestForSubscriberResponse.builder()
+                                .habitId(12L)
+                                .build()
+                )
         );
     }
 
@@ -474,9 +481,9 @@ class SubscriptionServiceTest {
 
         when(subscriptionRepository.findAllBySubscriberId(userId)).thenReturn(userSubscriptions);
 
-        UnprocessedRequestsForSubscriberResponse response = underTest.getUserUnprocessedRequests(userIdStr);
+        List<UnprocessedRequestForSubscriberResponse> response = underTest.getUserUnprocessedRequests(userIdStr);
 
-        assertThat(response.getHabitIds()).isEqualTo(
+        assertThat(response).isEqualTo(
                 List.of()
         );
     }

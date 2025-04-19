@@ -1,7 +1,7 @@
 package com.vladmikhayl.subscription.controller;
 
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
-import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.service.SubscriptionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -98,10 +98,10 @@ public class SubscriptionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация")
     })
-    public ResponseEntity<UnprocessedRequestsForSubscriberResponse> getUserUnprocessedRequests(
+    public ResponseEntity<List<UnprocessedRequestForSubscriberResponse>> getUserUnprocessedRequests(
             @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
     ) {
-        UnprocessedRequestsForSubscriberResponse response = subscriptionService.getUserUnprocessedRequests(userId);
+        List<UnprocessedRequestForSubscriberResponse> response = subscriptionService.getUserUnprocessedRequests(userId);
         return ResponseEntity.ok(response);
     }
 

@@ -3,7 +3,7 @@ package com.vladmikhayl.subscription.service;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionCreatedEvent;
 import com.vladmikhayl.commons.dto.AcceptedSubscriptionDeletedEvent;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
-import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -141,17 +140,17 @@ public class SubscriptionService {
         }
     }
 
-    public UnprocessedRequestsForSubscriberResponse getUserUnprocessedRequests(String userId) {
+    public List<UnprocessedRequestForSubscriberResponse> getUserUnprocessedRequests(String userId) {
         Long userIdLong = parseUserId(userId);
 
-        List<Long> habitIds = subscriptionRepository.findAllBySubscriberId(userIdLong).stream()
+        return subscriptionRepository.findAllBySubscriberId(userIdLong).stream()
                 .filter(subscription -> !subscription.isAccepted())
-                .map(Subscription::getHabitId)
+                .map(subscription ->
+                        UnprocessedRequestForSubscriberResponse.builder()
+                                .habitId(subscription.getHabitId())
+                                .build()
+                )
                 .toList();
-
-        return UnprocessedRequestsForSubscriberResponse.builder()
-                .habitIds(habitIds)
-                .build();
     }
 
     public List<UnprocessedRequestForCreatorResponse> getHabitUnprocessedRequests(Long habitId, String userId) {

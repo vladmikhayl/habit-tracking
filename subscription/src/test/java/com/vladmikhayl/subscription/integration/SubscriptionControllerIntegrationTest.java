@@ -3,7 +3,7 @@ package com.vladmikhayl.subscription.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.subscription.FeignClientTestConfig;
 import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForCreatorResponse;
-import com.vladmikhayl.subscription.dto.response.UnprocessedRequestsForSubscriberResponse;
+import com.vladmikhayl.subscription.dto.response.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.entity.Subscription;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
@@ -498,9 +498,14 @@ public class SubscriptionControllerIntegrationTest {
         subscriptionRepository.save(subscription4);
 
         String expectedJson = objectMapper.writeValueAsString(
-                UnprocessedRequestsForSubscriberResponse.builder()
-                        .habitIds(List.of(10L, 11L))
-                        .build()
+                List.of(
+                        UnprocessedRequestForSubscriberResponse.builder()
+                                .habitId(10L)
+                                .build(),
+                        UnprocessedRequestForSubscriberResponse.builder()
+                                .habitId(11L)
+                                .build()
+                )
         );
 
         mockMvc.perform(get("/api/v1/subscriptions/get-user-unprocessed-requests")
@@ -515,9 +520,7 @@ public class SubscriptionControllerIntegrationTest {
         String currentUserIdStr = "7";
 
         String expectedJson = objectMapper.writeValueAsString(
-                UnprocessedRequestsForSubscriberResponse.builder()
-                        .habitIds(List.of())
-                        .build()
+                List.of()
         );
 
         mockMvc.perform(get("/api/v1/subscriptions/get-user-unprocessed-requests")
