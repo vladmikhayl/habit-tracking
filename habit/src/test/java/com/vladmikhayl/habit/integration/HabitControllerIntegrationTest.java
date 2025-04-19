@@ -342,7 +342,7 @@ public class HabitControllerIntegrationTest {
         habitRepository.save(existingHabit);
 
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name("Новое название")
+//                .name("Новое название")
                 .description("Описание")
                 .isHarmful(true)
                 .durationDays(30)
@@ -357,7 +357,7 @@ public class HabitControllerIntegrationTest {
         Habit expected = Habit.builder()
                 .id(1L)
                 .userId(userId)
-                .name("Новое название")
+                .name("Старое название")
                 .description("Описание")
                 .isPhotoAllowed(true)
                 .isHarmful(true)
@@ -368,7 +368,7 @@ public class HabitControllerIntegrationTest {
                 .timesPerMonth(null)
                 .build();
 
-        Optional<Habit> habit = habitRepository.findByName("Новое название");
+        Optional<Habit> habit = habitRepository.findByName("Старое название");
         assertThat(habit.isPresent()).isTrue();
 
         assertThat(habit.get())
@@ -402,7 +402,7 @@ public class HabitControllerIntegrationTest {
         habitRepository.save(existingHabit);
 
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description(null)
                 .isHarmful(null)
                 .durationDays(0)
@@ -461,7 +461,7 @@ public class HabitControllerIntegrationTest {
         habitRepository.save(existingHabit);
 
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name("Новое название")
+//                .name("Новое название")
                 .description("Описание")
                 .isHarmful(true)
                 .durationDays(30)
@@ -486,67 +486,67 @@ public class HabitControllerIntegrationTest {
         assertThat(habitsCount).isEqualTo(1);
     }
 
-    @Test
-    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void failEditHabitWhenUserAlreadyHasHabitWithSameName() throws Exception {
-        String userIdStr = "1";
-        Long userId = 1L;
-
-        Habit existingHabit1 = Habit.builder()
-                .userId(userId)
-                .name("Название 1")
-                .description(null)
-                .isPhotoAllowed(true)
-                .isHarmful(false)
-                .durationDays(5)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
-                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
-                .timesPerWeek(null)
-                .timesPerMonth(null)
-                .build();
-
-        habitRepository.save(existingHabit1);
-
-        Habit existingHabit2 = Habit.builder()
-                .userId(userId)
-                .name("Название 2")
-                .description(null)
-                .isPhotoAllowed(true)
-                .isHarmful(false)
-                .durationDays(5)
-                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
-                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
-                .timesPerWeek(null)
-                .timesPerMonth(null)
-                .build();
-
-        habitRepository.save(existingHabit2);
-
-        HabitEditingRequest request = HabitEditingRequest.builder()
-                .name("Название 1")
-                .description(null)
-                .isHarmful(null)
-                .durationDays(null)
-                .build();
-
-        mockMvc.perform(put("/api/v1/habits/2/edit")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", userIdStr))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("This user already has a habit with that name"));
-
-        Optional<Habit> oldHabit = habitRepository.findByName("Название 2");
-        assertThat(oldHabit.isPresent()).isTrue();
-
-        assertThat(oldHabit.get())
-                .usingRecursiveComparison()
-                .ignoringFields("id", "createdAt")
-                .isEqualTo(existingHabit2);
-
-        long habitsCount = habitRepository.count();
-        assertThat(habitsCount).isEqualTo(2);
-    }
+//    @Test
+//    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+//    void failEditHabitWhenUserAlreadyHasHabitWithSameName() throws Exception {
+//        String userIdStr = "1";
+//        Long userId = 1L;
+//
+//        Habit existingHabit1 = Habit.builder()
+//                .userId(userId)
+//                .name("Название 1")
+//                .description(null)
+//                .isPhotoAllowed(true)
+//                .isHarmful(false)
+//                .durationDays(5)
+//                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+//                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+//                .timesPerWeek(null)
+//                .timesPerMonth(null)
+//                .build();
+//
+//        habitRepository.save(existingHabit1);
+//
+//        Habit existingHabit2 = Habit.builder()
+//                .userId(userId)
+//                .name("Название 2")
+//                .description(null)
+//                .isPhotoAllowed(true)
+//                .isHarmful(false)
+//                .durationDays(5)
+//                .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
+//                .daysOfWeek(Set.of(DayOfWeek.MONDAY))
+//                .timesPerWeek(null)
+//                .timesPerMonth(null)
+//                .build();
+//
+//        habitRepository.save(existingHabit2);
+//
+//        HabitEditingRequest request = HabitEditingRequest.builder()
+//                .name("Название 1")
+//                .description(null)
+//                .isHarmful(null)
+//                .durationDays(null)
+//                .build();
+//
+//        mockMvc.perform(put("/api/v1/habits/2/edit")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                        .header("X-User-Id", userIdStr))
+//                .andExpect(status().isConflict())
+//                .andExpect(jsonPath("$.error").value("This user already has a habit with that name"));
+//
+//        Optional<Habit> oldHabit = habitRepository.findByName("Название 2");
+//        assertThat(oldHabit.isPresent()).isTrue();
+//
+//        assertThat(oldHabit.get())
+//                .usingRecursiveComparison()
+//                .ignoringFields("id", "createdAt")
+//                .isEqualTo(existingHabit2);
+//
+//        long habitsCount = habitRepository.count();
+//        assertThat(habitsCount).isEqualTo(2);
+//    }
 
     @Test
     @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -570,7 +570,7 @@ public class HabitControllerIntegrationTest {
         habitRepository.save(existingHabit);
 
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description(null)
                 .isHarmful(true)
                 .durationDays(null)

@@ -441,7 +441,7 @@ class HabitControllerTest {
     @Test
     void canMaxEditHabit() throws Exception {
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name("Название")
+//                .name("Название")
                 .description("Описание")
                 .isHarmful(true)
                 .durationDays(30)
@@ -464,7 +464,7 @@ class HabitControllerTest {
     @Test
     void canEditHabitWithDurationDaysEqualsToZero() throws Exception {
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description(null)
                 .isHarmful(null)
                 .durationDays(0)
@@ -487,7 +487,7 @@ class HabitControllerTest {
     @Test
     void canNullEditHabit() throws Exception {
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description(null)
                 .isHarmful(null)
                 .durationDays(null)
@@ -507,60 +507,60 @@ class HabitControllerTest {
         verify(habitService).editHabit(eq(habitId), argThat(req -> req.equals(request)), eq(userIdStr));
     }
 
-    @Test
-    void failEditHabitWithBlankName() throws Exception {
-        HabitEditingRequest request = HabitEditingRequest.builder()
-                .name("")
-                .description(null)
-                .isHarmful(null)
-                .durationDays(null)
-                .build();
+//    @Test
+//    void failEditHabitWithBlankName() throws Exception {
+//        HabitEditingRequest request = HabitEditingRequest.builder()
+//                .name("")
+//                .description(null)
+//                .isHarmful(null)
+//                .durationDays(null)
+//                .build();
+//
+//        String userIdStr = "1";
+//
+//        mockMvc.perform(put("/api/v1/habits/10/edit")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                        .header("X-User-Id", userIdStr))
+//                .andExpect(result -> {
+//                    Exception exception = result.getResolvedException();
+//                    assertTrue(exception instanceof MethodArgumentNotValidException);
+//                    assertTrue(exception.getMessage().contains("Name cannot be blank"));
+//                })
+//                .andExpect(status().isBadRequest());
+//
+//        verify(habitService, never()).editHabit(any(), any(), any());
+//    }
 
-        String userIdStr = "1";
-
-        mockMvc.perform(put("/api/v1/habits/10/edit")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", userIdStr))
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Name cannot be blank"));
-                })
-                .andExpect(status().isBadRequest());
-
-        verify(habitService, never()).editHabit(any(), any(), any());
-    }
-
-    @Test
-    void failEditHabitWithTooLongName() throws Exception {
-        HabitEditingRequest request = HabitEditingRequest.builder()
-                .name("А".repeat(256))
-                .description(null)
-                .isHarmful(null)
-                .durationDays(null)
-                .build();
-
-        String userIdStr = "1";
-
-        mockMvc.perform(put("/api/v1/habits/10/edit")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", userIdStr))
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Name must not exceed 255 characters"));
-                })
-                .andExpect(status().isBadRequest());
-
-        verify(habitService, never()).editHabit(any(), any(), any());
-    }
+//    @Test
+//    void failEditHabitWithTooLongName() throws Exception {
+//        HabitEditingRequest request = HabitEditingRequest.builder()
+//                .name("А".repeat(256))
+//                .description(null)
+//                .isHarmful(null)
+//                .durationDays(null)
+//                .build();
+//
+//        String userIdStr = "1";
+//
+//        mockMvc.perform(put("/api/v1/habits/10/edit")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                        .header("X-User-Id", userIdStr))
+//                .andExpect(result -> {
+//                    Exception exception = result.getResolvedException();
+//                    assertTrue(exception instanceof MethodArgumentNotValidException);
+//                    assertTrue(exception.getMessage().contains("Name must not exceed 255 characters"));
+//                })
+//                .andExpect(status().isBadRequest());
+//
+//        verify(habitService, never()).editHabit(any(), any(), any());
+//    }
 
     @Test
     void failEditHabitWithTooLongDescription() throws Exception {
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description("А".repeat(1001))
                 .isHarmful(null)
                 .durationDays(null)
@@ -585,7 +585,7 @@ class HabitControllerTest {
     @Test
     void failEditHabitWithTooLittleDurationDays() throws Exception {
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description(null)
                 .isHarmful(null)
                 .durationDays(-1)
@@ -610,7 +610,7 @@ class HabitControllerTest {
     @Test
     void failEditHabitWithTooBigDurationDays() throws Exception {
         HabitEditingRequest request = HabitEditingRequest.builder()
-                .name(null)
+//                .name(null)
                 .description(null)
                 .isHarmful(null)
                 .durationDays(731)

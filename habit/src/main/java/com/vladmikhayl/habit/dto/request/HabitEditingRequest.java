@@ -18,9 +18,9 @@ public class HabitEditingRequest {
     Чтобы положить значение null в поле durationDays, в качестве этого параметра нужно передать 0
      */
 
-    @Size(max = 255, message = "Name must not exceed 255 characters")
-    @Schema(description = "Новое название", example = "Бегать")
-    private String name;
+//    @Size(max = 255, message = "Name must not exceed 255 characters")
+//    @Schema(description = "Новое название", example = "Бегать")
+//    private String name;
 
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     @Schema(description = "Новое описание", example = "Бег это очень полезно, поэтому я решил делать пробежку в течение 2ух месяцев")
@@ -39,10 +39,10 @@ public class HabitEditingRequest {
     )
     private Integer durationDays;
 
-    @AssertTrue(message = "Name cannot be blank")
-    @Hidden
-    public boolean isNameNotBlank() {
-        return name == null || !name.isEmpty();
-    }
+//    @AssertTrue(message = "Name cannot be blank")
+//    @Hidden
+//    public boolean isNameNotBlank() {
+//        return name == null || !name.isEmpty();
+//    }
 
 }

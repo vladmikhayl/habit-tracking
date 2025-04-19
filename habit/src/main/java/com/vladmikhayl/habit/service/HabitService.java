@@ -95,12 +95,12 @@ public class HabitService {
         Habit habit = habitRepository.findByIdAndUserId(habitId, userIdLong)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have a habit with this id"));
 
-        if (request.getName() != null) {
-            if (habitRepository.existsByUserIdAndName(userIdLong, request.getName())) {
-                throw new DataIntegrityViolationException("This user already has a habit with that name");
-            }
-            habit.setName(request.getName());
-        }
+//        if (request.getName() != null) {
+//            if (habitRepository.existsByUserIdAndName(userIdLong, request.getName())) {
+//                throw new DataIntegrityViolationException("This user already has a habit with that name");
+//            }
+//            habit.setName(request.getName());
+//        }
 
         if (request.getDescription() != null) {
             habit.setDescription(request.getDescription());
