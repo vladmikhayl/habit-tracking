@@ -3,4 +3,4 @@ spring:
   application:
     name: subscription # this name will be shown in eureka
   config:
-    import: optional:configserver:http://localhost:8888
+    import: optional:configserver:http://config-server:8888

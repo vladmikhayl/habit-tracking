@@ -1,7 +1,7 @@
 # the name of this file must be exactly like the name of the application
 eureka:
   instance:
-    hostname: localhost
+    hostname: discovery
   client:
     register-with-eureka: false # eureka server itself should not register with itself
     fetch-registry: false # and it should not fetch data about available services

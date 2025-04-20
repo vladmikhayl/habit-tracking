@@ -1,0 +1,21 @@
+# IDE
+**/.idea/
+**/*.iml
+
+# Java и Maven
+**/target/
+**/build/
+**/*.log
+**/out/
+
+# Node.js
+**/node_modules/
+
+# Системные и временные файлы
+**/.DS_Store
+**/*.swp
+**/.env
+
+# Git
+**/.git
+**/.gitignore

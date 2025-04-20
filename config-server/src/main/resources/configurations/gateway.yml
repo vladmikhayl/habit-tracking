@@ -1,10 +1,18 @@
 # the name of this file must be exactly like the name of the application
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
 server:
   port: 8080
 spring:
   app:
     jwtSecret: BSyus78W73UHhqpIOJS9Jjd03928u3rdh9UIHD89wh9dw
   cloud:
+    discovery:
+      enabled: true
     gateway:
       discovery:
         locator:

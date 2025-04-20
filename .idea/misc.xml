@@ -13,6 +13,7 @@
         <option value="$PROJECT_DIR$/common-events/pom.xml" />
         <option value="$PROJECT_DIR$/subscription/pom.xml" />
         <option value="$PROJECT_DIR$/common-kafka-events/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
