@@ -1,0 +1,36 @@
+# the name of this file must be exactly like the name of the application
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: discovery
+  client:
+    service-url:
+      defaultZone: http://discovery:8761/eureka
+
+server:
+  port: 8083
+  address: 0.0.0.0
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/reports
+    username: username
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: kafka:29092
+    consumer:
+      group-id: report-group
+      auto-offset-reset: latest # only new messages
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

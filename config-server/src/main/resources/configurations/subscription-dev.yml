@@ -1,18 +1,20 @@
 # the name of this file must be exactly like the name of the application
 eureka:
   instance:
-    prefer-ip-address: true
-    hostname: discovery
+    prefer-ip-address: false
+    hostname: localhost
   client:
     service-url:
-      defaultZone: http://discovery:8761/eureka
+      defaultZone: http://localhost:8761/eureka
+
 server:
-  port: 8082
-  address: 0.0.0.0
+  port: 8084
+  address: localhost
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres:5432/habits
+    url: jdbc:postgresql://localhost:15432/subscriptions
     username: username
     password: password
   jpa:
@@ -21,9 +23,9 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     consumer:
-      group-id: habit-group
+      group-id: subscription-group
       auto-offset-reset: latest # only new messages
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer

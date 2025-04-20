@@ -6,20 +6,24 @@ eureka:
   client:
     service-url:
       defaultZone: http://discovery:8761/eureka
+
 server:
   port: 8081
   address: 0.0.0.0
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://postgres:5432/users
     username: username
     password: password
+
   jpa:
     hibernate:
       ddl-auto: create-drop
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
   app:
     jwtSecret: BSyus78W73UHhqpIOJS9Jjd03928u3rdh9UIHD89wh9dw
     jwtExpirationMs: 8640000000
