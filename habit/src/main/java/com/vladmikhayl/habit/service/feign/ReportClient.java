@@ -27,7 +27,7 @@ public interface ReportClient {
             @RequestParam(required = false) Set<DayOfWeek> daysOfWeek,
             @RequestParam(required = false) Integer timesPerWeek,
             @RequestParam(required = false) Integer timesPerMonth,
-            @RequestParam LocalDate createdAt
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAt
     );
 
     @GetMapping("/internal/reports/get-report/of-habit/{habitId}/at-day/{date}")
