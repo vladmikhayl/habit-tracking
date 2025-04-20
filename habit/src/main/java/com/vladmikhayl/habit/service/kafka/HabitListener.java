@@ -34,7 +34,7 @@ public class HabitListener {
         );
 
         System.out.println(
-                "В таблицу subscriptions_cache добавлена подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
+                "В таблицу subscriptions_cache добавлена принятая подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
         );
     }
 
@@ -52,7 +52,7 @@ public class HabitListener {
         );
 
         System.out.println(
-                "Из таблицы subscriptions_cache удалена подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
+                "Из таблицы subscriptions_cache удалена принятая подписка на привычку " + event.habitId() + " от юзера " + event.subscriberId()
         );
     }
 
