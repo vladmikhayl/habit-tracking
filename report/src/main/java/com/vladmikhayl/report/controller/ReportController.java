@@ -5,6 +5,7 @@ import com.vladmikhayl.report.dto.request.ReportPhotoEditingRequest;
 import com.vladmikhayl.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,7 +38,9 @@ public class ReportController {
             @ApiResponse(responseCode = "201", description = "Успешное создание"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к созданию отчетов к этой привычке в этот день " +
                     "(либо он не является создателем этой привычки, либо эта привычка не является текущей в переданный день)"),
-            @ApiResponse(responseCode = "409", description = "Эта привычка уже отмечена выполненной в этот день")
+            @ApiResponse(responseCode = "409", description = "Эта привычка уже отмечена выполненной в этот день"),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<Void> createReport(
             @Valid @RequestBody ReportCreationRequest request,

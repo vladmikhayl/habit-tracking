@@ -6,6 +6,8 @@ import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
 import com.vladmikhayl.report.service.feign.HabitClient;
+import feign.FeignException;
+import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -40,11 +42,7 @@ public class ReportService {
     ) {
         Long userIdLong = parseUserId(userId);
 
-        boolean isHabitCurrentAtThatDateForThatUser = habitClient.isCurrent(
-                request.getHabitId(),
-                userIdLong,
-                request.getDate()
-        ).getBody();
+        boolean isHabitCurrentAtThatDateForThatUser = getIsCurrentOrThrow(request.getHabitId(), userIdLong, request.getDate());
 
         if (!isHabitCurrentAtThatDateForThatUser) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this habit on this day");
@@ -117,6 +115,16 @@ public class ReportService {
         }
 
         reportRepository.deleteById(reportId);
+    }
+
+    private boolean getIsCurrentOrThrow(Long habitId, Long userId, LocalDate date) {
+        try {
+            return habitClient.isCurrent(habitId, userId, date).getBody();
+        } catch (RetryableException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Habit service is unavailable");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Habit service returned an error");
+        }
     }
 
 }

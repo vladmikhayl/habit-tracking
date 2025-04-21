@@ -100,7 +100,9 @@ public class HabitController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
-                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content)
+                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<HabitReportsInfoResponse> getReportsInfo(
             @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
@@ -115,7 +117,9 @@ public class HabitController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
-                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content)
+                    "(он не является ее создателем или принятым подписчиком на нее)", content = @Content),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<ReportFullInfoResponse> getReportAtDay(
             @PathVariable @Parameter(description = "ID привычки", example = "1") Long habitId,
@@ -131,7 +135,9 @@ public class HabitController {
     @Operation(summary = "Просмотреть список всех привычек пользователя (сделавшего этот запрос), " +
             "которые являются текущими в конкретный день")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Успешно получена информация")
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<List<HabitShortInfoResponse>> getAllUserHabitsAtDay(
             @PathVariable @Parameter(description = "За какую дату нужно вернуть привычки", example = "2025-04-11")
@@ -146,7 +152,9 @@ public class HabitController {
     @Operation(summary = "Просмотреть список всех привычек, на которые подписан и принят пользователь " +
             "(сделавший этот запрос) и которые являются текущими в конкретный день")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Успешно получена информация")
+            @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<List<SubscribedHabitShortInfoResponse>> getAllUserSubscribedHabitsAtDay(
             @PathVariable @Parameter(description = "За какую дату нужно вернуть привычки", example = "2025-04-11")

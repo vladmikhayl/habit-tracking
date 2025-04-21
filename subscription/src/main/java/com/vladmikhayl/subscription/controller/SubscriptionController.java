@@ -54,7 +54,9 @@ public class SubscriptionController {
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой заявке " +
                     "(он не является создателем привычки, на которую отправлена эта заявка)"),
             @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность"),
-            @ApiResponse(responseCode = "409", description = "Эта заявка уже принята")
+            @ApiResponse(responseCode = "409", description = "Эта заявка уже принята"),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<Void> acceptSubscriptionRequest(
             @PathVariable @Parameter(description = "ID заявки", example = "10") Long subscriptionId,
@@ -113,7 +115,9 @@ public class SubscriptionController {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
                     "(он не является ее создателем)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность", content = @Content),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<List<UnprocessedRequestForCreatorResponse>> getHabitUnprocessedRequests(
             @PathVariable @Parameter(description = "ID привычки", example = "7") Long habitId,
@@ -141,7 +145,9 @@ public class SubscriptionController {
             @ApiResponse(responseCode = "200", description = "Успешно получена информация"),
             @ApiResponse(responseCode = "403", description = "Пользователь не имеет доступа к этой привычке " +
                     "(он не является ее создателем)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Не найдена какая-либо сущность", content = @Content),
+            @ApiResponse(responseCode = "502", description = "Микросервис, на который делается внутренний запрос, вернул ошибку", content = @Content),
+            @ApiResponse(responseCode = "503", description = "Недоступен микросервис, на который делается внутренний запрос", content = @Content)
     })
     public ResponseEntity<List<AcceptedSubscriptionForCreatorResponse>> getHabitAcceptedSubscriptions(
             @PathVariable @Parameter(description = "ID привычки", example = "7") Long habitId,

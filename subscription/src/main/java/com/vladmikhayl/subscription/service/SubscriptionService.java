@@ -12,6 +12,7 @@ import com.vladmikhayl.subscription.repository.SubscriptionRepository;
 import com.vladmikhayl.subscription.service.feign.AuthClient;
 import com.vladmikhayl.subscription.service.kafka.SubscriptionEventProducer;
 import feign.FeignException;
+import feign.RetryableException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -92,7 +93,7 @@ public class SubscriptionService {
 
         subscription.setAccepted(true);
 
-        String habitCreatorLogin = getLoginOrThrow(habitCreatorId, "Cannot get habit creator's login because user not found");
+        String habitCreatorLogin = getLoginOrThrow(habitCreatorId);
 
         // Отправка события о появлении принятой подписки всем, кто подписан на accepted-subscription-created
         AcceptedSubscriptionCreatedEvent event = AcceptedSubscriptionCreatedEvent.builder()
@@ -173,7 +174,7 @@ public class SubscriptionService {
                         UnprocessedRequestForCreatorResponse.builder()
                                 .subscriptionId(subscription.getId())
                                 .subscriberLogin(
-                                        getLoginOrThrow(subscription.getSubscriberId(), "Cannot get subscriber's login because user not found")
+                                        getLoginOrThrow(subscription.getSubscriberId())
                                 )
                                 .build()
                 )
@@ -210,18 +211,20 @@ public class SubscriptionService {
                 .map(subscription ->
                         AcceptedSubscriptionForCreatorResponse.builder()
                                 .subscriberLogin(
-                                        getLoginOrThrow(subscription.getSubscriberId(), "Cannot get subscriber's login because user not found")
+                                        getLoginOrThrow(subscription.getSubscriberId())
                                 )
                                 .build()
                 )
                 .toList();
     }
 
-    private String getLoginOrThrow(Long userId, String message) {
+    private String getLoginOrThrow(Long userId) {
         try {
             return authClient.getUserLogin(userId).getBody();
-        } catch (FeignException.NotFound e) {
-            throw new EntityNotFoundException(message);
+        } catch (RetryableException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Auth service is unavailable");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Auth service returned an error");
         }
     }
 
