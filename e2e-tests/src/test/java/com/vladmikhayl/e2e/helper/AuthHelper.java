@@ -6,6 +6,7 @@ import com.vladmikhayl.e2e.dto.auth.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,11 +16,13 @@ import java.util.Map;
 public class AuthHelper {
 
     private final RestTemplate restTemplate;
-    private final HttpHeaders headers;
     private final String gatewayUrl;
     private final ObjectMapper objectMapper;
 
     public void register(String username, String password) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
         String url = gatewayUrl + "/auth/register";
 
         Map<String, String> requestBody = Map.of(
@@ -27,11 +30,14 @@ public class AuthHelper {
                 "password", password
         );
 
-        HttpEntity<String> entity = buildEntity(requestBody);
+        HttpEntity<String> entity = buildEntity(requestBody, headers);
         restTemplate.postForEntity(url, entity, Void.class);
     }
 
     public AuthResponse login(String username, String password) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
         String url = gatewayUrl + "/auth/login";
 
         Map<String, String> requestBody = Map.of(
@@ -39,13 +45,13 @@ public class AuthHelper {
                 "password", password
         );
 
-        HttpEntity<String> entity = buildEntity(requestBody);
+        HttpEntity<String> entity = buildEntity(requestBody, headers);
         ResponseEntity<AuthResponse> response = restTemplate.postForEntity(url, entity, AuthResponse.class);
 
         return response.getBody();
     }
 
-    private HttpEntity<String> buildEntity(Map<String, String> body) {
+    private <T> HttpEntity<String> buildEntity(T body, HttpHeaders headers) {
         try {
             String json = objectMapper.writeValueAsString(body);
             return new HttpEntity<>(json, headers);
