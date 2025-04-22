@@ -253,6 +253,7 @@ public class HabitService {
                 }
 
                 currentUserHabitsAtDay.add(HabitShortInfoResponse.builder()
+                        .habitId(habitId)
                         .name(habit.getName())
                         .isCompleted(isCompleted)
                         .subscribersCount(subscribersCount)
@@ -314,6 +315,7 @@ public class HabitService {
                 }
 
                 currentUserSubscribedHabitsAtDay.add(SubscribedHabitShortInfoResponse.builder()
+                        .habitId(habitId)
                         .creatorLogin(creatorLogin)
                         .name(habit.getName())
                         .isCompleted(isCompleted)

@@ -1008,6 +1008,7 @@ class HabitServiceTest {
 
         assertThat(response).isEqualTo(List.of(
                 HabitShortInfoResponse.builder()
+                        .habitId(2L)
                         .name("Название 2")
                         .isCompleted(true)
                         .subscribersCount(3)
@@ -1103,6 +1104,7 @@ class HabitServiceTest {
 
         assertThat(response).isEqualTo(List.of(
                 HabitShortInfoResponse.builder()
+                        .habitId(2L)
                         .name("Название 2")
                         .isCompleted(true)
                         .subscribersCount(3)
@@ -1111,6 +1113,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(null)
                         .build(),
                 HabitShortInfoResponse.builder()
+                        .habitId(3L)
                         .name("Название 3")
                         .isCompleted(false)
                         .subscribersCount(0)
@@ -1119,6 +1122,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(2)
                         .build(),
                 HabitShortInfoResponse.builder()
+                        .habitId(4L)
                         .name("Название 4")
                         .isCompleted(true)
                         .subscribersCount(10)
@@ -1254,6 +1258,7 @@ class HabitServiceTest {
 
         assertThat(response).isEqualTo(List.of(
                 SubscribedHabitShortInfoResponse.builder()
+                        .habitId(2L)
                         .creatorLogin("user3")
                         .name("Название 2")
                         .isCompleted(false)
@@ -1350,6 +1355,7 @@ class HabitServiceTest {
 
         assertThat(response).isEqualTo(List.of(
                 SubscribedHabitShortInfoResponse.builder()
+                        .habitId(1L)
                         .creatorLogin("user2")
                         .name("Название 1")
                         .isCompleted(false)
@@ -1359,6 +1365,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(5)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
+                        .habitId(2L)
                         .creatorLogin("user2")
                         .name("Название 2")
                         .isCompleted(true)

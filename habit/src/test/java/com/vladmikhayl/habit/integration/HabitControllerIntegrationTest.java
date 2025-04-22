@@ -7,6 +7,7 @@ import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
 import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
+import com.vladmikhayl.habit.dto.response.SubscribedHabitShortInfoResponse;
 import com.vladmikhayl.habit.entity.*;
 import com.vladmikhayl.habit.entity.Period;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -1267,6 +1268,7 @@ public class HabitControllerIntegrationTest {
 
         List<HabitShortInfoResponse> expectedList = List.of(
                 HabitShortInfoResponse.builder()
+                        .habitId(2L)
                         .name("Название 2")
                         .isCompleted(false)
                         .subscribersCount(0)
@@ -1275,6 +1277,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(null)
                         .build(),
                 HabitShortInfoResponse.builder()
+                        .habitId(3L)
                         .name("Название 3")
                         .isCompleted(true)
                         .subscribersCount(1)
@@ -1352,6 +1355,7 @@ public class HabitControllerIntegrationTest {
 
         List<HabitShortInfoResponse> expectedList = List.of(
                 HabitShortInfoResponse.builder()
+                        .habitId(2L)
                         .name("Название 2")
                         .isCompleted(false)
                         .subscribersCount(0)
@@ -1360,6 +1364,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(1)
                         .build(),
                 HabitShortInfoResponse.builder()
+                        .habitId(3L)
                         .name("Название 3")
                         .isCompleted(true)
                         .subscribersCount(0)
@@ -1599,8 +1604,10 @@ public class HabitControllerIntegrationTest {
 
         Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
-        List<HabitShortInfoResponse> expectedList = List.of(
-                HabitShortInfoResponse.builder()
+        List<SubscribedHabitShortInfoResponse> expectedList = List.of(
+                SubscribedHabitShortInfoResponse.builder()
+                        .habitId(2L)
+                        .creatorLogin("user11")
                         .name("Название 2")
                         .isCompleted(false)
                         .subscribersCount(1)
@@ -1608,7 +1615,9 @@ public class HabitControllerIntegrationTest {
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
                         .build(),
-                HabitShortInfoResponse.builder()
+                SubscribedHabitShortInfoResponse.builder()
+                        .habitId(3L)
+                        .creatorLogin("user12")
                         .name("Название 3")
                         .isCompleted(true)
                         .subscribersCount(2)
@@ -1713,8 +1722,10 @@ public class HabitControllerIntegrationTest {
 
         Mockito.when(reportClient.countCompletionsInPeriod(3L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(5));
 
-        List<HabitShortInfoResponse> expectedList = List.of(
-                HabitShortInfoResponse.builder()
+        List<SubscribedHabitShortInfoResponse> expectedList = List.of(
+                SubscribedHabitShortInfoResponse.builder()
+                        .habitId(2L)
+                        .creatorLogin("user11")
                         .name("Название 2")
                         .isCompleted(false)
                         .subscribersCount(1)
@@ -1722,7 +1733,9 @@ public class HabitControllerIntegrationTest {
                         .completionsInPeriod(0)
                         .completionsPlannedInPeriod(5)
                         .build(),
-                HabitShortInfoResponse.builder()
+                SubscribedHabitShortInfoResponse.builder()
+                        .habitId(3L)
+                        .creatorLogin("user12")
                         .name("Название 3")
                         .isCompleted(true)
                         .subscribersCount(1)

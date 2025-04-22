@@ -10,6 +10,9 @@ import lombok.Data;
 @Schema(description = "Короткая информация о конкретной привычке за конкретный день")
 public class HabitShortInfoResponse {
 
+    @Schema(description = "ID привычки", example = "7")
+    private Long habitId;
+
     @Schema(description = "Название", example = "Бегать по понедельникам")
     private String name;
 
