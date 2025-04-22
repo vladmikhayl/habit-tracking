@@ -1,0 +1,41 @@
+# === IntelliJ IDEA ===
+.idea/
+*.iml
+*.iws
+out/
+
+# === Maven ===
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# === Logs ===
+*.log
+logs/
+*.pid
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Build ===
+build/
+dist/
+
+# === Test results ===
+*.exec
+*.coverage
+test-output/
+
+# === Spring Boot ===
+spring.log
+
+# === Docker ===
+*.env
+.env.*
+docker-compose.override.yml
+
+.vscode/
+
+node_modules/
+npm-debug.log*
