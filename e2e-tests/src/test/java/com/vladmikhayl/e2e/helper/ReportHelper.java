@@ -51,6 +51,24 @@ public class ReportHelper {
         );
     }
 
+    public void deleteReport(
+            String token,
+            Long reportId
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+
+        String url = gatewayUrl + "/reports/" + reportId + "/delete";
+
+        restTemplate.exchange(
+                url,
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                Void.class
+        );
+    }
+
     private <T> HttpEntity<String> buildEntity(T body, HttpHeaders headers) {
         try {
             String json = objectMapper.writeValueAsString(body);

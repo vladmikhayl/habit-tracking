@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HabitFlowTests extends BaseE2ETest {
 
     @Test
-    void testHabitsCreatingAndGettingAllUserHabitsAtDay() throws InterruptedException {
+    void testHabitCreatingAndGettingAllUserHabitsAtDay() throws InterruptedException {
         // Создается юзер с рандомным логином
         String userLogin = "user_" + UUID.randomUUID().toString().substring(0, 20);
         authHelper.register(userLogin, "12345");

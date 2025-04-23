@@ -97,6 +97,27 @@ public class HabitHelper {
         return response.getBody();
     }
 
+    public HabitReportsInfoResponse getReportsInfo(
+            String token,
+            Long habitId
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = gatewayUrl + "/habits/" + habitId + "/reports-info";
+
+        ResponseEntity<HabitReportsInfoResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                HabitReportsInfoResponse.class
+        );
+
+        return response.getBody();
+    }
+
     public ReportFullInfoResponse getReportAtDay(
             String token,
             Long habitId,
