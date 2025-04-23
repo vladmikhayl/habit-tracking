@@ -3,6 +3,7 @@ import com.vladmikhayl.e2e.entity.FrequencyType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class HabitGeneralInfoResponse {
 
     private Long id;
