@@ -8,7 +8,6 @@ import com.vladmikhayl.e2e.dto.habit.HabitShortInfoResponse;
 import com.vladmikhayl.e2e.entity.FrequencyType;
 import org.junit.jupiter.api.Test;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class HabitFlowTests extends BaseE2ETest {
 
     @Test
-    void testGettingAllUserHabitsAtDay() throws InterruptedException {
+    void testHabitsCreatingAndGettingAllUserHabitsAtDay() throws InterruptedException {
         // Создается юзер с рандомным логином
         String userLogin = "user_" + UUID.randomUUID().toString().substring(0, 20);
         authHelper.register(userLogin, "12345");

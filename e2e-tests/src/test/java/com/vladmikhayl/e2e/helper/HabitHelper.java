@@ -2,15 +2,13 @@ package com.vladmikhayl.e2e.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vladmikhayl.e2e.dto.habit.HabitCreationRequest;
-import com.vladmikhayl.e2e.dto.habit.HabitEditingRequest;
-import com.vladmikhayl.e2e.dto.habit.HabitGeneralInfoResponse;
-import com.vladmikhayl.e2e.dto.habit.HabitShortInfoResponse;
+import com.vladmikhayl.e2e.dto.habit.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -94,6 +92,28 @@ public class HabitHelper {
                 HttpMethod.GET,
                 entity,
                 HabitGeneralInfoResponse.class
+        );
+
+        return response.getBody();
+    }
+
+    public ReportFullInfoResponse getReportAtDay(
+            String token,
+            Long habitId,
+            String dateStr
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = gatewayUrl + "/habits/" + habitId + "/get-report/at-day/" + dateStr;
+
+        ResponseEntity<ReportFullInfoResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                ReportFullInfoResponse.class
         );
 
         return response.getBody();
