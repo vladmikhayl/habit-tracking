@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 @Schema(description = "Информация об отчете о выполнении привычки за конкретный день")
 public class ReportFullInfoResponse {
 
+    @Schema(description = "ID отчета", example = "25")
+    private Long reportId;
+
     @Schema(description = "Выполнена ли привычка в этот день", example = "true")
     private boolean isCompleted;
 

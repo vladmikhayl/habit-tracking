@@ -108,6 +108,7 @@ public class InternalReportControllerIntegrationTest {
 
         mockMvc.perform(get("/internal/reports/get-report/of-habit/10/at-day/2025-03-28"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reportId").value(1))
                 .andExpect(jsonPath("$.completed").value(true))
                 .andExpect(jsonPath("$.completionTime").exists())
                 .andExpect(jsonPath("$.photoUrl").value("https://photo-url.com/"));
@@ -130,6 +131,7 @@ public class InternalReportControllerIntegrationTest {
 
         mockMvc.perform(get("/internal/reports/get-report/of-habit/10/at-day/2025-03-28"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reportId").value(1))
                 .andExpect(jsonPath("$.completed").value(true))
                 .andExpect(jsonPath("$.completionTime").exists())
                 .andExpect(jsonPath("$.photoUrl").isEmpty());
@@ -140,6 +142,7 @@ public class InternalReportControllerIntegrationTest {
     void canGetReportAtDayWhenReportIsNotPresent() throws Exception {
         mockMvc.perform(get("/internal/reports/get-report/of-habit/10/at-day/2025-03-28"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reportId").isEmpty())
                 .andExpect(jsonPath("$.completed").value(false))
                 .andExpect(jsonPath("$.completionTime").isEmpty())
                 .andExpect(jsonPath("$.photoUrl").isEmpty());

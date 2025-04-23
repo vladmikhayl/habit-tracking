@@ -824,6 +824,7 @@ public class HabitControllerIntegrationTest {
 
         Mockito.when(reportClient.getReportAtDay(1L, date)).thenReturn(ResponseEntity.ok(
                 ReportFullInfoResponse.builder()
+                        .reportId(null)
                         .isCompleted(false)
                         .completionTime(null)
                         .photoUrl(null)
@@ -833,6 +834,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reportId").doesNotExist())
                 .andExpect(jsonPath("$.completed").value("false"))
                 .andExpect(jsonPath("$.completionTime").doesNotExist())
                 .andExpect(jsonPath("$.photoUrl").doesNotExist());
@@ -867,6 +869,7 @@ public class HabitControllerIntegrationTest {
 
         Mockito.when(reportClient.getReportAtDay(1L, date)).thenReturn(ResponseEntity.ok(
                 ReportFullInfoResponse.builder()
+                        .reportId(null)
                         .isCompleted(false)
                         .completionTime(null)
                         .photoUrl(null)
@@ -876,6 +879,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reportId").doesNotExist())
                 .andExpect(jsonPath("$.completed").value("false"))
                 .andExpect(jsonPath("$.completionTime").doesNotExist())
                 .andExpect(jsonPath("$.photoUrl").doesNotExist());

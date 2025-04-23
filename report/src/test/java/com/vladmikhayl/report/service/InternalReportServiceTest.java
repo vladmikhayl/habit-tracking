@@ -68,6 +68,7 @@ class InternalReportServiceTest {
 
         ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date);
 
+        assertThat(response.getReportId()).isEqualTo(reportId);
         assertThat(response.isCompleted()).isTrue();
         assertThat(response.getCompletionTime()).isEqualTo(createdAt);
         assertThat(response.getPhotoUrl()).isEqualTo("https://photo-url.com/");
@@ -92,6 +93,7 @@ class InternalReportServiceTest {
 
         ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date);
 
+        assertThat(response.getReportId()).isEqualTo(reportId);
         assertThat(response.isCompleted()).isTrue();
         assertThat(response.getCompletionTime()).isEqualTo(createdAt);
         assertThat(response.getPhotoUrl()).isNull();
@@ -106,6 +108,7 @@ class InternalReportServiceTest {
 
         ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date);
 
+        assertThat(response.getReportId()).isNull();
         assertThat(response.isCompleted()).isFalse();
         assertThat(response.getCompletionTime()).isNull();
         assertThat(response.getPhotoUrl()).isNull();

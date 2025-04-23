@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @Builder
 public class ReportFullInfoResponse {
 
+    private Long reportId;
+
     private boolean isCompleted;
 
     private LocalDateTime completionTime;

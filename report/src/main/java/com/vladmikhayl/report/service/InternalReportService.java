@@ -34,6 +34,7 @@ public class InternalReportService {
 
         if (report.isEmpty()) {
             return ReportFullInfoResponse.builder()
+                    .reportId(null)
                     .isCompleted(false)
                     .completionTime(null)
                     .photoUrl(null)
@@ -41,6 +42,7 @@ public class InternalReportService {
         }
 
         return ReportFullInfoResponse.builder()
+                .reportId(report.get().getId())
                 .isCompleted(true)
                 .completionTime(report.get().getCreatedAt())
                 .photoUrl(report.get().getPhotoUrl())
