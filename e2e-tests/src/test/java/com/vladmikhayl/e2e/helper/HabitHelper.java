@@ -161,6 +161,27 @@ public class HabitHelper {
         return response.getBody();
     }
 
+    public List<SubscribedHabitShortInfoResponse> getAllUserSubscribedHabitsAtDay(
+            String token,
+            String dateStr
+    ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = gatewayUrl + "/habits/all-user-subscribed-habits/at-day/" + dateStr;
+
+        ResponseEntity<List<SubscribedHabitShortInfoResponse>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        return response.getBody();
+    }
+
     private <T> HttpEntity<String> buildEntity(T body, HttpHeaders headers) {
         try {
             String json = objectMapper.writeValueAsString(body);

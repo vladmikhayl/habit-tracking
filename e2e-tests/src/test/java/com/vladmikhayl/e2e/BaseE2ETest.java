@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vladmikhayl.e2e.helper.AuthHelper;
 import com.vladmikhayl.e2e.helper.HabitHelper;
 import com.vladmikhayl.e2e.helper.ReportHelper;
+import com.vladmikhayl.e2e.helper.SubscriptionHelper;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public abstract class BaseE2ETest {
     protected final AuthHelper authHelper = new AuthHelper(restTemplate, gatewayUrl, objectMapper);
     protected final HabitHelper habitHelper = new HabitHelper(restTemplate, gatewayUrl, objectMapper);
     protected final ReportHelper reportHelper = new ReportHelper(restTemplate, gatewayUrl, objectMapper);
+    protected final SubscriptionHelper subscriptionHelper = new SubscriptionHelper(restTemplate, gatewayUrl, objectMapper);
 
     {
         objectMapper.registerModule(new JavaTimeModule());

@@ -252,7 +252,7 @@ public class ReportFlowTests extends BaseE2ETest {
                 )
         );
 
-        // Берем ID созданной привычке с WEEKLY_X_TIMES
+        // Берем ID созданной привычки с WEEKLY_X_TIMES
         List<HabitShortInfoResponse> habitShortInfoResponses1 = habitHelper.getAllUserHabitsAtDay(token, TODAY_DATE_STR);
         Optional<HabitShortInfoResponse> existingHabitOptional1 = habitShortInfoResponses1.stream()
                 .filter(h -> h.getName().equals("Привычка 1"))
@@ -306,7 +306,7 @@ public class ReportFlowTests extends BaseE2ETest {
                 )
         );
 
-        // Берем ID созданной привычке с WEEKLY_X_TIMES
+        // Берем ID созданной привычки с WEEKLY_X_TIMES
         List<HabitShortInfoResponse> habitShortInfoResponses2 = habitHelper.getAllUserHabitsAtDay(token, TODAY_DATE_STR);
         Optional<HabitShortInfoResponse> existingHabitOptional2 = habitShortInfoResponses2.stream()
                 .filter(h -> h.getName().equals("Привычка 2"))

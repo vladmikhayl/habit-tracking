@@ -5,8 +5,10 @@ import com.vladmikhayl.e2e.dto.habit.HabitCreationRequest;
 import com.vladmikhayl.e2e.dto.habit.HabitEditingRequest;
 import com.vladmikhayl.e2e.dto.habit.HabitGeneralInfoResponse;
 import com.vladmikhayl.e2e.dto.habit.HabitShortInfoResponse;
+import com.vladmikhayl.e2e.dto.subscription.UnprocessedRequestForSubscriberResponse;
 import com.vladmikhayl.e2e.entity.FrequencyType;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class HabitFlowTests extends BaseE2ETest {
 
@@ -217,6 +220,7 @@ public class HabitFlowTests extends BaseE2ETest {
         Long existingHabitId = existingHabitOptional.get().getHabitId();
 
         // Юзер 2 отправляет заявку на привычку юзера 1
+        subscriptionHelper.sendSubscriptionRequest(token2, existingHabitId);
 
         // Юзер 1 удаляет созданную привычку
         habitHelper.deleteHabit(token1, existingHabitId);
@@ -226,8 +230,14 @@ public class HabitFlowTests extends BaseE2ETest {
         assertThat(habitShortInfoResponsesAfterDeleting.size()).isEqualTo(0);
 
         // Проверяем, что у юзера 2 пропала заявка на удаленную привычку
+        List<UnprocessedRequestForSubscriberResponse> unprocessedRequestForSubscriberResponses2 =
+                subscriptionHelper.getUserUnprocessedRequests(token2);
+        assertThat(unprocessedRequestForSubscriberResponses2).isEmpty();
 
         // Проверяем, что юзер 3 не может отправить заявку на удаленную привычку
+        assertThatThrownBy(() -> subscriptionHelper.sendSubscriptionRequest(token3, existingHabitId))
+                .isInstanceOf(HttpClientErrorException.NotFound.class)
+                .hasMessageContaining("Habit not found");
     }
 
 }
