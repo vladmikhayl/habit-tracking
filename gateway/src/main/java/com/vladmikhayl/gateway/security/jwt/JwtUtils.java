@@ -44,7 +44,7 @@ public class JwtUtils {
         try {
             Jwts.parser().verifyWith((SecretKey) key()).build().parseSignedClaims(token);
             return true;
-        } catch (JwtException | IllegalArgumentException ex) { // TODO: добавить чтобы в логи писалась какая конкретно ошибка
+        } catch (JwtException | IllegalArgumentException ex) {
             return false;
         }
     }
