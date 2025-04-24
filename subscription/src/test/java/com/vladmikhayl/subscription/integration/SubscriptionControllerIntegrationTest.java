@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -49,6 +50,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин Feign-клиента
 @AutoConfigureMockMvc
 public class SubscriptionControllerIntegrationTest {
+
+    @Value("${internal.token}")
+    private String testInternalToken;
 
     @Autowired
     private MockMvc mockMvc;
@@ -220,7 +224,7 @@ public class SubscriptionControllerIntegrationTest {
 
         habitCacheRepository.save(existingHabitCache);
 
-        Mockito.when(authClient.getUserLogin(currentUserId)).thenReturn(ResponseEntity.ok("user7"));
+        Mockito.when(authClient.getUserLogin(testInternalToken, currentUserId)).thenReturn(ResponseEntity.ok("user7"));
 
         mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
@@ -257,7 +261,7 @@ public class SubscriptionControllerIntegrationTest {
 
         habitCacheRepository.save(existingHabitCache);
 
-        Mockito.when(authClient.getUserLogin(currentUserId)).thenReturn(ResponseEntity.ok("user7"));
+        Mockito.when(authClient.getUserLogin(testInternalToken, currentUserId)).thenReturn(ResponseEntity.ok("user7"));
 
         mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
@@ -650,8 +654,8 @@ public class SubscriptionControllerIntegrationTest {
                 .build();
         subscriptionRepository.save(subscription3);
 
-        Mockito.when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
-        Mockito.when(authClient.getUserLogin(12L)).thenReturn(ResponseEntity.ok("user12"));
+        Mockito.when(authClient.getUserLogin(testInternalToken, 11L)).thenReturn(ResponseEntity.ok("user11"));
+        Mockito.when(authClient.getUserLogin(testInternalToken, 12L)).thenReturn(ResponseEntity.ok("user12"));
 
         String expectedJson = objectMapper.writeValueAsString(
                 List.of(
@@ -840,8 +844,8 @@ public class SubscriptionControllerIntegrationTest {
                 .build();
         subscriptionRepository.save(subscription3);
 
-        Mockito.when(authClient.getUserLogin(10L)).thenReturn(ResponseEntity.ok("user10"));
-        Mockito.when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
+        Mockito.when(authClient.getUserLogin(testInternalToken, 10L)).thenReturn(ResponseEntity.ok("user10"));
+        Mockito.when(authClient.getUserLogin(testInternalToken, 11L)).thenReturn(ResponseEntity.ok("user11"));
 
         String expectedJson = objectMapper.writeValueAsString(
                 List.of(

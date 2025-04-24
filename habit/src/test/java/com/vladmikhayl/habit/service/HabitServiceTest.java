@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,9 @@ class HabitServiceTest {
     // При тестировании методов getGeneralInfo() и getAllUserHabitsAtDay() предполагается, что сегодня 12 апреля 2025
     // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
     private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 12);
+
+    @Value("${internal.token}")
+    private String testInternalToken;
 
     @Mock
     private HabitRepository habitRepository;
@@ -531,6 +535,7 @@ class HabitServiceTest {
         when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
 
         when(reportClient.getReportsInfo(
+                testInternalToken,
                 habitId,
                 WEEKLY_ON_DAYS,
                 Set.of(DayOfWeek.MONDAY),
@@ -571,6 +576,7 @@ class HabitServiceTest {
         when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
 
         when(reportClient.getReportsInfo(
+                testInternalToken,
                 habitId,
                 FrequencyType.WEEKLY_X_TIMES,
                 null,
@@ -611,6 +617,7 @@ class HabitServiceTest {
         when(habitRepository.findById(habitId)).thenReturn(Optional.of(existingHabit));
 
         when(reportClient.getReportsInfo(
+                testInternalToken,
                 habitId,
                 FrequencyType.MONTHLY_X_TIMES,
                 null,
@@ -645,7 +652,7 @@ class HabitServiceTest {
                 })
                 .hasMessageContaining("This user doesn't have access to this habit");
 
-        verify(reportClient, never()).getReportsInfo(any(), any(), any(), any(), any(), any());
+        verify(reportClient, never()).getReportsInfo(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -663,7 +670,7 @@ class HabitServiceTest {
                         id.getSubscriberId().equals(userId)
         ))).thenReturn(false);
 
-        when(reportClient.getReportAtDay(habitId,date))
+        when(reportClient.getReportAtDay(testInternalToken, habitId, date))
                 .thenReturn(ResponseEntity.ok(ReportFullInfoResponse.builder().build()));
 
         ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date, userIdStr);
@@ -686,7 +693,7 @@ class HabitServiceTest {
                         id.getSubscriberId().equals(userId)
         ))).thenReturn(true);
 
-        when(reportClient.getReportAtDay(habitId,date))
+        when(reportClient.getReportAtDay(testInternalToken, habitId, date))
                 .thenReturn(ResponseEntity.ok(ReportFullInfoResponse.builder().build()));
 
         ReportFullInfoResponse response = underTest.getReportAtDay(habitId, date, userIdStr);
@@ -717,7 +724,7 @@ class HabitServiceTest {
                 })
                 .hasMessageContaining("This user doesn't have access to this habit");
 
-        verify(reportClient, never()).getReportAtDay(any(), any());
+        verify(reportClient, never()).getReportAtDay(any(), any(), any());
     }
 
     @Test
@@ -1002,7 +1009,7 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(3);
 
-        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
         List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
 
@@ -1086,19 +1093,19 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(3);
 
-        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
         when(subscriptionCacheRepository.countById_HabitId(3L)).thenReturn(0);
 
-        when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
-        when(reportClient.countCompletionsInPeriod(3L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
+        when(reportClient.countCompletionsInPeriod(testInternalToken, 3L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
 
         when(subscriptionCacheRepository.countById_HabitId(4L)).thenReturn(10);
 
-        when(reportClient.isCompletedAtDay(4L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 4L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
-        when(reportClient.countCompletionsInPeriod(4L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
+        when(reportClient.countCompletionsInPeriod(testInternalToken, 4L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
 
         List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
 
@@ -1252,7 +1259,7 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(1);
 
-        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
         List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
 
@@ -1335,9 +1342,9 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(1L)).thenReturn(1);
 
-        when(reportClient.isCompletedAtDay(1L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        when(reportClient.isCompletedAtDay(testInternalToken, 1L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
-        when(reportClient.countCompletionsInPeriod(1L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
+        when(reportClient.countCompletionsInPeriod(testInternalToken, 1L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
 
         // Стабы для привычки 2
 
@@ -1347,9 +1354,9 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(1);
 
-        when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
-        when(reportClient.countCompletionsInPeriod(2L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
+        when(reportClient.countCompletionsInPeriod(testInternalToken, 2L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
 
         List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
 

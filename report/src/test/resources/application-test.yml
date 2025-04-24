@@ -1,3 +1,6 @@
+internal:
+  token: test-internal-token
+
 spring:
   jpa:
     hibernate:

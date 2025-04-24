@@ -15,6 +15,7 @@ import feign.FeignException;
 import feign.RetryableException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class SubscriptionService {
+
+    @Value("${internal.token}")
+    private String internalToken;
 
     private final SubscriptionRepository subscriptionRepository;
 
@@ -218,20 +222,20 @@ public class SubscriptionService {
                 .toList();
     }
 
-    private String getLoginOrThrow(Long userId) {
-        try {
-            return authClient.getUserLogin(userId).getBody();
-        } catch (RetryableException e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Auth service is unavailable");
-        } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Auth service returned an error");
-        }
-    }
-
     private String getHabitName(Long habitId) {
         return habitCacheRepository.findByHabitId(habitId)
                 .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
                 .getHabitName();
+    }
+
+    private String getLoginOrThrow(Long userId) {
+        try {
+            return authClient.getUserLogin(internalToken, userId).getBody();
+        } catch (FeignException.ServiceUnavailable e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Auth service is unavailable");
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Auth service returned an error");
+        }
     }
 
 }

@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SubscriptionServiceTest {
+
+    @Value("${internal.token}")
+    private String testInternalToken;
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
@@ -151,7 +155,7 @@ class SubscriptionServiceTest {
 
         when(habitCacheRepository.findByHabitId(habitId)).thenReturn(Optional.of(habitCache));
 
-        when(authClient.getUserLogin(7L)).thenReturn(ResponseEntity.ok("user7"));
+        when(authClient.getUserLogin(testInternalToken, 7L)).thenReturn(ResponseEntity.ok("user7"));
 
         underTest.acceptSubscriptionRequest(subscriptionId, userIdStr);
 
@@ -586,8 +590,8 @@ class SubscriptionServiceTest {
                         .build()
         ));
 
-        when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
-        when(authClient.getUserLogin(12L)).thenReturn(ResponseEntity.ok("user12"));
+        when(authClient.getUserLogin(testInternalToken, 11L)).thenReturn(ResponseEntity.ok("user11"));
+        when(authClient.getUserLogin(testInternalToken, 12L)).thenReturn(ResponseEntity.ok("user12"));
 
         List<UnprocessedRequestForCreatorResponse> response = underTest.getHabitUnprocessedRequests(habitId, userIdStr);
 
@@ -788,8 +792,8 @@ class SubscriptionServiceTest {
                         .build()
         ));
 
-        when(authClient.getUserLogin(11L)).thenReturn(ResponseEntity.ok("user11"));
-        when(authClient.getUserLogin(12L)).thenReturn(ResponseEntity.ok("user12"));
+        when(authClient.getUserLogin(testInternalToken, 11L)).thenReturn(ResponseEntity.ok("user11"));
+        when(authClient.getUserLogin(testInternalToken, 12L)).thenReturn(ResponseEntity.ok("user12"));
 
         List<AcceptedSubscriptionForCreatorResponse> response = underTest.getHabitAcceptedSubscriptions(habitId, userIdStr);
 

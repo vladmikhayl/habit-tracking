@@ -21,8 +21,15 @@ public class AuthTokenFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        String path = request.getPath().value();
+
+        // Пропускаем, если это не внешний запрос
+        if (!path.startsWith("/api/")) {
+            return chain.filter(exchange);
+        }
 
         String token = jwtUtils.getJwtTokenFromRequest(request);
+//        System.out.println("Пришел внешний запрос, токен " + token);
 
         if (token != null && jwtUtils.validateJwtToken(token)) {
             Authentication authentication = jwtUtils.getAuthenticationFromJwtToken(token);

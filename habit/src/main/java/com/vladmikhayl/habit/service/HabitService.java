@@ -15,6 +15,7 @@ import feign.RetryableException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class HabitService {
+
+    @Value("${internal.token}")
+    private String internalToken;
 
     private final HabitRepository habitRepository;
 
@@ -345,8 +349,8 @@ public class HabitService {
 
     private boolean getIsCompletedOrThrow(Long habitId, LocalDate date) {
         try {
-            return reportClient.isCompletedAtDay(habitId, date).getBody();
-        } catch (RetryableException e) {
+            return reportClient.isCompletedAtDay(internalToken, habitId, date).getBody();
+        } catch (FeignException.ServiceUnavailable e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
@@ -355,8 +359,8 @@ public class HabitService {
 
     private Integer countCompletionsInPeriodOrThrow(Long habitId, Period period, LocalDate date) {
         try {
-            return reportClient.countCompletionsInPeriod(habitId, period, date).getBody();
-        } catch (RetryableException e) {
+            return reportClient.countCompletionsInPeriod(internalToken, habitId, period, date).getBody();
+        } catch (FeignException.ServiceUnavailable e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
@@ -365,8 +369,8 @@ public class HabitService {
 
     private ReportFullInfoResponse getReportAtDayOrThrow(Long habitId, LocalDate date) {
         try {
-            return reportClient.getReportAtDay(habitId, date).getBody();
-        } catch (RetryableException e) {
+            return reportClient.getReportAtDay(internalToken, habitId, date).getBody();
+        } catch (FeignException.ServiceUnavailable e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
@@ -377,6 +381,7 @@ public class HabitService {
         try {
             Set<DayOfWeek> daysOfWeek = habit.getDaysOfWeek();
             return reportClient.getReportsInfo(
+                    internalToken,
                     habit.getId(),
                     habit.getFrequencyType(),
                     daysOfWeek == null || daysOfWeek.isEmpty() ? null : daysOfWeek,
@@ -384,7 +389,7 @@ public class HabitService {
                     habit.getTimesPerMonth(),
                     habit.getCreatedAt().toLocalDate()
             ).getBody();
-        } catch (RetryableException e) {
+        } catch (FeignException.ServiceUnavailable e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -47,6 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(FeignClientTestConfig.class) // импортируем конфиг, где мы создали замоканный бин Feign-клиента
 @AutoConfigureMockMvc
 public class ReportControllerIntegrationTest {
+
+    @Value("${internal.token}")
+    private String testInternalToken;
 
     @Autowired
     private MockMvc mockMvc;
@@ -93,7 +97,7 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        Mockito.when(habitClient.isCurrent(1L, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(habitClient.isCurrent(testInternalToken, 1L, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +136,7 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         habitPhotoAllowedCacheRepository.save(
                 HabitPhotoAllowedCache.builder()
@@ -177,7 +181,7 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         habitPhotoAllowedCacheRepository.save(
                 HabitPhotoAllowedCache.builder()
@@ -222,7 +226,7 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -249,7 +253,7 @@ public class ReportControllerIntegrationTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -285,7 +289,7 @@ public class ReportControllerIntegrationTest {
                 .photoUrl(null)
                 .build();
 
-        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -312,7 +316,7 @@ public class ReportControllerIntegrationTest {
                 .photoUrl(null)
                 .build();
 
-        Mockito.when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(false));
 
         mockMvc.perform(post("/api/v1/reports/create")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -7,6 +7,9 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
+internal:
+  token: U8GN1JJG0nSLhyEfon6lllMSqNym45sCnuQhYUgMpQ5esm3F5p5rE
+
 server:
   port: 8083
   address: localhost

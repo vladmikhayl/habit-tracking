@@ -6,6 +6,9 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 
+internal:
+  token: U8GN1JJG0nSLhyEfon6lllMSqNym45sCnuQhYUgMpQ5esm3F5p5rE
+
 server:
   port: 8080
   address: 0.0.0.0

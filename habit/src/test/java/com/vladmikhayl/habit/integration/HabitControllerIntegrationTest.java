@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -61,10 +62,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class HabitControllerIntegrationTest {
 
-
     // При тестировании методов getGeneralInfo() и getAllUserHabitsAtDay() предполагается, что сегодня 12 апреля 2025
     // Все тесты написаны исходя их этого предположения. Если поменять здесь эту дату, то тесты могут не работать
     private static final LocalDate TODAY_DATE = LocalDate.of(2025, 4, 12);
+
+    @Value("${internal.token}")
+    private String testInternalToken;
 
     @TestConfiguration
     static class FixedClockConfig {
@@ -685,6 +688,7 @@ public class HabitControllerIntegrationTest {
         habitRepository.save(habit);
 
         Mockito.when(reportClient.getReportsInfo(
+                eq(testInternalToken),
                 eq(1L),
                 eq(FrequencyType.WEEKLY_ON_DAYS),
                 eq(Set.of(DayOfWeek.MONDAY)),
@@ -738,6 +742,7 @@ public class HabitControllerIntegrationTest {
         subscriptionCacheRepository.save(subscriptionCache);
 
         Mockito.when(reportClient.getReportsInfo(
+                eq(testInternalToken),
                 eq(1L),
                 eq(FrequencyType.MONTHLY_X_TIMES),
                 eq(null),
@@ -822,7 +827,7 @@ public class HabitControllerIntegrationTest {
 
         habitRepository.save(habit);
 
-        Mockito.when(reportClient.getReportAtDay(1L, date)).thenReturn(ResponseEntity.ok(
+        Mockito.when(reportClient.getReportAtDay(testInternalToken, 1L, date)).thenReturn(ResponseEntity.ok(
                 ReportFullInfoResponse.builder()
                         .reportId(null)
                         .isCompleted(false)
@@ -867,7 +872,7 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscriptionCache);
 
-        Mockito.when(reportClient.getReportAtDay(1L, date)).thenReturn(ResponseEntity.ok(
+        Mockito.when(reportClient.getReportAtDay(testInternalToken, 1L, date)).thenReturn(ResponseEntity.ok(
                 ReportFullInfoResponse.builder()
                         .reportId(null)
                         .isCompleted(false)
@@ -1266,9 +1271,9 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscription);
 
-        Mockito.when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
-        Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
         List<HabitShortInfoResponse> expectedList = List.of(
                 HabitShortInfoResponse.builder()
@@ -1347,14 +1352,14 @@ public class HabitControllerIntegrationTest {
 
         habitWithoutAutoCreationTimeRepository.save(existingHabit3);
 
-        Mockito.when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
-        Mockito.when(reportClient.countCompletionsInPeriod(2L, Period.WEEK, TODAY_DATE))
+        Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 2L, Period.WEEK, TODAY_DATE))
                 .thenReturn(ResponseEntity.ok(0));
 
-        Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
-        Mockito.when(reportClient.countCompletionsInPeriod(3L, Period.MONTH, TODAY_DATE))
+        Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 3L, Period.MONTH, TODAY_DATE))
                 .thenReturn(ResponseEntity.ok(2));
 
         List<HabitShortInfoResponse> expectedList = List.of(
@@ -1604,9 +1609,9 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscription4);
 
-        Mockito.when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
-        Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
         List<SubscribedHabitShortInfoResponse> expectedList = List.of(
                 SubscribedHabitShortInfoResponse.builder()
@@ -1718,13 +1723,13 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscription3);
 
-        Mockito.when(reportClient.isCompletedAtDay(2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
 
-        Mockito.when(reportClient.countCompletionsInPeriod(2L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
+        Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 2L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
 
-        Mockito.when(reportClient.isCompletedAtDay(3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
 
-        Mockito.when(reportClient.countCompletionsInPeriod(3L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(5));
+        Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 3L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(5));
 
         List<SubscribedHabitShortInfoResponse> expectedList = List.of(
                 SubscribedHabitShortInfoResponse.builder()

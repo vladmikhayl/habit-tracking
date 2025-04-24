@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceTest {
+
+    @Value("${internal.token}")
+    private String testInternalToken;
 
     @Mock
     private ReportRepository reportRepository;
@@ -52,7 +56,7 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -90,7 +94,7 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -130,7 +134,7 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -160,7 +164,7 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(false);
 
@@ -188,7 +192,7 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
+        when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(true));
 
         when(reportRepository.existsByHabitIdAndDate(habitId, request.getDate())).thenReturn(true);
 
@@ -212,7 +216,7 @@ class ReportServiceTest {
         String userIdStr = "2";
         Long userId = 2L;
 
-        when(habitClient.isCurrent(habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(false));
+        when(habitClient.isCurrent(testInternalToken, habitId, userId, request.getDate())).thenReturn(ResponseEntity.ok(false));
 
         assertThatThrownBy(() -> underTest.createReport(request, userIdStr))
                 .isInstanceOf(ResponseStatusException.class)

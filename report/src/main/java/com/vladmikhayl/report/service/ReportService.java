@@ -9,6 +9,7 @@ import com.vladmikhayl.report.service.feign.HabitClient;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ import java.time.LocalDate;
 @Service
 @RequiredArgsConstructor
 public class ReportService {
+
+    @Value("${internal.token}")
+    private String internalToken;
 
     private final ReportRepository reportRepository;
 
@@ -119,8 +123,8 @@ public class ReportService {
 
     private boolean getIsCurrentOrThrow(Long habitId, Long userId, LocalDate date) {
         try {
-            return habitClient.isCurrent(habitId, userId, date).getBody();
-        } catch (RetryableException e) {
+            return habitClient.isCurrent(internalToken, habitId, userId, date).getBody();
+        } catch (FeignException.ServiceUnavailable e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Habit service is unavailable");
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Habit service returned an error");

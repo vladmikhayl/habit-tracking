@@ -1,5 +1,6 @@
 package com.vladmikhayl.gateway.security;
 
+import com.vladmikhayl.gateway.security.internal.InternalTokenFilter;
 import com.vladmikhayl.gateway.security.jwt.AuthEntryPointJwt;
 import com.vladmikhayl.gateway.security.jwt.AuthTokenFilter;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
 
+    private final InternalTokenFilter internalTokenFilter;
+
     private final AuthEntryPointJwt authEntryPointJwt;
 
     @Bean
@@ -25,12 +28,13 @@ public class SecurityConfig {
                         .pathMatchers("/api/v1/auth/**").permitAll()
                         .pathMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/swagger-resources/**").permitAll()
                         .pathMatchers("/habit/v3/api-docs/**", "/auth/v3/api-docs/**", "/report/v3/api-docs/**", "/subscription/v3/api-docs/**").permitAll()
-                        .pathMatchers("/internal/**").permitAll() // TODO: сделать проверку на серверный токен для внутренних эндпоинтов
-                        .anyExchange().authenticated()
+                        .pathMatchers("/internal/**").authenticated()
+                        .pathMatchers("/api/**").authenticated()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt));
 
         http.addFilterAt(authTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION);
+        http.addFilterAt(internalTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION);
 
         return http.build();
     }
