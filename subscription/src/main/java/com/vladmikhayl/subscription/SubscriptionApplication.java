@@ -17,19 +17,4 @@ public class SubscriptionApplication {
 		SpringApplication.run(SubscriptionApplication.class, args);
 	}
 
-//	@Bean
-//	@Profile("!test")
-//	CommandLineRunner commandLineRunner(
-//			HabitCacheRepository habitCacheRepository
-//	) {
-//		return args -> {
-//			// У юзера 5 есть привычка 1
-//			HabitCache habitCache = HabitCache.builder()
-//					.habitId(1L)
-//					.creatorId(5L)
-//					.build();
-//			habitCacheRepository.save(habitCache);
-//		};
-//	}
-
 }

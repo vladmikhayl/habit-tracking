@@ -58,19 +58,19 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    @Profile("!test")
-    public CommandLineRunner initData(
-            PasswordEncoder passwordEncoder,
-            UserRepository userRepository
-    ) {
-        return args -> {
-            User user1 = User.builder()
-                    .username("xcomvlad")
-                    .passwordHash(passwordEncoder.encode("12345"))
-                    .build();
-            userRepository.save(user1);
-        };
-    }
+//    @Bean
+//    @Profile("!test")
+//    public CommandLineRunner initData(
+//            PasswordEncoder passwordEncoder,
+//            UserRepository userRepository
+//    ) {
+//        return args -> {
+//            User user1 = User.builder()
+//                    .username("xcomvlad")
+//                    .passwordHash(passwordEncoder.encode("12345"))
+//                    .build();
+//            userRepository.save(user1);
+//        };
+//    }
 
 }

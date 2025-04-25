@@ -18,19 +18,4 @@ public class ReportApplication {
 		SpringApplication.run(ReportApplication.class, args);
 	}
 
-//	@Bean
-//	@Profile("!test")
-//	CommandLineRunner commandLineRunner(
-//			ReportRepository reportRepository,
-//			HabitPhotoAllowedCacheRepository habitPhotoAllowedCacheRepository
-//	) {
-//		return args -> {
-//			habitPhotoAllowedCacheRepository.save(
-//					HabitPhotoAllowedCache.builder()
-//							.habitId(1L)
-//							.build()
-//			);
-//		};
-//	}
-
 }
