@@ -6,10 +6,12 @@ import com.vladmikhayl.subscription.entity.HabitCache;
 import com.vladmikhayl.subscription.repository.HabitCacheRepository;
 import com.vladmikhayl.subscription.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionListener {
@@ -20,7 +22,7 @@ public class SubscriptionListener {
 
     @KafkaListener(topics = "habit-created", groupId = "subscription-group")
     public void listen(HabitCreatedEvent event) {
-        System.out.println("Получено событие: создана привычка " + event.habitId());
+        log.info("Получено событие: создана привычка {}", event.habitId());
 
         habitCacheRepository.save(
                 HabitCache.builder()
@@ -30,7 +32,7 @@ public class SubscriptionListener {
                         .build()
         );
 
-        System.out.println("В таблицу habits_cache добавлена привычка " + event.habitId());
+        log.info("В таблицу habits_cache добавлена привычка {}", event.habitId());
     }
 
     @Transactional
@@ -38,15 +40,15 @@ public class SubscriptionListener {
     public void listen(HabitDeletedEvent event) {
         Long habitId = event.habitId();
 
-        System.out.println("Получено событие: удалена привычка " + habitId);
+        log.info("Получено событие: удалена привычка {}", habitId);
 
         habitCacheRepository.deleteByHabitId(habitId);
 
-        System.out.println("Из таблицы habits_cache удалена привычка " + habitId);
+        log.info("Из таблицы habits_cache удалена привычка {}", habitId);
 
         subscriptionRepository.deleteByHabitId(habitId);
 
-        System.out.println("Удалены все подписки/заявки на привычку " + habitId + " (если они там существовали)");
+        log.info("Удалены все подписки/заявки на привычку {} (если они существовали)", habitId);
     }
 
 }

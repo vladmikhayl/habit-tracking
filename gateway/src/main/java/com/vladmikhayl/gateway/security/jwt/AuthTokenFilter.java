@@ -29,7 +29,6 @@ public class AuthTokenFilter implements WebFilter {
         }
 
         String token = jwtUtils.getJwtTokenFromRequest(request);
-//        System.out.println("Пришел внешний запрос, токен " + token);
 
         if (token != null && jwtUtils.validateJwtToken(token)) {
             Authentication authentication = jwtUtils.getAuthenticationFromJwtToken(token);

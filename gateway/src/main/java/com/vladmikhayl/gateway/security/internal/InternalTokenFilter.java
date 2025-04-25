@@ -1,5 +1,6 @@
 package com.vladmikhayl.gateway.security.internal;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class InternalTokenFilter implements WebFilter {
 
@@ -31,10 +33,10 @@ public class InternalTokenFilter implements WebFilter {
         }
 
         String token = exchange.getRequest().getHeaders().getFirst("X-Internal-Token");
-//        System.out.println("Пришел внутренний запрос, токен " + token);
 
         if (!internalToken.equals(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            log.warn("Неверный внутренний токен в запросе к {}", path);
             return exchange.getResponse().setComplete();
         }
 
