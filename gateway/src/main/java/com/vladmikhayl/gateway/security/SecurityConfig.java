@@ -1,8 +1,7 @@
 package com.vladmikhayl.gateway.security;
 
 import com.vladmikhayl.gateway.security.internal.InternalTokenFilter;
-import com.vladmikhayl.gateway.security.jwt.AuthEntryPointJwt;
-import com.vladmikhayl.gateway.security.jwt.AuthTokenFilter;
+import com.vladmikhayl.gateway.security.jwt.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,11 +13,11 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthTokenFilter authTokenFilter;
+    private final JwtTokenFilter jwtTokenFilter;
 
     private final InternalTokenFilter internalTokenFilter;
 
-    private final AuthEntryPointJwt authEntryPointJwt;
+    private final AuthEntryPoint authEntryPoint;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -31,9 +30,9 @@ public class SecurityConfig {
                         .pathMatchers("/internal/**").authenticated()
                         .pathMatchers("/api/**").authenticated()
                 )
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt));
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint));
 
-        http.addFilterAt(authTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION);
+        http.addFilterAt(jwtTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION);
         http.addFilterAt(internalTokenFilter, SecurityWebFiltersOrder.AUTHENTICATION);
 
         return http.build();

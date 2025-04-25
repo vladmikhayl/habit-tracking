@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class AuthTokenFilter implements WebFilter {
+public class JwtTokenFilter implements WebFilter {
 
     private final JwtUtils jwtUtils;
 
