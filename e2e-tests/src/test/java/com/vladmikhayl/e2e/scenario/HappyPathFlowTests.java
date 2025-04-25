@@ -11,7 +11,6 @@ import com.vladmikhayl.e2e.dto.subscription.AcceptedSubscriptionForSubscriberRes
 import com.vladmikhayl.e2e.dto.subscription.UnprocessedRequestForCreatorResponse;
 import com.vladmikhayl.e2e.entity.FrequencyType;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class HappyPathFlowTests extends BaseE2ETest {
 

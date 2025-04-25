@@ -1,7 +1,7 @@
 package com.vladmikhayl.habit.service.feign;
 
-import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
+import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Period;
 import org.springframework.cloud.openfeign.FeignClient;

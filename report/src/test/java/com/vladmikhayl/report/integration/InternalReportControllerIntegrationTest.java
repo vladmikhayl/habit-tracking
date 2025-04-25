@@ -28,9 +28,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static com.vladmikhayl.report.entity.FrequencyType.WEEKLY_ON_DAYS;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest

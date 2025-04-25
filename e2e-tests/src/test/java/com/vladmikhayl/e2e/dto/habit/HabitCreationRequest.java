@@ -1,7 +1,7 @@
 package com.vladmikhayl.e2e.dto.habit;
-import com.vladmikhayl.e2e.entity.FrequencyType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vladmikhayl.e2e.entity.FrequencyType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -1,8 +1,8 @@
 package com.vladmikhayl.auth.service;
 
-import com.vladmikhayl.auth.dto.response.AuthResponse;
 import com.vladmikhayl.auth.dto.request.LoginRequest;
 import com.vladmikhayl.auth.dto.request.RegisterRequest;
+import com.vladmikhayl.auth.dto.response.AuthResponse;
 import com.vladmikhayl.auth.entity.User;
 import com.vladmikhayl.auth.repository.UserRepository;
 import com.vladmikhayl.auth.security.JwtTokenProvider;

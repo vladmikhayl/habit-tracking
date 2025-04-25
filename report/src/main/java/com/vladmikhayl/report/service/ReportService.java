@@ -7,7 +7,6 @@ import com.vladmikhayl.report.repository.HabitPhotoAllowedCacheRepository;
 import com.vladmikhayl.report.repository.ReportRepository;
 import com.vladmikhayl.report.service.feign.HabitClient;
 import feign.FeignException;
-import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;

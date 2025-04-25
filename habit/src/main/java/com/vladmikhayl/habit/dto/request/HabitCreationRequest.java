@@ -5,7 +5,6 @@ import com.vladmikhayl.habit.entity.FrequencyType;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 

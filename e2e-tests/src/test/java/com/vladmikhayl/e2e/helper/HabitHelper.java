@@ -8,7 +8,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor

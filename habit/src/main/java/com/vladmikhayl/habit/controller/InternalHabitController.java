@@ -2,9 +2,7 @@ package com.vladmikhayl.habit.controller;
 
 import com.vladmikhayl.habit.service.InternalHabitService;
 import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

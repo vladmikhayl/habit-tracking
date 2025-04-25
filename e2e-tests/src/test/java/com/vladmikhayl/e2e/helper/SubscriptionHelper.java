@@ -2,8 +2,6 @@ package com.vladmikhayl.e2e.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vladmikhayl.e2e.dto.report.ReportCreationRequest;
-import com.vladmikhayl.e2e.dto.report.ReportPhotoEditingRequest;
 import com.vladmikhayl.e2e.dto.subscription.AcceptedSubscriptionForCreatorResponse;
 import com.vladmikhayl.e2e.dto.subscription.AcceptedSubscriptionForSubscriberResponse;
 import com.vladmikhayl.e2e.dto.subscription.UnprocessedRequestForCreatorResponse;

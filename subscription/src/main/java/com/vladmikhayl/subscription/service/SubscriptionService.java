@@ -12,7 +12,6 @@ import com.vladmikhayl.subscription.repository.SubscriptionRepository;
 import com.vladmikhayl.subscription.service.feign.AuthClient;
 import com.vladmikhayl.subscription.service.kafka.SubscriptionEventProducer;
 import feign.FeignException;
-import feign.RetryableException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

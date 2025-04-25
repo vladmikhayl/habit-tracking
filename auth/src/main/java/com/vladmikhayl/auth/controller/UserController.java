@@ -1,8 +1,8 @@
 package com.vladmikhayl.auth.controller;
 
-import com.vladmikhayl.auth.dto.response.AuthResponse;
 import com.vladmikhayl.auth.dto.request.LoginRequest;
 import com.vladmikhayl.auth.dto.request.RegisterRequest;
+import com.vladmikhayl.auth.dto.response.AuthResponse;
 import com.vladmikhayl.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
