@@ -1,5 +1,8 @@
 # the name of this file must be exactly like the name of the application
 eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: discovery
   client:
     service-url:
       defaultZone: http://discovery:8761/eureka

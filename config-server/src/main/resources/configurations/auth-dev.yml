@@ -12,6 +12,13 @@ server:
   address: localhost
 
 spring:
+  cloud:
+    inetutils:
+      preferred-networks:
+        - 127.0.0.1
+      ignored-interfaces:
+        - docker0
+        - veth.*
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:15432/users
