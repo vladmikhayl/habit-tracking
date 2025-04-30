@@ -1008,7 +1008,12 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(3);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         List<HabitShortInfoResponse> response = underTest.getAllUserHabitsAtDay(TODAY_DATE, userIdStr);
 
@@ -1017,6 +1022,8 @@ class HabitServiceTest {
                         .habitId(2L)
                         .name("Название 2")
                         .isCompleted(true)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .subscribersCount(3)
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
@@ -1075,6 +1082,7 @@ class HabitServiceTest {
                 .daysOfWeek(null)
                 .timesPerWeek(null)
                 .timesPerMonth(10)
+                .isPhotoAllowed(true)
                 .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
                 .build();
 
@@ -1092,17 +1100,32 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(3);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         when(subscriptionCacheRepository.countById_HabitId(3L)).thenReturn(0);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         when(reportClient.countCompletionsInPeriod(testInternalToken, 3L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
 
         when(subscriptionCacheRepository.countById_HabitId(4L)).thenReturn(10);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 4L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 4L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(true)
+                        .build()
+        ));
 
         when(reportClient.countCompletionsInPeriod(testInternalToken, 4L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
 
@@ -1117,6 +1140,8 @@ class HabitServiceTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1126,6 +1151,8 @@ class HabitServiceTest {
                         .frequencyType(WEEKLY_X_TIMES)
                         .completionsInPeriod(0)
                         .completionsPlannedInPeriod(2)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(4L)
@@ -1135,6 +1162,8 @@ class HabitServiceTest {
                         .frequencyType(MONTHLY_X_TIMES)
                         .completionsInPeriod(3)
                         .completionsPlannedInPeriod(10)
+                        .isPhotoAllowed(true)
+                        .isPhotoUploaded(true)
                         .build()
         ));
     }
@@ -1258,7 +1287,13 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(1);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse
+                        .builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         List<SubscribedHabitShortInfoResponse> response = underTest.getAllUserSubscribedHabitsAtDay(TODAY_DATE, userIdStr);
 
@@ -1272,6 +1307,8 @@ class HabitServiceTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build()
         ));
 
@@ -1326,6 +1363,7 @@ class HabitServiceTest {
                 .daysOfWeek(null)
                 .timesPerWeek(null)
                 .timesPerMonth(10)
+                .isPhotoAllowed(true)
                 .createdAt(TODAY_DATE.minusDays(3).atStartOfDay())
                 .build();
 
@@ -1341,7 +1379,13 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(1L)).thenReturn(1);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 1L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        when(reportClient.isCompletedAtDay(testInternalToken, 1L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse
+                        .builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         when(reportClient.countCompletionsInPeriod(testInternalToken, 1L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
 
@@ -1353,7 +1397,13 @@ class HabitServiceTest {
 
         when(subscriptionCacheRepository.countById_HabitId(2L)).thenReturn(1);
 
-        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse
+                        .builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(true)
+                        .build()
+        ));
 
         when(reportClient.countCompletionsInPeriod(testInternalToken, 2L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(3));
 
@@ -1369,6 +1419,8 @@ class HabitServiceTest {
                         .frequencyType(WEEKLY_X_TIMES)
                         .completionsInPeriod(0)
                         .completionsPlannedInPeriod(5)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
                         .habitId(2L)
@@ -1379,6 +1431,8 @@ class HabitServiceTest {
                         .frequencyType(MONTHLY_X_TIMES)
                         .completionsInPeriod(3)
                         .completionsPlannedInPeriod(10)
+                        .isPhotoAllowed(true)
+                        .isPhotoUploaded(true)
                         .build()
         ));
 

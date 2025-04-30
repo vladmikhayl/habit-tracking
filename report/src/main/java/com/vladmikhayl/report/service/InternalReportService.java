@@ -2,6 +2,7 @@ package com.vladmikhayl.report.service;
 
 import com.vladmikhayl.report.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.report.dto.response.ReportFullInfoResponse;
+import com.vladmikhayl.report.dto.response.ReportShortInfoResponse;
 import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.entity.Report;
@@ -49,11 +50,21 @@ public class InternalReportService {
                 .build();
     }
 
-    public boolean isCompletedAtDay(
+    public ReportShortInfoResponse isCompletedAtDay(
             Long habitId,
             LocalDate date
     ) {
-        return reportRepository.existsByHabitIdAndDate(habitId, date);
+        boolean isCompleted = reportRepository.existsByHabitIdAndDate(habitId, date);
+        boolean isPhotoUploaded = false;
+
+        if (isCompleted) {
+            isPhotoUploaded = reportRepository.findByHabitIdAndDate(habitId, date).get().getPhotoUrl() != null;
+        }
+
+        return ReportShortInfoResponse.builder()
+                .isCompleted(isCompleted)
+                .isPhotoUploaded(isPhotoUploaded)
+                .build();
     }
 
     public int countCompletionsInPeriod(

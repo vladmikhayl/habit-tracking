@@ -19,9 +19,6 @@ public class SubscribedHabitShortInfoResponse {
     @Schema(description = "Название", example = "Бегать по понедельникам")
     private String name;
 
-    @Schema(description = "Отмечена ли привычка выполненной в этот день", example = "true")
-    private Boolean isCompleted;
-
     @Schema(description = "Количество подписчиков на привычку", example = "2")
     private Integer subscribersCount;
 
@@ -43,5 +40,14 @@ public class SubscribedHabitShortInfoResponse {
             example = "5"
     )
     private Integer completionsPlannedInPeriod;
+
+    @Schema(description = "Отмечена ли привычка выполненной в этот день", example = "true")
+    private Boolean isCompleted;
+
+    @Schema(description = "Подразумевает ли эта привычка фотоотчёт", example = "true")
+    private Boolean isPhotoAllowed;
+
+    @Schema(description = "Прикреплено ли фото к отчёту в этот день", example = "false")
+    private Boolean isPhotoUploaded;
 
 }

@@ -2,6 +2,7 @@ package com.vladmikhayl.report.controller;
 
 import com.vladmikhayl.report.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.report.dto.response.ReportFullInfoResponse;
+import com.vladmikhayl.report.dto.response.ReportShortInfoResponse;
 import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.service.InternalReportService;
@@ -33,12 +34,12 @@ public class InternalReportController {
     }
 
     @GetMapping("/{habitId}/is-completed/at-day/{date}")
-    public ResponseEntity<Boolean> isCompletedAtDay(
+    public ResponseEntity<ReportShortInfoResponse> isCompletedAtDay(
             @PathVariable Long habitId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        boolean isCompleted = internalReportService.isCompletedAtDay(habitId, date);
-        return ResponseEntity.ok(isCompleted);
+        ReportShortInfoResponse response = internalReportService.isCompletedAtDay(habitId, date);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{habitId}/completion-count/{period}/at/{date}")

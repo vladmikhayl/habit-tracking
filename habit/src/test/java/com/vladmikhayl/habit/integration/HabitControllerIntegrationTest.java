@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vladmikhayl.habit.FeignClientTestConfig;
 import com.vladmikhayl.habit.dto.request.HabitCreationRequest;
 import com.vladmikhayl.habit.dto.request.HabitEditingRequest;
-import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
-import com.vladmikhayl.habit.dto.response.HabitShortInfoResponse;
-import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
-import com.vladmikhayl.habit.dto.response.SubscribedHabitShortInfoResponse;
+import com.vladmikhayl.habit.dto.response.*;
 import com.vladmikhayl.habit.entity.Period;
 import com.vladmikhayl.habit.entity.*;
 import com.vladmikhayl.habit.repository.HabitRepository;
@@ -1256,6 +1253,7 @@ public class HabitControllerIntegrationTest {
                 .daysOfWeek(Set.of(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY))
                 .timesPerWeek(null)
                 .timesPerMonth(null)
+                .isPhotoAllowed(true)
                 .createdAt(createdAt)
                 .build();
 
@@ -1272,9 +1270,19 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscription);
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(true)
+                        .build()
+        ));
 
         List<HabitShortInfoResponse> expectedList = List.of(
                 HabitShortInfoResponse.builder()
@@ -1285,6 +1293,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1294,6 +1304,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .isPhotoAllowed(true)
+                        .isPhotoUploaded(true)
                         .build()
         );
 
@@ -1348,17 +1360,28 @@ public class HabitControllerIntegrationTest {
                 .daysOfWeek(null)
                 .timesPerWeek(null)
                 .timesPerMonth(5)
+                .isPhotoAllowed(true)
                 .createdAt(createdAt)
                 .build();
 
         habitWithoutAutoCreationTimeRepository.save(existingHabit3);
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 2L, Period.WEEK, TODAY_DATE))
                 .thenReturn(ResponseEntity.ok(0));
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(true)
+                        .build()
+        ));
 
         Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 3L, Period.MONTH, TODAY_DATE))
                 .thenReturn(ResponseEntity.ok(2));
@@ -1372,6 +1395,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(WEEKLY_X_TIMES)
                         .completionsInPeriod(0)
                         .completionsPlannedInPeriod(1)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1381,6 +1406,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(MONTHLY_X_TIMES)
                         .completionsInPeriod(2)
                         .completionsPlannedInPeriod(5)
+                        .isPhotoAllowed(true)
+                        .isPhotoUploaded(true)
                         .build()
         );
 
@@ -1583,6 +1610,7 @@ public class HabitControllerIntegrationTest {
                 .daysOfWeek(Set.of(DayOfWeek.SATURDAY))
                 .timesPerWeek(null)
                 .timesPerMonth(null)
+                .isPhotoAllowed(true)
                 .createdAt(TODAY_DATE.minusDays(30).atStartOfDay())
                 .build();
 
@@ -1610,9 +1638,19 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscription4);
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(true)
+                        .build()
+        ));
 
         List<SubscribedHabitShortInfoResponse> expectedList = List.of(
                 SubscribedHabitShortInfoResponse.builder()
@@ -1624,6 +1662,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1634,6 +1674,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .isPhotoAllowed(true)
+                        .isPhotoUploaded(true)
                         .build()
         );
 
@@ -1708,6 +1750,7 @@ public class HabitControllerIntegrationTest {
                 .daysOfWeek(null)
                 .timesPerWeek(null)
                 .timesPerMonth(10)
+                .isPhotoAllowed(true)
                 .createdAt(TODAY_DATE.minusDays(30).atStartOfDay())
                 .build();
 
@@ -1724,11 +1767,21 @@ public class HabitControllerIntegrationTest {
 
         subscriptionCacheRepository.save(subscription3);
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(false));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 2L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(false)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 2L, Period.WEEK, TODAY_DATE)).thenReturn(ResponseEntity.ok(0));
 
-        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(true));
+        Mockito.when(reportClient.isCompletedAtDay(testInternalToken, 3L, TODAY_DATE)).thenReturn(ResponseEntity.ok(
+                ReportShortInfoResponse.builder()
+                        .isCompleted(true)
+                        .isPhotoUploaded(false)
+                        .build()
+        ));
 
         Mockito.when(reportClient.countCompletionsInPeriod(testInternalToken, 3L, Period.MONTH, TODAY_DATE)).thenReturn(ResponseEntity.ok(5));
 
@@ -1742,6 +1795,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(WEEKLY_X_TIMES)
                         .completionsInPeriod(0)
                         .completionsPlannedInPeriod(5)
+                        .isPhotoAllowed(false)
+                        .isPhotoUploaded(false)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1752,6 +1807,8 @@ public class HabitControllerIntegrationTest {
                         .frequencyType(MONTHLY_X_TIMES)
                         .completionsInPeriod(5)
                         .completionsPlannedInPeriod(10)
+                        .isPhotoAllowed(true)
+                        .isPhotoUploaded(false)
                         .build()
         );
 

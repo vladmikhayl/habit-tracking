@@ -363,6 +363,8 @@ public class SubscriptionFlowTests extends BaseE2ETest {
         assertThat(subscribedHabitShortInfoResponse.getFrequencyType()).isEqualTo(FrequencyType.WEEKLY_X_TIMES);
         assertThat(subscribedHabitShortInfoResponse.getCompletionsInPeriod()).isEqualTo(0);
         assertThat(subscribedHabitShortInfoResponse.getCompletionsPlannedInPeriod()).isEqualTo(5);
+        assertThat(subscribedHabitShortInfoResponse.getIsPhotoAllowed()).isEqualTo(false);
+        assertThat(subscribedHabitShortInfoResponse.getIsPhotoUploaded()).isEqualTo(false);
 
         // Юзер 2 может смотреть общую инфу о привычке юзера 1
         HabitGeneralInfoResponse habitGeneralInfoResponse = habitHelper.getGeneralInfo(token2, existingHabitId1);

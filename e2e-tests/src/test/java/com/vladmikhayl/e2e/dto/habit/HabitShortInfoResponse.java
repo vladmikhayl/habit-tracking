@@ -14,8 +14,6 @@ public class HabitShortInfoResponse {
 
     private String name;
 
-    private Boolean isCompleted;
-
     private Integer subscribersCount;
 
     private FrequencyType frequencyType;
@@ -23,5 +21,11 @@ public class HabitShortInfoResponse {
     private Integer completionsInPeriod;
 
     private Integer completionsPlannedInPeriod;
+
+    private Boolean isCompleted;
+
+    private Boolean isPhotoAllowed;
+
+    private Boolean isPhotoUploaded;
 
 }

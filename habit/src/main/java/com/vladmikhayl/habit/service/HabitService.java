@@ -236,7 +236,7 @@ public class HabitService {
 
                 int subscribersCount = subscriptionCacheRepository.countById_HabitId(habitId);
 
-                boolean isCompleted = getIsCompletedOrThrow(habitId, date);
+                ReportShortInfoResponse reportResponse = getIsCompletedOrThrow(habitId, date);
 
                 Integer completionsInPeriod = null;
 
@@ -258,14 +258,18 @@ public class HabitService {
                     completionsPlannedInPeriod = habit.getTimesPerMonth();
                 }
 
+                boolean isPhotoAllowed = habit.isPhotoAllowed();
+
                 currentUserHabitsAtDay.add(HabitShortInfoResponse.builder()
                         .habitId(habitId)
                         .name(habit.getName())
-                        .isCompleted(isCompleted)
                         .subscribersCount(subscribersCount)
                         .frequencyType(frequencyType)
                         .completionsInPeriod(completionsInPeriod)
                         .completionsPlannedInPeriod(completionsPlannedInPeriod)
+                        .isCompleted(reportResponse.isCompleted())
+                        .isPhotoAllowed(isPhotoAllowed)
+                        .isPhotoUploaded(reportResponse.isPhotoUploaded())
                         .build());
             }
         }
@@ -298,7 +302,7 @@ public class HabitService {
 
                 int subscribersCount = subscriptionCacheRepository.countById_HabitId(habitId);
 
-                boolean isCompleted = getIsCompletedOrThrow(habitId, date);
+                ReportShortInfoResponse reportResponse = getIsCompletedOrThrow(habitId, date);
 
                 Integer completionsInPeriod = null;
 
@@ -320,15 +324,19 @@ public class HabitService {
                     completionsPlannedInPeriod = habit.getTimesPerMonth();
                 }
 
+                boolean isPhotoAllowed = habit.isPhotoAllowed();
+
                 currentUserSubscribedHabitsAtDay.add(SubscribedHabitShortInfoResponse.builder()
                         .habitId(habitId)
                         .creatorLogin(creatorLogin)
                         .name(habit.getName())
-                        .isCompleted(isCompleted)
                         .subscribersCount(subscribersCount)
                         .frequencyType(frequencyType)
                         .completionsInPeriod(completionsInPeriod)
                         .completionsPlannedInPeriod(completionsPlannedInPeriod)
+                        .isCompleted(reportResponse.isCompleted())
+                        .isPhotoAllowed(isPhotoAllowed)
+                        .isPhotoUploaded(reportResponse.isPhotoUploaded())
                         .build());
             }
         }
@@ -349,7 +357,7 @@ public class HabitService {
         return isUserCreator || isUserSubscriber;
     }
 
-    private boolean getIsCompletedOrThrow(Long habitId, LocalDate date) {
+    private ReportShortInfoResponse getIsCompletedOrThrow(Long habitId, LocalDate date) {
         try {
             return reportClient.isCompletedAtDay(internalToken, habitId, date).getBody();
         } catch (FeignException.ServiceUnavailable e) {

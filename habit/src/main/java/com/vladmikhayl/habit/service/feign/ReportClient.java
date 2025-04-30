@@ -2,6 +2,7 @@ package com.vladmikhayl.habit.service.feign;
 
 import com.vladmikhayl.habit.dto.response.HabitReportsInfoResponse;
 import com.vladmikhayl.habit.dto.response.ReportFullInfoResponse;
+import com.vladmikhayl.habit.dto.response.ReportShortInfoResponse;
 import com.vladmikhayl.habit.entity.FrequencyType;
 import com.vladmikhayl.habit.entity.Period;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -40,7 +41,7 @@ public interface ReportClient {
     );
 
     @GetMapping("/internal/reports/{habitId}/is-completed/at-day/{date}")
-    ResponseEntity<Boolean> isCompletedAtDay(
+    ResponseEntity<ReportShortInfoResponse> isCompletedAtDay(
             @RequestHeader("X-Internal-Token") String internalToken,
             @PathVariable Long habitId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date

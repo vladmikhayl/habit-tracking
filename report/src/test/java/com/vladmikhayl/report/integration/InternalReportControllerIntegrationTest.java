@@ -149,7 +149,7 @@ public class InternalReportControllerIntegrationTest {
 
     @Test
     @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void canCheckIsCompletedWhenReportIsPresent() throws Exception {
+    void canCheckIsCompletedWhenReportWithPhotoIsPresent() throws Exception {
         Long userId = 2L;
         Long habitId = 10L;
 
@@ -164,7 +164,29 @@ public class InternalReportControllerIntegrationTest {
 
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(jsonPath("$.completed").value("true"))
+                .andExpect(jsonPath("$.photoUploaded").value("true"));
+    }
+
+    @Test
+    @Sql(statements = "ALTER SEQUENCE report_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void canCheckIsCompletedWhenReportWithoutPhotoIsPresent() throws Exception {
+        Long userId = 2L;
+        Long habitId = 10L;
+
+        Report existingReport = Report.builder()
+                .userId(userId)
+                .habitId(habitId)
+                .date(LocalDate.of(2025, 3, 28))
+                .photoUrl(null)
+                .build();
+
+        reportRepository.save(existingReport);
+
+        mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completed").value("true"))
+                .andExpect(jsonPath("$.photoUploaded").value("false"));
     }
 
     @Test
@@ -184,7 +206,8 @@ public class InternalReportControllerIntegrationTest {
 
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("false"));
+                .andExpect(jsonPath("$.completed").value("false"))
+                .andExpect(jsonPath("$.photoUploaded").value("false"));
     }
 
     @Test
@@ -192,7 +215,8 @@ public class InternalReportControllerIntegrationTest {
     void canCheckIsCompletedWhenReportIsNotPresentAtAll() throws Exception {
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("false"));
+                .andExpect(jsonPath("$.completed").value("false"))
+                .andExpect(jsonPath("$.photoUploaded").value("false"));
     }
 
     @Test
