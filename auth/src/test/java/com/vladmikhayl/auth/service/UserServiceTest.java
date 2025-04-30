@@ -76,7 +76,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> underTest.register(request))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessage("Username already exists");
+                .hasMessage("Этот логин уже занят");
 
         verify(userRepository, never()).save(any());
     }
@@ -116,7 +116,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> underTest.login(loginRequest))
                 .isInstanceOf(BadCredentialsException.class)
-                .hasMessage("Invalid username or password");
+                .hasMessage("Неверный логин или пароль");
     }
 
 }

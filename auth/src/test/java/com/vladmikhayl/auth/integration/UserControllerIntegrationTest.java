@@ -106,7 +106,7 @@ public class UserControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Username already exists"));
+                .andExpect(jsonPath("$.error").value("Этот логин уже занят"));
 
         long usersCount = userRepository.count();
         assertThat(usersCount).isEqualTo(1);
@@ -177,7 +177,7 @@ public class UserControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid username or password"));
+                .andExpect(jsonPath("$.error").value("Неверный логин или пароль"));
 
         long usersCount = userRepository.count();
         assertThat(usersCount).isEqualTo(1);
@@ -194,7 +194,7 @@ public class UserControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid username or password"));
+                .andExpect(jsonPath("$.error").value("Неверный логин или пароль"));
 
         long usersCount = userRepository.count();
         assertThat(usersCount).isEqualTo(0);

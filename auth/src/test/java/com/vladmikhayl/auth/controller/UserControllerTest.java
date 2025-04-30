@@ -70,7 +70,7 @@ class UserControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Username cannot be blank"));
+                    assertTrue(exception.getMessage().contains("Логин не может быть пустым"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -90,7 +90,7 @@ class UserControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Username must contain from 3 to 30 characters"));
+                    assertTrue(exception.getMessage().contains("Логин должен содержать от 3 до 30 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -110,7 +110,7 @@ class UserControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Username must contain from 3 to 30 characters"));
+                    assertTrue(exception.getMessage().contains("Логин должен содержать от 3 до 30 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -130,7 +130,7 @@ class UserControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Password cannot be blank"));
+                    assertTrue(exception.getMessage().contains("Пароль не может быть пустым"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -150,7 +150,7 @@ class UserControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Password must contain from 5 to 72 characters"));
+                    assertTrue(exception.getMessage().contains("Пароль должен содержать от 5 до 72 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -170,7 +170,7 @@ class UserControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Password must contain from 5 to 72 characters"));
+                    assertTrue(exception.getMessage().contains("Пароль должен содержать от 5 до 72 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
