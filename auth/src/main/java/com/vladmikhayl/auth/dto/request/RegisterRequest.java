@@ -11,8 +11,8 @@ import lombok.Data;
 @Schema(description = "Запрос на регистрацию")
 public class RegisterRequest {
 
-    @NotBlank(message = "Username cannot be blank")
-    @Size(min = 3, max = 30, message = "Username must contain from 3 to 30 characters")
+    @NotBlank(message = "Логин не может быть пустым")
+    @Size(min = 3, max = 30, message = "Логин должен содержать от 3 до 30 символов")
     @Schema(
             description = "Логин",
             example = "user",
@@ -20,8 +20,8 @@ public class RegisterRequest {
     )
     private String username;
 
-    @NotBlank(message = "Password cannot be blank")
-    @Size(min = 5, max = 72, message = "Password must contain from 5 to 72 characters")
+    @NotBlank(message = "Пароль не может быть пустым")
+    @Size(min = 5, max = 72, message = "Пароль должен содержать от 5 до 72 символов")
     @Schema(
             description = "Пароль",
             example = "password",

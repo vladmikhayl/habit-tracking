@@ -39,19 +39,19 @@ public class UserService {
 
             String username = loginRequest.getUsername();
             Long userId = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"))
+                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"))
                     .getId();
             String token = jwtTokenProvider.generateToken(username, userId);
 
             return new AuthResponse(token);
         } catch (BadCredentialsException ex) {
-            throw new BadCredentialsException("Invalid username or password");
+            throw new BadCredentialsException("Неверный логин или пароль");
         }
     }
 
     public void register(RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new DataIntegrityViolationException("Username already exists");
+            throw new DataIntegrityViolationException("Этот логин уже занят");
         }
 
         User user = User.builder()
