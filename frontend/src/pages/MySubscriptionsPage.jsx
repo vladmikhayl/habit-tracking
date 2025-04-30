@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import habitsApi from "../api/habitsApi";
-import HabitCardForCreator from "../components/HabitCardForCreator";
+import HabitCardForSubscriber from "../components/HabitCardForSubscriber";
 
-const MyHabitsPage = () => {
+const MySubscriptionsPage = () => {
   const [habits, setHabits] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
@@ -15,7 +15,7 @@ const MyHabitsPage = () => {
 
   const fetchHabits = async (date) => {
     try {
-      const data = await habitsApi.getAllUserHabitsAtDay(date);
+      const data = await habitsApi.getAllUserSubscribedHabitsAtDay(date);
       setHabits(data);
     } catch (error) {
       console.error("Ошибка при получении привычек:", error);
@@ -41,33 +41,23 @@ const MyHabitsPage = () => {
               className="p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
           </div>
-
-          <button
-            onClick={() => navigate("/create-habit")}
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-xl transition"
-          >
-            + Новая привычка
-          </button>
         </div>
 
         <div>
           <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Привычки на {format(new Date(selectedDate), "dd.MM.yyyy")}
+            Привычки на {format(new Date(selectedDate), "dd.MM.yyyy")}, на
+            которые вы подписаны
           </h3>
 
           {habits.length === 0 ? (
             <p className="text-gray-600">
-              На эту дату не запланировано ни одной привычки
+              На эту дату не запланировано ни одной привычки, на которую вы
+              подписаны
             </p>
           ) : (
             <div className="flex flex-col gap-4">
               {habits.map((habit) => (
-                <HabitCardForCreator
-                  key={habit.habitId}
-                  habit={habit}
-                  date={selectedDate}
-                  onActionComplete={() => fetchHabits(selectedDate)}
-                />
+                <HabitCardForSubscriber key={habit.habitId} habit={habit} />
               ))}
             </div>
           )}
@@ -77,4 +67,4 @@ const MyHabitsPage = () => {
   );
 };
 
-export default MyHabitsPage;
+export default MySubscriptionsPage;

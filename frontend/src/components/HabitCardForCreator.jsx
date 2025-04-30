@@ -1,0 +1,296 @@
+import { useState, useRef } from "react";
+import React from "react";
+import reportsApi from "../api/reportsApi";
+import { toast } from "react-toastify";
+
+const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
+  const {
+    habitId,
+    name,
+    isCompleted,
+    subscribersCount,
+    frequencyType,
+    completionsInPeriod,
+    completionsPlannedInPeriod,
+    isPhotoAllowed,
+    isPhotoUploaded,
+    reportId,
+  } = habit;
+
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const fileInputRef = useRef(null);
+
+  const getProgressText = () => {
+    if (frequencyType === "WEEKLY_X_TIMES") {
+      return `За выбранную неделю выполнено ${completionsInPeriod}/${completionsPlannedInPeriod} раз`;
+    }
+    if (frequencyType === "MONTHLY_X_TIMES") {
+      return `За выбранный месяц выполнено ${completionsInPeriod}/${completionsPlannedInPeriod} раз`;
+    }
+    return null;
+  };
+
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
+  const markHabitCompleted = async () => {
+    console.log("Отмечаем как выполненную:", habitId, selectedFile);
+    try {
+      const photoUrl = selectedFile ? "123" : null; // временно photoUrl = 123 при создании отчета с фото
+      await reportsApi.createReport(habitId, date, photoUrl);
+      toast.success("Отметка о выполнении поставлена");
+      onActionComplete();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
+  };
+
+  const cancelHabitCompletion = async () => {
+    console.log("Отменяем выполнение:", habitId);
+    try {
+      await reportsApi.deleteReport(reportId);
+      toast.success("Отметка о выполнении удалена");
+      onActionComplete();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
+  };
+
+  const deleteHabitPhoto = async () => {
+    console.log("Удаляем фото:", habitId);
+    try {
+      await reportsApi.changeReportPhoto(reportId, "");
+      toast.success("Фото удалено");
+      onActionComplete();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
+  };
+
+  const changeHabitPhoto = async () => {
+    console.log("Изменяем фото:", habitId, selectedFile);
+
+    if (!selectedFile) {
+      toast.error("Файл не выбран");
+      return;
+    }
+
+    try {
+      await reportsApi.changeReportPhoto(reportId, "123"); // временно photoUrl = 123 при изменении фото
+      toast.success("Фото изменено");
+      onActionComplete();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message);
+    }
+  };
+
+  return (
+    <div className="w-full bg-white border-2 border-gray-400 rounded-2xl shadow-lg p-6 space-y-4">
+      <div className="flex items-start gap-4 flex-wrap">
+        <h4 className="text-xl font-semibold text-gray-700 flex-1 min-w-0 break-words">
+          {name}
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          <span
+            className={`text-sm font-semibold px-4 py-2 rounded-full ${
+              isCompleted
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {isCompleted ? "Выполнена в этот день" : "Не выполнена в этот день"}
+          </span>
+          <span
+            className={`text-sm font-semibold px-4 py-2 rounded-full ${
+              !isPhotoAllowed
+                ? "bg-gray-100 text-gray-600"
+                : isPhotoUploaded
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {!isPhotoAllowed
+              ? "Фото не требуется"
+              : isPhotoUploaded
+              ? "Фото прикреплено"
+              : "Фото не прикреплено"}
+          </span>
+        </div>
+      </div>
+
+      <div className="text-gray-700">
+        Подписчиков: <span className="font-medium">{subscribersCount}</span>
+      </div>
+
+      {getProgressText() && (
+        <div className="text-gray-700">{getProgressText()}</div>
+      )}
+
+      <div className="pt-2 space-y-3">
+        {!isCompleted ? (
+          !isPhotoAllowed ? (
+            <button
+              onClick={markHabitCompleted}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold px-5 py-2 rounded-xl transition"
+            >
+              Отметить как выполненную
+            </button>
+          ) : !isPhotoUploaded ? (
+            <div className="flex flex-col gap-3 border border-gray-300 p-4 rounded-xl bg-gray-50">
+              <label className="flex items-center justify-between gap-4 cursor-pointer">
+                <div className="flex items-center gap-3 text-gray-700">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828m-3-2.828a4 4 0 015.656 0 4 4 0 010 5.656L12 21H3v-9l9-9a4 4 0 015.656 0z"
+                    />
+                  </svg>
+                  <div className="flex items-center gap-2">
+                    <span>
+                      {selectedFile
+                        ? selectedFile.name
+                        : "Выберите файл, если хотите прикрепить фото (необязательно)"}
+                    </span>
+                    {selectedFile && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setSelectedFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        }}
+                        className="text-red-500 hover:text-red-700 text-xl leading-none"
+                        title="Удалить файл"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              <button
+                onClick={markHabitCompleted}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold px-5 py-2 rounded-xl transition"
+              >
+                Отметить как выполненную
+              </button>
+            </div>
+          ) : (
+            <></>
+          )
+        ) : (
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={cancelHabitCompletion}
+                className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded-xl transition"
+              >
+                Отменить выполнение
+              </button>
+              {isPhotoUploaded && (
+                <button
+                  onClick={deleteHabitPhoto}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-xl transition"
+                >
+                  Удалить фото
+                </button>
+              )}
+            </div>
+            {isPhotoAllowed && (
+              <div className="flex flex-col gap-3 border border-gray-300 p-4 rounded-xl bg-gray-50">
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828L18 9.828m-3-2.828a4 4 0 015.656 0 4 4 0 010 5.656L12 21H3v-9l9-9a4 4 0 015.656 0z"
+                      />
+                    </svg>
+
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {selectedFile
+                          ? selectedFile.name
+                          : isPhotoUploaded
+                          ? "Выберите файл, если хотите заменить фото"
+                          : "Выберите файл, если хотите добавить фото"}
+                      </span>
+                      {selectedFile && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setSelectedFile(null);
+                            if (fileInputRef.current) {
+                              fileInputRef.current.value = "";
+                            }
+                          }}
+                          className="text-red-500 hover:text-red-700 text-xl leading-none"
+                          title="Удалить файл"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  onClick={changeHabitPhoto}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold px-5 py-2 rounded-xl transition"
+                >
+                  {isPhotoUploaded ? "Заменить фото" : "Добавить фото"}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <button className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition">
+          Подробнее о привычке
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default HabitCardForCreator;
