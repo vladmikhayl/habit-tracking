@@ -7,6 +7,8 @@ import lombok.Data;
 @Builder
 public class ReportShortInfoResponse {
 
+    private Long reportId;
+
     private boolean isCompleted;
 
     private boolean isPhotoUploaded;

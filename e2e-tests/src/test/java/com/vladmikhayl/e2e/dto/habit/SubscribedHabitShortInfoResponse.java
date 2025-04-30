@@ -30,4 +30,6 @@ public class SubscribedHabitShortInfoResponse {
 
     private Boolean isPhotoUploaded;
 
+    private Long reportId;
+
 }

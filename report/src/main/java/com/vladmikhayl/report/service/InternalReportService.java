@@ -7,6 +7,7 @@ import com.vladmikhayl.report.entity.FrequencyType;
 import com.vladmikhayl.report.entity.Period;
 import com.vladmikhayl.report.entity.Report;
 import com.vladmikhayl.report.repository.ReportRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,12 +57,17 @@ public class InternalReportService {
     ) {
         boolean isCompleted = reportRepository.existsByHabitIdAndDate(habitId, date);
         boolean isPhotoUploaded = false;
+        Long reportId = null;
 
         if (isCompleted) {
-            isPhotoUploaded = reportRepository.findByHabitIdAndDate(habitId, date).get().getPhotoUrl() != null;
+            Report report = reportRepository.findByHabitIdAndDate(habitId, date)
+                    .orElseThrow(() -> new EntityNotFoundException("Report not found"));
+            isPhotoUploaded = report.getPhotoUrl() != null;
+            reportId = report.getId();
         }
 
         return ReportShortInfoResponse.builder()
+                .reportId(reportId)
                 .isCompleted(isCompleted)
                 .isPhotoUploaded(isPhotoUploaded)
                 .build();

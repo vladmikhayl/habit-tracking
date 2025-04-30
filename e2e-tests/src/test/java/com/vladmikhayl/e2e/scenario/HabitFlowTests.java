@@ -65,6 +65,7 @@ public class HabitFlowTests extends BaseE2ETest {
         assertThat(existingHabit1.getCompletionsPlannedInPeriod()).isEqualTo(5);
         assertThat(existingHabit1.getIsPhotoAllowed()).isEqualTo(false);
         assertThat(existingHabit1.getIsPhotoUploaded()).isEqualTo(false);
+        assertThat(existingHabit1.getReportId()).isEqualTo(null);
 
         // Юзер создал привычку с WEEKLY_ON_DAYS, которая выполняется только в завтрашний день недели
         habitHelper.createHabit(
@@ -103,6 +104,7 @@ public class HabitFlowTests extends BaseE2ETest {
         assertThat(existingHabit2.getCompletionsPlannedInPeriod()).isEqualTo(null);
         assertThat(existingHabit2.getIsPhotoAllowed()).isEqualTo(true);
         assertThat(existingHabit2.getIsPhotoUploaded()).isEqualTo(false);
+        assertThat(existingHabit2.getReportId()).isEqualTo(null);
 
         // Привычки юзера на вчерашний день (должно быть 0)
         List<HabitShortInfoResponse> habitShortInfoResponses5 = habitHelper.getAllUserHabitsAtDay(token, YESTERDAY_DATE_STR);

@@ -165,7 +165,8 @@ public class InternalReportControllerIntegrationTest {
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.completed").value("true"))
-                .andExpect(jsonPath("$.photoUploaded").value("true"));
+                .andExpect(jsonPath("$.photoUploaded").value("true"))
+                .andExpect(jsonPath("$.reportId").value("1"));
     }
 
     @Test
@@ -186,7 +187,8 @@ public class InternalReportControllerIntegrationTest {
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.completed").value("true"))
-                .andExpect(jsonPath("$.photoUploaded").value("false"));
+                .andExpect(jsonPath("$.photoUploaded").value("false"))
+                .andExpect(jsonPath("$.reportId").value("1"));
     }
 
     @Test
@@ -207,7 +209,8 @@ public class InternalReportControllerIntegrationTest {
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.completed").value("false"))
-                .andExpect(jsonPath("$.photoUploaded").value("false"));
+                .andExpect(jsonPath("$.photoUploaded").value("false"))
+                .andExpect(jsonPath("$.reportId").doesNotExist());
     }
 
     @Test
@@ -216,7 +219,8 @@ public class InternalReportControllerIntegrationTest {
         mockMvc.perform(get("/internal/reports/10/is-completed/at-day/2025-03-28"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.completed").value("false"))
-                .andExpect(jsonPath("$.photoUploaded").value("false"));
+                .andExpect(jsonPath("$.photoUploaded").value("false"))
+                .andExpect(jsonPath("$.reportId").doesNotExist());
     }
 
     @Test

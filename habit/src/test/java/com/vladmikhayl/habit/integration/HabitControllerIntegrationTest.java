@@ -1274,6 +1274,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1281,6 +1282,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1295,6 +1297,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(null)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1306,6 +1309,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(null)
                         .isPhotoAllowed(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         );
 
@@ -1370,6 +1374,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1380,6 +1385,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1397,6 +1403,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(1)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1408,6 +1415,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(5)
                         .isPhotoAllowed(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         );
 
@@ -1642,6 +1650,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1649,6 +1658,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1664,6 +1674,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(null)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1676,6 +1687,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(null)
                         .isPhotoAllowed(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         );
 
@@ -1771,6 +1783,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1780,6 +1793,7 @@ public class HabitControllerIntegrationTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(false)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1797,6 +1811,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(5)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1809,6 +1824,7 @@ public class HabitControllerIntegrationTest {
                         .completionsPlannedInPeriod(10)
                         .isPhotoAllowed(true)
                         .isPhotoUploaded(false)
+                        .reportId(100L)
                         .build()
         );
 

@@ -3,11 +3,11 @@ package com.vladmikhayl.report.dto.response;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 public class ReportShortInfoResponse {
+
+    private Long reportId;
 
     private boolean isCompleted;
 

@@ -28,4 +28,6 @@ public class HabitShortInfoResponse {
 
     private Boolean isPhotoUploaded;
 
+    private Long reportId;
+
 }

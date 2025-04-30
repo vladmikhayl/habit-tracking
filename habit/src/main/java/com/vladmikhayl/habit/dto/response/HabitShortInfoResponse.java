@@ -47,4 +47,7 @@ public class HabitShortInfoResponse {
     @Schema(description = "Прикреплено ли фото к отчёту в этот день", example = "false")
     private Boolean isPhotoUploaded;
 
+    @Schema(description = "ID отчёта (только если выполнена в этот день, иначе null)", example = "14")
+    private Long reportId;
+
 }

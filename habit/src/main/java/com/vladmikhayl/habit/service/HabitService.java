@@ -270,6 +270,7 @@ public class HabitService {
                         .isCompleted(reportResponse.isCompleted())
                         .isPhotoAllowed(isPhotoAllowed)
                         .isPhotoUploaded(reportResponse.isPhotoUploaded())
+                        .reportId(reportResponse.getReportId())
                         .build());
             }
         }
@@ -337,6 +338,7 @@ public class HabitService {
                         .isCompleted(reportResponse.isCompleted())
                         .isPhotoAllowed(isPhotoAllowed)
                         .isPhotoUploaded(reportResponse.isPhotoUploaded())
+                        .reportId(reportResponse.getReportId())
                         .build());
             }
         }

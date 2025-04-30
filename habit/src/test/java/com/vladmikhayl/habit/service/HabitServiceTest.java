@@ -1012,6 +1012,7 @@ class HabitServiceTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(false)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1028,6 +1029,7 @@ class HabitServiceTest {
                         .frequencyType(WEEKLY_ON_DAYS)
                         .completionsInPeriod(null)
                         .completionsPlannedInPeriod(null)
+                        .reportId(100L)
                         .build()
         ));
     }
@@ -1104,6 +1106,7 @@ class HabitServiceTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(false)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1113,6 +1116,7 @@ class HabitServiceTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1124,6 +1128,7 @@ class HabitServiceTest {
                 ReportShortInfoResponse.builder()
                         .isCompleted(true)
                         .isPhotoUploaded(true)
+                        .reportId(101L)
                         .build()
         ));
 
@@ -1142,6 +1147,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(null)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(100L)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(3L)
@@ -1153,6 +1159,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(2)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build(),
                 HabitShortInfoResponse.builder()
                         .habitId(4L)
@@ -1164,6 +1171,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(10)
                         .isPhotoAllowed(true)
                         .isPhotoUploaded(true)
+                        .reportId(101L)
                         .build()
         ));
     }
@@ -1292,6 +1300,7 @@ class HabitServiceTest {
                         .builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1309,6 +1318,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(null)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1384,6 +1394,7 @@ class HabitServiceTest {
                         .builder()
                         .isCompleted(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build()
         ));
 
@@ -1402,6 +1413,7 @@ class HabitServiceTest {
                         .builder()
                         .isCompleted(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         ));
 
@@ -1421,6 +1433,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(5)
                         .isPhotoAllowed(false)
                         .isPhotoUploaded(false)
+                        .reportId(null)
                         .build(),
                 SubscribedHabitShortInfoResponse.builder()
                         .habitId(2L)
@@ -1433,6 +1446,7 @@ class HabitServiceTest {
                         .completionsPlannedInPeriod(10)
                         .isPhotoAllowed(true)
                         .isPhotoUploaded(true)
+                        .reportId(100L)
                         .build()
         ));
 
