@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   UserCircleIcon,
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import habitsApi from "../api/habitsApi";
 import subscriptionsApi from "../api/subscriptionsApi";
@@ -176,6 +177,7 @@ const HabitPage = () => {
     try {
       await subscriptionsApi.acceptSubscriptionRequest(subscriptionId);
       toast.success("Заявка принята");
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       setPendingRequests((prev) =>
         prev.filter((req) => req.subscriptionId !== subscriptionId)
@@ -198,6 +200,7 @@ const HabitPage = () => {
     try {
       await subscriptionsApi.denySubscriptionRequest(subscriptionId);
       toast.success("Заявка отклонена");
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       setPendingRequests((prev) =>
         prev.filter((req) => req.subscriptionId !== subscriptionId)
@@ -353,8 +356,11 @@ const HabitPage = () => {
 
         <div className="bg-white shadow rounded-2xl p-6 mt-6 space-y-4">
           <div className="flex items-center justify-between">
-            <div className="text-base text-gray-800">
+            <div className="text-base text-gray-800 flex items-center gap-2">
               Необработанных заявок: {pendingRequests.length}
+              {pendingRequests.length > 0 && (
+                <ExclamationCircleIcon className="h-6 w-6 text-yellow-500" />
+              )}
             </div>
             {pendingRequests.length > 0 && (
               <button
