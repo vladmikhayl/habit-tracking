@@ -132,7 +132,7 @@ const CreateHabitPage = () => {
                   checked={type === "regular"}
                   onChange={() => setType("regular")}
                 />
-                <span className="flex items-center gap-1">
+                <span className="text-sm flex items-center gap-1">
                   Регулярная
                   <div className="relative group">
                     <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
@@ -156,7 +156,7 @@ const CreateHabitPage = () => {
                     setFrequencyType("weekdays");
                   }}
                 />
-                <span className="flex items-center gap-1">
+                <span className="text-sm flex items-center gap-1">
                   Вредная
                   <div className="relative group">
                     <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
@@ -184,7 +184,7 @@ const CreateHabitPage = () => {
                   checked={frequencyType === "weekdays"}
                   onChange={() => setFrequencyType("weekdays")}
                 />
-                <span>В определённые дни недели</span>
+                <span className="text-sm">В определённые дни недели</span>
               </label>
               <label
                 className={`flex items-center gap-2 ${
@@ -200,7 +200,7 @@ const CreateHabitPage = () => {
                   disabled={type === "harmful"}
                 />
                 <span
-                  className={`flex items-center gap-1 ${
+                  className={`text-sm flex items-center gap-1 ${
                     type === "harmful" ? "text-gray-500" : ""
                   }`}
                 >
