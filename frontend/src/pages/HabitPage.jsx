@@ -202,7 +202,7 @@ const HabitPage = () => {
           </span>
         </div>
 
-        <div className="mb-6 text-base flex items-center gap-2 text-blue-700 font-semibold">
+        <div className="mb-4 text-base flex items-center gap-2 text-blue-700 font-semibold">
           <UserCircleIcon className="h-5 w-5 text-blue-700" />
           Вы — создатель этой привычки
         </div>
