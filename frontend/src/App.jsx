@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import MyHabitsPage from "./pages/MyHabitsPage";
 import MySubscriptionsPage from "./pages/MySubscriptionsPage";
+import CreateHabitPage from "./pages/CreateHabitPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PrivateRoute from "./api/PrivateRoute";
@@ -34,6 +35,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <MySubscriptionsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/create-habit"
+          element={
+            <PrivateRoute>
+              <CreateHabitPage />
             </PrivateRoute>
           }
         />

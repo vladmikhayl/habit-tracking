@@ -33,7 +33,7 @@ const MainLayout = ({ children }) => {
             onClick={handleLogout}
             className="bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition"
           >
-            Выйти
+            Выйти из аккаунта
           </button>
         </nav>
 
