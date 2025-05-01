@@ -2,8 +2,11 @@ import { useState, useRef } from "react";
 import React from "react";
 import reportsApi from "../api/reportsApi";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
+  const navigate = useNavigate();
+
   const {
     habitId,
     name,
@@ -285,7 +288,10 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
           </div>
         )}
 
-        <button className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition">
+        <button
+          onClick={() => navigate(`/habits/${habitId}`)}
+          className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition"
+        >
           Подробнее о привычке
         </button>
       </div>

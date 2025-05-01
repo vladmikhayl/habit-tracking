@@ -87,6 +87,25 @@ const habitsApi = {
       throw new Error(errorMessage);
     }
   },
+
+  // Общая инфа о конкретной привычке
+  getGeneralInfo: async (habitId) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`/api/habits/${habitId}/general-info`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Не удалось получить информацию о привычке");
+    }
+
+    return await response.json();
+  },
 };
 
 export default habitsApi;
