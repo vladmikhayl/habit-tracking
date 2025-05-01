@@ -123,6 +123,25 @@ const habitsApi = {
 
     return await response.json();
   },
+
+  // Инфа по отчетам о конкретной привычке
+  getReportsInfo: async (habitId) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`/api/habits/${habitId}/reports-info`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Не удалось получить информацию о привычке");
+    }
+
+    return await response.json();
+  },
 };
 
 export default habitsApi;

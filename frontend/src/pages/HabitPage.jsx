@@ -14,7 +14,9 @@ import { toast } from "react-toastify";
 const HabitPage = () => {
   const navigate = useNavigate();
   const { id: pageHabitId } = useParams();
+
   const [habit, setHabit] = useState(null);
+  const [reportsInfo, setReportsInfo] = useState(null);
 
   // Принятые подписчики
   const [showSubscribers, setShowSubscribers] = useState(false);
@@ -32,6 +34,13 @@ const HabitPage = () => {
       setHabit(data);
     } catch (error) {
       console.error("Ошибка при получении привычек:", error);
+    }
+
+    try {
+      const data = await habitsApi.getReportsInfo(pageHabitId);
+      setReportsInfo(data);
+    } catch (error) {
+      console.error("Ошибка при получении информации об отчетах:", error);
     }
 
     try {
@@ -395,6 +404,93 @@ const HabitPage = () => {
             </div>
           )}
         </div>
+
+        {reportsInfo && (
+          <div className="bg-gray-50 rounded-xl p-6 mt-6 space-y-4">
+            <h3 className="text-lg font-semibold mb-4">
+              Статистика выполнения
+            </h3>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+              <span className="text-gray-500">
+                Сколько всего раз вы выполнили эту привычку:
+              </span>
+              <span className="text-gray-800">
+                {reportsInfo.completionsInTotal}
+              </span>
+            </div>
+
+            {frequencyType === "WEEKLY_ON_DAYS" && (
+              <>
+                <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+                  <span className="text-gray-500">
+                    Процент успешных выполнений:
+                  </span>
+                  <span className="text-gray-800">
+                    {reportsInfo.completionsPercent !== null ? (
+                      `${reportsInfo.completionsPercent}% от всех запланированных`
+                    ) : (
+                      <span className="inline-flex items-center gap-1 relative">
+                        —
+                        <div
+                          className="group relative"
+                          onMouseEnter={(e) => {
+                            const tooltip =
+                              e.currentTarget.querySelector(".tooltip");
+                            if (tooltip) {
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              tooltip.style.top = `${rect.top}px`;
+                              tooltip.style.left = `${rect.right + 8}px`;
+                            }
+                          }}
+                        >
+                          <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                          <div
+                            className="tooltip fixed w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none"
+                            style={{ top: 0, left: 0 }}
+                          >
+                            Этот показатель не рассчитывается, если пока не
+                            начался ни один день, на который запланирована эта
+                            привычка
+                          </div>
+                        </div>
+                      </span>
+                    )}
+                  </span>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+                  <span className="text-gray-500">Дней в текущей серии:</span>
+                  <span className="text-gray-800">
+                    {reportsInfo.serialDays !== null
+                      ? reportsInfo.serialDays
+                      : "0"}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {(frequencyType === "WEEKLY_X_TIMES" ||
+              frequencyType === "MONTHLY_X_TIMES") && (
+              <>
+                <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+                  <span className="text-gray-500">
+                    Выполнений за{" "}
+                    {frequencyType === "WEEKLY_X_TIMES"
+                      ? "текущую неделю"
+                      : "текущий месяц"}
+                    :
+                  </span>
+                  <span className="text-gray-800">
+                    {reportsInfo.completionsInPeriod ?? "Не указано"} из{" "}
+                    {reportsInfo.completionsPlannedInPeriod ?? "Не указано"}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         <div className="flex justify-end gap-3 mt-4">
           <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm">
