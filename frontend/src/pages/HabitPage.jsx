@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import {
@@ -12,6 +12,7 @@ import subscriptionsApi from "../api/subscriptionsApi";
 import { toast } from "react-toastify";
 
 const HabitPage = () => {
+  const navigate = useNavigate();
   const { id: pageHabitId } = useParams();
   const [habit, setHabit] = useState(null);
 
@@ -114,6 +115,21 @@ const HabitPage = () => {
         return `${habit.timesPerMonth} раз в месяц`;
       default:
         return "Неизвестно";
+    }
+  };
+
+  const handleDeleteHabit = async () => {
+    try {
+      const confirm = window.confirm(
+        "Вы уверены, что хотите удалить привычку?"
+      );
+      if (!confirm) return;
+      await habitsApi.delete(pageHabitId);
+      toast.success("Привычка успешно удалена");
+      navigate("/my-habits");
+    } catch (error) {
+      toast.error("Ошибка при удалении привычки");
+      console.error("Ошибка при удалении привычки:", error);
     }
   };
 
@@ -384,7 +400,10 @@ const HabitPage = () => {
           <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm">
             Редактировать привычку
           </button>
-          <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm">
+          <button
+            onClick={handleDeleteHabit}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm"
+          >
             Удалить привычку
           </button>
         </div>

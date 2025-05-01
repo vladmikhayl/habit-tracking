@@ -88,6 +88,23 @@ const habitsApi = {
     }
   },
 
+  // Удалить привычку
+  delete: async (habitId) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`/api/habits/${habitId}/delete`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Не удалось удалить привычку");
+    }
+  },
+
   // Общая инфа о конкретной привычке
   getGeneralInfo: async (habitId) => {
     const token = localStorage.getItem("token");
