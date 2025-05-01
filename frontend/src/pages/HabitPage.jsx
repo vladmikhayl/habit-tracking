@@ -8,21 +8,42 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
 import habitsApi from "../api/habitsApi";
+import subscriptionsApi from "../api/subscriptionsApi";
+import { toast } from "react-toastify";
 
 const HabitPage = () => {
   const { id: pageHabitId } = useParams();
   const [habit, setHabit] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await habitsApi.getGeneralInfo(pageHabitId);
-        setHabit(data);
-      } catch (error) {
-        console.error("Ошибка при получении привычек:", error);
-      }
-    };
+  // Принятые подписчики
+  const [showSubscribers, setShowSubscribers] = useState(false);
+  const [subscribers, setSubscribers] = useState([]);
+  const [isLoadingSubscribers, setIsLoadingSubscribers] = useState(false);
 
+  // Необработанные заявки на подписку
+  const [showPending, setShowPending] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [isLoadingPending, setIsLoadingPending] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const data = await habitsApi.getGeneralInfo(pageHabitId);
+      setHabit(data);
+    } catch (error) {
+      console.error("Ошибка при получении привычек:", error);
+    }
+
+    try {
+      const data = await subscriptionsApi.getHabitUnprocessedRequests(
+        pageHabitId
+      );
+      setPendingRequests(data);
+    } catch (error) {
+      console.error("Ошибка при получении необработанных заявок:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [pageHabitId]);
 
@@ -93,6 +114,73 @@ const HabitPage = () => {
         return `${habit.timesPerMonth} раз в месяц`;
       default:
         return "Неизвестно";
+    }
+  };
+
+  const handleToggleSubscribers = async () => {
+    if (!showSubscribers && subscribers.length === 0) {
+      setIsLoadingSubscribers(true);
+      try {
+        const result = await subscriptionsApi.getHabitAcceptedSubscriptions(id);
+        setSubscribers(result.map((s) => s.subscriberLogin));
+      } catch (error) {
+        console.error("Ошибка при получении подписчиков:", error);
+      } finally {
+        setIsLoadingSubscribers(false);
+      }
+    }
+    setShowSubscribers((prev) => !prev);
+  };
+
+  const handleTogglePending = async () => {
+    if (!showPending && pendingRequests.length === 0) {
+      setIsLoadingPending(true);
+      try {
+        const result = await subscriptionsApi.getHabitUnprocessedRequests(id);
+        setPendingRequests(result);
+      } catch (error) {
+        console.error("Ошибка при получении заявок:", error);
+      } finally {
+        setIsLoadingPending(false);
+      }
+    }
+    setShowPending((prev) => !prev);
+  };
+
+  const handleAccept = async (subscriptionId) => {
+    try {
+      await subscriptionsApi.acceptSubscriptionRequest(subscriptionId);
+      toast.success("Заявка принята");
+
+      setPendingRequests((prev) =>
+        prev.filter((req) => req.subscriptionId !== subscriptionId)
+      );
+
+      try {
+        const result = await subscriptionsApi.getHabitAcceptedSubscriptions(id);
+        setSubscribers(result.map((s) => s.subscriberLogin));
+      } catch (error) {
+        console.error("Ошибка при обновлении подписчиков:", error);
+      }
+
+      fetchData();
+    } catch (error) {
+      console.error("Ошибка при принятии заявки:", error);
+    }
+  };
+
+  const handleDeny = async (subscriptionId) => {
+    try {
+      await subscriptionsApi.denySubscriptionRequest(subscriptionId);
+      toast.success("Заявка отклонена");
+
+      setPendingRequests((prev) =>
+        prev.filter((req) => req.subscriptionId !== subscriptionId)
+      );
+
+      fetchData();
+    } catch (error) {
+      console.error("Ошибка при отклонении заявки:", error);
     }
   };
 
@@ -198,6 +286,96 @@ const HabitPage = () => {
             <div>
               <span className="text-gray-500">Описание:</span>
               <p className="mt-1 text-base text-gray-800">{description}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white shadow rounded-2xl p-6 mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="text-base text-gray-800">
+              Принятых подписчиков: {subscribersCount}
+            </div>
+            {subscribersCount > 0 && (
+              <button
+                onClick={handleToggleSubscribers}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showSubscribers ? "Скрыть" : "Показать"}
+              </button>
+            )}
+          </div>
+
+          {showSubscribers && (
+            <div className="mt-2">
+              {isLoadingSubscribers ? (
+                <div className="text-gray-500 text-sm">Загрузка...</div>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                  {subscribers.map((login) => (
+                    <div
+                      key={login}
+                      className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                    >
+                      <UserCircleIcon className="h-6 w-6 text-blue-500" />
+                      <span className="text-gray-800">{login}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white shadow rounded-2xl p-6 mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="text-base text-gray-800">
+              Необработанных заявок: {pendingRequests.length}
+            </div>
+            {pendingRequests.length > 0 && (
+              <button
+                onClick={handleTogglePending}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showPending ? "Скрыть" : "Показать"}
+              </button>
+            )}
+          </div>
+
+          {showPending && pendingRequests.length > 0 && (
+            <div className="mt-2">
+              {isLoadingPending ? (
+                <div className="text-gray-500 text-sm">Загрузка...</div>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                  {pendingRequests.map((req) => (
+                    <div
+                      key={req.subscriptionId}
+                      className="flex items-center justify-between bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <UserCircleIcon className="h-6 w-6 text-blue-500" />
+                        <span className="text-gray-800">
+                          {req.subscriberLogin}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleAccept(req.subscriptionId)}
+                          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg"
+                        >
+                          Принять
+                        </button>
+                        <button
+                          onClick={() => handleDeny(req.subscriptionId)}
+                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg"
+                        >
+                          Отклонить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
