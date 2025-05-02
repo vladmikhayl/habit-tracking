@@ -21,7 +21,7 @@ const subscriptionsApi = {
     return await response.json();
   },
 
-  // Список необработанные заявок на подписку на привычку
+  // Список необработанных заявок на подписку на привычку
   getHabitUnprocessedRequests: async (habitId) => {
     const token = localStorage.getItem("token");
 

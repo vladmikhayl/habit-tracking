@@ -19,16 +19,17 @@ const HabitPage = () => {
   const [habit, setHabit] = useState(null);
   const [reportsInfo, setReportsInfo] = useState(null);
 
-  // Принятые подписчики
+  // Хуки для показа принятых подписчиков
   const [showSubscribers, setShowSubscribers] = useState(false);
   const [subscribers, setSubscribers] = useState([]);
   const [isLoadingSubscribers, setIsLoadingSubscribers] = useState(false);
 
-  // Необработанные заявки на подписку
+  // Хуки для показа необработанных заявок
   const [showPending, setShowPending] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [isLoadingPending, setIsLoadingPending] = useState(false);
 
+  // Данные при загрузке страницы
   const fetchData = async () => {
     try {
       const data = await habitsApi.getGeneralInfo(pageHabitId);
@@ -94,7 +95,7 @@ const HabitPage = () => {
   const formatFrequency = () => {
     switch (frequencyType) {
       case "WEEKLY_ON_DAYS":
-        if (habit.daysOfWeek?.length > 0) {
+        if (daysOfWeek?.length > 0) {
           const dayNames = {
             MONDAY: "понедельник",
             TUESDAY: "вторник",
@@ -113,21 +114,22 @@ const HabitPage = () => {
             "SATURDAY",
             "SUNDAY",
           ];
-          const sortedDays = [...habit.daysOfWeek].sort(
+          const sortedDays = [...daysOfWeek].sort(
             (a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b)
           );
           return sortedDays.map((day) => dayNames[day]).join(", ");
         }
         return "Нет указанных дней";
       case "WEEKLY_X_TIMES":
-        return `${habit.timesPerWeek} раз в неделю`;
+        return `${timesPerWeek} раз(а) в неделю`;
       case "MONTHLY_X_TIMES":
-        return `${habit.timesPerMonth} раз в месяц`;
+        return `${timesPerMonth} раз(а) в месяц`;
       default:
         return "Неизвестно";
     }
   };
 
+  // При нажатии на кнопку для удаления привычки
   const handleDeleteHabit = async () => {
     try {
       const confirm = window.confirm(
@@ -143,6 +145,7 @@ const HabitPage = () => {
     }
   };
 
+  // При нажатии на кнопку для показа/скрытия принятых подписчиков
   const handleToggleSubscribers = async () => {
     if (!showSubscribers && subscribers.length === 0) {
       setIsLoadingSubscribers(true);
@@ -158,6 +161,7 @@ const HabitPage = () => {
     setShowSubscribers((prev) => !prev);
   };
 
+  // При нажатии на кнопку для показа/скрытия необработанных заявок
   const handleTogglePending = async () => {
     if (!showPending && pendingRequests.length === 0) {
       setIsLoadingPending(true);
@@ -173,6 +177,7 @@ const HabitPage = () => {
     setShowPending((prev) => !prev);
   };
 
+  // При нажатии на кнопку для принятия заявки
   const handleAccept = async (subscriptionId) => {
     try {
       await subscriptionsApi.acceptSubscriptionRequest(subscriptionId);
@@ -196,6 +201,7 @@ const HabitPage = () => {
     }
   };
 
+  // При нажатии на кнопку для отклонения заявки
   const handleDeny = async (subscriptionId) => {
     try {
       await subscriptionsApi.denySubscriptionRequest(subscriptionId);
