@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { UserIcon, UsersIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
@@ -62,16 +62,21 @@ const HabitCardForSubscriber = ({ habit }) => {
         </div>
       </div>
 
-      <div className="text-gray-700">
+      <div className="text-gray-700 flex items-center gap-1">
+        <UserIcon className="h-5 w-5 text-blue-500 mr-1" />
         Создатель привычки: <span className="font-medium">{creatorLogin}</span>
       </div>
 
-      <div className="text-gray-700">
+      <div className="text-gray-700 flex items-center gap-1">
+        <UsersIcon className="h-5 w-5 text-blue-500 mr-1" />
         Подписчиков: <span className="font-medium">{subscribersCount}</span>
       </div>
 
       {getProgressText() && (
-        <div className="text-gray-700">{getProgressText()}</div>
+        <div className="text-gray-700 flex items-center gap-1">
+          <CalendarIcon className="h-5 w-5 text-blue-500 mr-1" />
+          {getProgressText()}
+        </div>
       )}
 
       <div className="pt-2 space-y-3">

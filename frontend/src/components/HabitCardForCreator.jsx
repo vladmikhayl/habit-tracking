@@ -3,6 +3,7 @@ import React from "react";
 import reportsApi from "../api/reportsApi";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { UsersIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
 const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
   const navigate = useNavigate();
@@ -132,12 +133,16 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
         </div>
       </div>
 
-      <div className="text-gray-700">
+      <div className="text-gray-700 flex items-center gap-1">
+        <UsersIcon className="h-5 w-5 text-blue-500 mr-1" />
         Подписчиков: <span className="font-medium">{subscribersCount}</span>
       </div>
 
       {getProgressText() && (
-        <div className="text-gray-700">{getProgressText()}</div>
+        <div className="text-gray-700 flex items-center gap-1">
+          <CalendarIcon className="h-5 w-5 text-blue-500 mr-1" />
+          {getProgressText()}
+        </div>
       )}
 
       <div className="pt-2 space-y-3">
