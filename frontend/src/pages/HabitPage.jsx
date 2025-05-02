@@ -29,7 +29,13 @@ const HabitPage = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [isLoadingPending, setIsLoadingPending] = useState(false);
 
-  // Данные при загрузке страницы
+  // Хуки для показа отчета за выбранный день
+  const [selectedDate, setSelectedDate] = useState(
+    () => new Date().toISOString().split("T")[0]
+  );
+  const [dailyReport, setDailyReport] = useState(null);
+
+  // Подгрузка основных данных о привычке
   const fetchData = async () => {
     try {
       const data = await habitsApi.getGeneralInfo(pageHabitId);
@@ -55,9 +61,21 @@ const HabitPage = () => {
     }
   };
 
+  // Подгрузка данных по отчету за выбранный день
+  const fetchReport = async () => {
+    try {
+      const report = await habitsApi.getReportAtDay(pageHabitId, selectedDate);
+      setDailyReport(report);
+    } catch (error) {
+      setDailyReport(null);
+      console.error("Ошибка при получении отчета за день:", error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
-  }, [pageHabitId]);
+    fetchReport();
+  }, [selectedDate, pageHabitId]);
 
   if (!habit) {
     return (
@@ -534,6 +552,65 @@ const HabitPage = () => {
             )}
           </div>
         )}
+
+        <div className="bg-white shadow rounded-2xl p-6 mt-6 space-y-4">
+          <h3 className="text-lg font-semibold mb-0">История отчётов</h3>
+
+          <div className="flex items-center gap-2 mb-4">
+            <p className="text-base text-gray-500 mb-0">Выберите дату:</p>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="p-2 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+          </div>
+
+          {new Date(new Date(selectedDate).toDateString()) <
+          new Date(new Date(createdAt).toDateString()) ? (
+            <p className="text-gray-600">
+              В этот день привычка ещё не существовала
+            </p>
+          ) : dailyReport ? (
+            <div className="bg-gray-50 border p-4 rounded-xl space-y-2">
+              <p>
+                <span className="font-semibold">Выполнена:</span>{" "}
+                {dailyReport.completed ? "Да" : "Нет"}
+              </p>
+              <p>
+                <span className="font-semibold">Дата выполнения:</span>{" "}
+                {dailyReport.completed
+                  ? formatDate(dailyReport.completionTime)
+                  : "—"}
+              </p>
+              {!isPhotoAllowed ? (
+                <p>
+                  <span className="font-semibold">Фото не требуется</span>
+                </p>
+              ) : (
+                <>
+                  <p>
+                    <span className="font-semibold">Фото прикреплено:</span>{" "}
+                    {!dailyReport.completed
+                      ? "—"
+                      : dailyReport.photoUrl
+                      ? "Да"
+                      : "Нет"}
+                  </p>
+                  {dailyReport.photoUrl && (
+                    <img
+                      src={dailyReport.photoUrl}
+                      alt="Фотоотчёт"
+                      className="max-w-xs rounded-lg shadow"
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-600">Нет отчета за выбранную дату</p>
+          )}
+        </div>
 
         <div className="flex justify-end gap-3 mt-4">
           <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm">

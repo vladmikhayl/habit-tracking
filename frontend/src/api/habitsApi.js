@@ -105,6 +105,28 @@ const habitsApi = {
     }
   },
 
+  // Отчет о привычке за конкретный день
+  getReportAtDay: async (habitId, date) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `/api/habits/${habitId}/get-report/at-day/${date}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Не удалось получить отчет");
+    }
+
+    return await response.json();
+  },
+
   // Общая инфа о конкретной привычке
   getGeneralInfo: async (habitId) => {
     const token = localStorage.getItem("token");

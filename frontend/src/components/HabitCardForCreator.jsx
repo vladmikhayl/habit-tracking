@@ -41,7 +41,9 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
   const markHabitCompleted = async () => {
     console.log("Отмечаем как выполненную:", habitId, selectedFile);
     try {
-      const photoUrl = selectedFile ? "123" : null; // временно photoUrl = 123 при создании отчета с фото
+      const photoUrl = selectedFile
+        ? "https://i.pinimg.com/736x/b9/a7/55/b9a75516248779bead50d84c52daebf3.jpg"
+        : null; // временно photoUrl = ... при создании отчета с фото
       await reportsApi.createReport(habitId, date, photoUrl);
       toast.success("Отметка о выполнении поставлена");
       onActionComplete();
@@ -84,7 +86,10 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     }
 
     try {
-      await reportsApi.changeReportPhoto(reportId, "123"); // временно photoUrl = 123 при изменении фото
+      await reportsApi.changeReportPhoto(
+        reportId,
+        "https://i.pinimg.com/736x/b9/a7/55/b9a75516248779bead50d84c52daebf3.jpg"
+      ); // временно photoUrl = ... при изменении фото
       toast.success("Фото изменено");
       onActionComplete();
     } catch (err) {
