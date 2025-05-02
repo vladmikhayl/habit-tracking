@@ -261,10 +261,18 @@ const HabitPage = () => {
               Привычка завершена: прошло {durationDays} / {durationDays} дней
             </>
           ) : (
-            <>
+            <div className="flex items-center gap-1 text-blue-700">
               <ClockIcon className="h-5 w-5 text-blue-600" />
-              Осталось: {howManyDaysLeft} / {durationDays} дней
-            </>
+              <span className="ml-1">
+                Осталось: {howManyDaysLeft} / {durationDays} дней
+              </span>
+              <div className="relative group">
+                <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm font-normal p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
+                  Включая сегодняшний день
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
@@ -473,11 +481,34 @@ const HabitPage = () => {
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
-                  <span className="text-gray-500">Дней в текущей серии:</span>
-                  <span className="text-gray-800">
+                  <span className="text-gray-500">
+                    Выполнений подряд в текущей серии:
+                  </span>
+                  <span className="text-gray-800 inline-flex items-center gap-1 relative">
                     {reportsInfo.serialDays !== null
                       ? reportsInfo.serialDays
                       : "0"}
+                    <div
+                      className="group relative"
+                      onMouseEnter={(e) => {
+                        const tooltip =
+                          e.currentTarget.querySelector(".tooltip");
+                        if (tooltip) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          tooltip.style.top = `${rect.top}px`;
+                          tooltip.style.left = `${rect.right + 8}px`;
+                        }
+                      }}
+                    >
+                      <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                      <div
+                        className="tooltip fixed w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none"
+                        style={{ top: 0, left: 0 }}
+                      >
+                        Столько раз подряд вы выполняете эту привычку, не
+                        пропустив ни одного запланированного выполнения
+                      </div>
+                    </div>
                   </span>
                 </div>
               </>
