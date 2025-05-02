@@ -1,7 +1,10 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import React from "react";
 
 const HabitCardForSubscriber = ({ habit }) => {
+  const navigate = useNavigate();
+
   const {
     habitId,
     creatorLogin,
@@ -72,7 +75,10 @@ const HabitCardForSubscriber = ({ habit }) => {
       )}
 
       <div className="pt-2 space-y-3">
-        <button className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition">
+        <button
+          onClick={() => navigate(`/subscribed-habits/${habitId}`)}
+          className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition"
+        >
           Подробнее о привычке
         </button>
       </div>

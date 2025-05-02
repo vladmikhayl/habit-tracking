@@ -2,7 +2,6 @@ import React from "react";
 import MainLayout from "../layouts/MainLayout";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
 import habitsApi from "../api/habitsApi";
 import HabitCardForSubscriber from "../components/HabitCardForSubscriber";
 import subscriptionsApi from "../api/subscriptionsApi";
@@ -22,8 +21,6 @@ const MySubscriptionsPage = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showPending, setShowPending] = useState(false);
   const [isLoadingPending, setIsLoadingPending] = useState(false);
-
-  const navigate = useNavigate();
 
   const fetchSubscriptions = async () => {
     try {
