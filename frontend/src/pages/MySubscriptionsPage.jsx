@@ -85,8 +85,8 @@ const MySubscriptionsPage = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-8">
-        <div className="bg-white shadow rounded-2xl p-6">
+      <div className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 shadow-sm rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Подписаться на привычку
           </h2>
@@ -109,7 +109,7 @@ const MySubscriptionsPage = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white shadow rounded-2xl p-6">
+          <div className="bg-blue-50 border border-blue-200 shadow-sm rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div className="text-base text-gray-800 flex items-center gap-2">
                 Привычки, на которые вы подписаны и приняты:{" "}
@@ -127,11 +127,11 @@ const MySubscriptionsPage = () => {
 
             {showAccepted && acceptedSubscriptions.length > 0 && (
               <div className="mt-2">
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                <div className="space-y-2">
                   {acceptedSubscriptions.map((sub) => (
                     <div
                       key={sub.habitId}
-                      className="flex items-center justify-between bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                      className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                     >
                       <span className="text-gray-800 text-sm flex items-center gap-2">
                         <ClipboardIcon className="h-5 w-5 text-blue-500" />
@@ -150,7 +150,7 @@ const MySubscriptionsPage = () => {
             )}
           </div>
 
-          <div className="bg-white shadow rounded-2xl p-6">
+          <div className="bg-blue-50 border border-blue-200 shadow-sm rounded-2xl p-6">
             <div className="flex items-center justify-between">
               <div className="text-base text-gray-800 flex items-center gap-2">
                 Ваши необработанные заявки: {pendingRequests.length}
@@ -170,11 +170,11 @@ const MySubscriptionsPage = () => {
                 {isLoadingPending ? (
                   <div className="text-gray-500 text-sm">Загрузка...</div>
                 ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                  <div className="space-y-2">
                     {pendingRequests.map((req) => (
                       <div
                         key={req.habitId}
-                        className="flex items-center justify-between bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                        className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                       >
                         <span className="text-gray-800 text-sm flex items-center gap-2">
                           <ClipboardIcon className="h-5 w-5 text-blue-500" />
@@ -194,6 +194,8 @@ const MySubscriptionsPage = () => {
             )}
           </div>
         </div>
+
+        <div className="border-t border-gray-300 my-8" />
 
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
