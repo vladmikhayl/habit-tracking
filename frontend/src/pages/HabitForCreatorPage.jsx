@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { CameraIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
 import {
   CheckCircleIcon,
   ClockIcon,
   UserCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
+
 import habitsApi from "../api/habitsApi";
 import subscriptionsApi from "../api/subscriptionsApi";
 import { toast } from "react-toastify";
@@ -243,22 +245,27 @@ const HabitForCreatorPage = () => {
       <div className="max-w-3xl mx-auto p-6">
         <div className="flex flex-wrap items-center gap-4 mb-4">
           <h1 className="text-3xl font-bold">{name}</h1>
-          <span
-            className={`text-sm font-semibold px-4 py-2 rounded-full ${
-              isPhotoAllowed
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600"
-            }`}
-          >
-            {isPhotoAllowed
-              ? "Привычка с фотоотчётами"
-              : "Привычка без фотоотчётов"}
+          <span className="text-sm font-semibold px-4 py-2 rounded-full bg-blue-100 text-blue-700">
+            Это ваша привычка
           </span>
         </div>
 
-        <div className="mb-4 text-base flex items-center gap-2 text-blue-700 font-semibold">
-          <UserCircleIcon className="h-5 w-5 text-blue-700" />
-          Вы — создатель этой привычки
+        <div
+          className={`mb-4 text-base flex items-center gap-2 font-semibold ${
+            isPhotoAllowed ? "text-blue-700" : "text-gray-700"
+          }`}
+        >
+          {isPhotoAllowed ? (
+            <>
+              <CameraIcon className="h-5 w-5 text-blue-600" />
+              Привычка с фотоотчётами
+            </>
+          ) : (
+            <>
+              <NoSymbolIcon className="h-5 w-5 text-gray-500" />
+              Привычка без фотоотчётов
+            </>
+          )}
         </div>
 
         <div
