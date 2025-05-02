@@ -12,7 +12,7 @@ import habitsApi from "../api/habitsApi";
 import subscriptionsApi from "../api/subscriptionsApi";
 import { toast } from "react-toastify";
 
-const HabitPage = () => {
+const HabitForCreatorPage = () => {
   const navigate = useNavigate();
   const { id: pageHabitId } = useParams();
 
@@ -215,6 +215,7 @@ const HabitPage = () => {
 
       fetchData();
     } catch (error) {
+      toast.error(error.message);
       console.error("Ошибка при принятии заявки:", error);
     }
   };
@@ -232,6 +233,7 @@ const HabitPage = () => {
 
       fetchData();
     } catch (error) {
+      toast.error(error.message);
       console.error("Ошибка при отклонении заявки:", error);
     }
   };
@@ -613,7 +615,10 @@ const HabitPage = () => {
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
-          <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm">
+          <button
+            onClick={() => navigate(`/habits/${pageHabitId}/edit`)}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm"
+          >
             Редактировать привычку
           </button>
           <button
@@ -628,4 +633,4 @@ const HabitPage = () => {
   );
 };
 
-export default HabitPage;
+export default HabitForCreatorPage;

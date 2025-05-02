@@ -52,7 +52,7 @@ const MyHabitsPage = () => {
 
         <div>
           <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Привычки на {format(new Date(selectedDate), "dd.MM.yyyy")}
+            Ваши привычки на {format(new Date(selectedDate), "dd.MM.yyyy")}
           </h3>
 
           {habits.length === 0 ? (

@@ -11,7 +11,8 @@ import RegisterPage from "./pages/RegisterPage";
 import MyHabitsPage from "./pages/MyHabitsPage";
 import MySubscriptionsPage from "./pages/MySubscriptionsPage";
 import CreateHabitPage from "./pages/CreateHabitPage";
-import HabitPage from "./pages/HabitPage";
+import HabitForCreatorPage from "./pages/HabitForCreatorPage";
+import EditingHabitPage from "./pages/EditingHabitPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PrivateRoute from "./api/PrivateRoute";
@@ -51,7 +52,15 @@ const App = () => {
           path="/habits/:id"
           element={
             <PrivateRoute>
-              <HabitPage />
+              <HabitForCreatorPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/habits/:id/edit"
+          element={
+            <PrivateRoute>
+              <EditingHabitPage />
             </PrivateRoute>
           }
         />

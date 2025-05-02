@@ -88,6 +88,38 @@ const habitsApi = {
     }
   },
 
+  // Редактировать привычку
+  edit: async (habitId, { description, isHarmful, durationDays }) => {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`/api/habits/${habitId}/edit`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        description,
+        isHarmful,
+        durationDays,
+      }),
+    });
+
+    if (!response.ok) {
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (error) {}
+      let errorMessage = "Не удалось изменить привычку";
+      if (data?.error) {
+        errorMessage = data.error;
+      } else if (Array.isArray(data?.errors)) {
+        errorMessage = data.errors[0];
+      }
+      throw new Error(errorMessage);
+    }
+  },
+
   // Удалить привычку
   delete: async (habitId) => {
     const token = localStorage.getItem("token");
