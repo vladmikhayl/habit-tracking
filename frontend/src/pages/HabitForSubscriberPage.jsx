@@ -82,6 +82,7 @@ const HabitForSubscriberPage = () => {
     timesPerWeek,
     timesPerMonth,
     createdAt,
+    subscribersCount,
   } = habit;
 
   const formatDate = (iso) =>
@@ -233,6 +234,11 @@ const HabitForSubscriberPage = () => {
                   : "Частота выполнения:"}
               </span>
               <div className="text-base text-gray-800">{formatFrequency()}</div>
+            </div>
+
+            <div>
+              <span className="text-gray-500">Подписчиков:</span>
+              <div className="text-base text-gray-800">{subscribersCount}</div>
             </div>
           </div>
 
