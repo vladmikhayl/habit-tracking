@@ -20,7 +20,6 @@ const MySubscriptionsPage = () => {
   const [showAccepted, setShowAccepted] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showPending, setShowPending] = useState(false);
-  const [isLoadingPending, setIsLoadingPending] = useState(false);
 
   const fetchSubscriptions = async () => {
     try {
@@ -167,29 +166,25 @@ const MySubscriptionsPage = () => {
 
             {showPending && pendingRequests.length > 0 && (
               <div className="mt-2">
-                {isLoadingPending ? (
-                  <div className="text-gray-500 text-sm">Загрузка...</div>
-                ) : (
-                  <div className="space-y-2">
-                    {pendingRequests.map((req) => (
-                      <div
-                        key={req.habitId}
-                        className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                <div className="space-y-2">
+                  {pendingRequests.map((req) => (
+                    <div
+                      key={req.habitId}
+                      className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                    >
+                      <span className="text-gray-800 text-sm flex items-center gap-2">
+                        <ClipboardIcon className="h-5 w-5 text-blue-500" />
+                        {req.habitName} (ID {req.habitId})
+                      </span>
+                      <button
+                        onClick={() => handleUnsubscribe(req.habitId)}
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg"
                       >
-                        <span className="text-gray-800 text-sm flex items-center gap-2">
-                          <ClipboardIcon className="h-5 w-5 text-blue-500" />
-                          {req.habitName} (ID {req.habitId})
-                        </span>
-                        <button
-                          onClick={() => handleUnsubscribe(req.habitId)}
-                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg"
-                        >
-                          Отменить заявку
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                        Отменить заявку
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -211,25 +206,27 @@ const MySubscriptionsPage = () => {
           </div>
         </div>
 
-        <div>
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Привычки на {format(new Date(selectedDate), "dd.MM.yyyy")} среди
-            ваших подписок
-          </h3>
+        {selectedDate && (
+          <div>
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+              Привычки на {format(new Date(selectedDate), "dd.MM.yyyy")} среди
+              ваших подписок
+            </h3>
 
-          {habits.length === 0 ? (
-            <p className="text-gray-600">
-              На эту дату не запланировано ни одной привычки, на которую вы
-              подписаны
-            </p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {habits.map((habit) => (
-                <HabitCardForSubscriber key={habit.habitId} habit={habit} />
-              ))}
-            </div>
-          )}
-        </div>
+            {habits.length === 0 ? (
+              <p className="text-gray-600">
+                На эту дату не запланировано ни одной привычки, на которую вы
+                подписаны
+              </p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {habits.map((habit) => (
+                  <HabitCardForSubscriber key={habit.habitId} habit={habit} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </MainLayout>
   );

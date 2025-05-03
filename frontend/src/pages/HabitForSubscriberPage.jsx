@@ -9,6 +9,7 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
 import habitsApi from "../api/habitsApi";
+import { format } from "date-fns";
 
 const HabitForSubscriberPage = () => {
   const { id: pageHabitId } = useParams();
@@ -18,7 +19,7 @@ const HabitForSubscriberPage = () => {
 
   // Хуки для показа отчета за выбранный день
   const [selectedDate, setSelectedDate] = useState(
-    () => new Date().toISOString().split("T")[0]
+    format(new Date(), "yyyy-MM-dd")
   );
   const [dailyReport, setDailyReport] = useState(null);
 
@@ -419,7 +420,7 @@ const HabitForSubscriberPage = () => {
               )}
             </div>
           ) : (
-            <p className="text-gray-600">Нет отчета за выбранную дату</p>
+            <></>
           )}
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
 import habitsApi from "../api/habitsApi";
 import subscriptionsApi from "../api/subscriptionsApi";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
 
 const HabitForCreatorPage = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const HabitForCreatorPage = () => {
 
   // Хуки для показа отчета за выбранный день
   const [selectedDate, setSelectedDate] = useState(
-    () => new Date().toISOString().split("T")[0]
+    format(new Date(), "yyyy-MM-dd")
   );
   const [dailyReport, setDailyReport] = useState(null);
 
@@ -623,7 +624,7 @@ const HabitForCreatorPage = () => {
               )}
             </div>
           ) : (
-            <p className="text-gray-600">Нет отчета за выбранную дату</p>
+            <></>
           )}
         </div>
 

@@ -11,6 +11,7 @@ const MyHabitsPage = () => {
   const [selectedDate, setSelectedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
+
   const navigate = useNavigate();
 
   const fetchHabits = async (date) => {
@@ -50,28 +51,30 @@ const MyHabitsPage = () => {
           </button>
         </div>
 
-        <div>
-          <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-            Ваши привычки на {format(new Date(selectedDate), "dd.MM.yyyy")}
-          </h3>
+        {selectedDate && (
+          <div>
+            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+              Ваши привычки на {format(new Date(selectedDate), "dd.MM.yyyy")}
+            </h3>
 
-          {habits.length === 0 ? (
-            <p className="text-gray-600">
-              На эту дату не запланировано ни одной привычки
-            </p>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {habits.map((habit) => (
-                <HabitCardForCreator
-                  key={habit.habitId}
-                  habit={habit}
-                  date={selectedDate}
-                  onActionComplete={() => fetchHabits(selectedDate)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+            {habits.length === 0 ? (
+              <p className="text-gray-600">
+                На эту дату не запланировано ни одной привычки
+              </p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {habits.map((habit) => (
+                  <HabitCardForCreator
+                    key={habit.habitId}
+                    habit={habit}
+                    date={selectedDate}
+                    onActionComplete={() => fetchHabits(selectedDate)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </MainLayout>
   );
