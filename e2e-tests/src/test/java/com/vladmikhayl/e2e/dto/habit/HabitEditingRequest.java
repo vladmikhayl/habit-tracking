@@ -10,8 +10,8 @@ public class HabitEditingRequest {
 
     private String description;
 
-    @JsonProperty("isHarmful")
-    private Boolean isHarmful;
+//    @JsonProperty("isHarmful")
+//    private Boolean isHarmful;
 
     private Integer durationDays;
 

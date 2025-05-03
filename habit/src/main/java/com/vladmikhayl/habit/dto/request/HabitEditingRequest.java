@@ -27,9 +27,9 @@ public class HabitEditingRequest {
     @Schema(description = "Новое описание", example = "Бег это очень полезно, поэтому я решил делать пробежку в течение 2ух месяцев")
     private String description;
 
-    @JsonProperty("isHarmful")
-    @Schema(description = "Является ли теперь эта привычка вредной", example = "false")
-    private Boolean isHarmful;
+//    @JsonProperty("isHarmful")
+//    @Schema(description = "Является ли теперь эта привычка вредной", example = "false")
+//    private Boolean isHarmful;
 
     @Min(value = 0, message = "Если длительность указана, то она должна составлять хотя бы 1 день")
     @Max(value = 730, message = "Длительность не может превышать 730 дней")

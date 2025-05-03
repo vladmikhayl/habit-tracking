@@ -34,8 +34,8 @@ public class HabitWithoutAutoCreationTime {
     @Column(nullable = false)
     private boolean isPhotoAllowed = false;
 
-    @Column(nullable = false)
-    private boolean isHarmful = false;
+//    @Column(nullable = false)
+//    private boolean isHarmful = false;
 
     private Integer durationDays;
 

@@ -87,7 +87,7 @@ class HabitServiceTest {
                 .name("Чистить зубы 2 раза в день")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .daysOfWeek(null)
@@ -121,7 +121,7 @@ class HabitServiceTest {
                 .name("Чистить зубы 2 раза в день")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .daysOfWeek(null)
@@ -152,7 +152,7 @@ class HabitServiceTest {
                 .name("Чистить зубы 2 раза в день")
                 .description("Чистка зубов - это очень полезно")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(60)
                 .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
@@ -186,7 +186,7 @@ class HabitServiceTest {
                 .name("Чистить зубы 2 раза в день")
                 .description("Чистка зубов - это очень полезно")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(60)
                 .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
@@ -217,7 +217,7 @@ class HabitServiceTest {
                 .name("Чистить зубы 2 раза в день")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.FRIDAY))
@@ -244,7 +244,7 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -253,7 +253,7 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name("Новое название привычки")
                 .description("Новое описание привычки")
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(60)
                 .build();
 
@@ -268,7 +268,7 @@ class HabitServiceTest {
 
 //        assertThat(habit.getName()).isEqualTo("Новое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Новое описание привычки");
-        assertThat(habit.isHarmful()).isTrue();
+//        assertThat(habit.isHarmful()).isTrue();
         assertThat(habit.getDurationDays()).isEqualTo(60);
     }
 
@@ -309,7 +309,7 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .timesPerWeek(3)
@@ -318,7 +318,7 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(null)
                 .build();
 
@@ -332,7 +332,7 @@ class HabitServiceTest {
 
         assertThat(habit.getName()).isEqualTo("Старое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
-        assertThat(habit.isHarmful()).isFalse();
+//        assertThat(habit.isHarmful()).isFalse();
         assertThat(habit.getDurationDays()).isEqualTo(30);
     }
 
@@ -341,7 +341,7 @@ class HabitServiceTest {
         Habit habit = Habit.builder()
                 .name("Старое название привычки")
                 .description("Старое описание привычки")
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .timesPerWeek(3)
@@ -350,7 +350,7 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(0)
                 .build();
 
@@ -364,7 +364,7 @@ class HabitServiceTest {
 
         assertThat(habit.getName()).isEqualTo("Старое название привычки");
         assertThat(habit.getDescription()).isEqualTo("Старое описание привычки");
-        assertThat(habit.isHarmful()).isFalse();
+//        assertThat(habit.isHarmful()).isFalse();
         assertThat(habit.getDurationDays()).isNull();
     }
 
@@ -373,7 +373,7 @@ class HabitServiceTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name("Новое название привычки")
                 .description("Новое описание привычки")
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(60)
                 .build();
 
@@ -422,38 +422,38 @@ class HabitServiceTest {
 //                .hasMessage("This user already has a habit with that name");
 //    }
 
-    @Test
-    void failSetHarmfulTrueWithNotWeeklyOnDaysFrequency() {
-        Habit habit = Habit.builder()
-                .name("Старое название привычки")
-                .description("Старое описание привычки")
-                .isHarmful(false)
-                .durationDays(30)
-                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
-                .timesPerWeek(3)
-                .build();
-
-        HabitEditingRequest request = HabitEditingRequest.builder()
-//                .name(null)
-                .description(null)
-                .isHarmful(true)
-                .durationDays(null)
-                .build();
-
-        String userIdStr = "1";
-        Long userId = 1L;
-        Long habitId = 2L;
-
-        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
-
-        assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
-                .isInstanceOf(ResponseStatusException.class)
-                .satisfies(ex -> {
-                    ResponseStatusException e = (ResponseStatusException) ex;
-                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-                })
-                .hasMessageContaining("Привычка может быть вредной, только если она выполняется в определённые дни недели");
-    }
+//    @Test
+//    void failSetHarmfulTrueWithNotWeeklyOnDaysFrequency() {
+//        Habit habit = Habit.builder()
+//                .name("Старое название привычки")
+//                .description("Старое описание привычки")
+//                .isHarmful(false)
+//                .durationDays(30)
+//                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+//                .timesPerWeek(3)
+//                .build();
+//
+//        HabitEditingRequest request = HabitEditingRequest.builder()
+////                .name(null)
+//                .description(null)
+//                .isHarmful(true)
+//                .durationDays(null)
+//                .build();
+//
+//        String userIdStr = "1";
+//        Long userId = 1L;
+//        Long habitId = 2L;
+//
+//        when(habitRepository.findByIdAndUserId(habitId, userId)).thenReturn(Optional.of(habit));
+//
+//        assertThatThrownBy(() -> underTest.editHabit(habitId, request, userIdStr))
+//                .isInstanceOf(ResponseStatusException.class)
+//                .satisfies(ex -> {
+//                    ResponseStatusException e = (ResponseStatusException) ex;
+//                    assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+//                })
+//                .hasMessageContaining("Привычка может быть вредной, только если она выполняется в определённые дни недели");
+//    }
 
     @Test
     void canDeleteHabitWhenItBelongsToUser() {

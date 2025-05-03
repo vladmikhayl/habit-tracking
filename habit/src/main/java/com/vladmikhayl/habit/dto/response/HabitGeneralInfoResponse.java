@@ -29,8 +29,8 @@ public class HabitGeneralInfoResponse {
     @Schema(description = "Подразумевает ли эта привычка фотоотчёт", example = "false")
     private Boolean isPhotoAllowed;
 
-    @Schema(description = "Является ли эта привычка вредной", example = "false")
-    private Boolean isHarmful;
+//    @Schema(description = "Является ли эта привычка вредной", example = "false")
+//    private Boolean isHarmful;
 
     @Schema(description = "Длительность привычки в днях", example = "30")
     private Integer durationDays;

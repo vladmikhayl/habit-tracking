@@ -123,7 +123,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -148,7 +148,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -168,7 +168,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .daysOfWeek(null)
@@ -193,7 +193,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .daysOfWeek(null)
@@ -213,7 +213,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.MONTHLY_X_TIMES)
                 .daysOfWeek(null)
@@ -238,7 +238,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.MONTHLY_X_TIMES)
                 .daysOfWeek(null)
@@ -258,7 +258,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.MONTHLY_X_TIMES)
                 .daysOfWeek(null)
@@ -274,7 +274,7 @@ public class HabitControllerIntegrationTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.MONTHLY_X_TIMES)
                 .daysOfWeek(null)
@@ -295,32 +295,32 @@ public class HabitControllerIntegrationTest {
         assertThat(habitsCount).isEqualTo(1);
     }
 
-    @Test
-    void failCreateHabitWithWrongHarmfulSetting() throws Exception {
-        HabitCreationRequest request = HabitCreationRequest.builder()
-                .name("Название")
-                .description(null)
-                .isPhotoAllowed(false)
-                .isHarmful(true)
-                .durationDays(5)
-                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
-                .daysOfWeek(null)
-                .timesPerWeek(1)
-                .timesPerMonth(null)
-                .build();
-
-        String userIdStr = "1";
-
-        mockMvc.perform(post("/api/v1/habits/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", userIdStr))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
-
-        long habitsCount = habitRepository.count();
-        assertThat(habitsCount).isEqualTo(0);
-    }
+//    @Test
+//    void failCreateHabitWithWrongHarmfulSetting() throws Exception {
+//        HabitCreationRequest request = HabitCreationRequest.builder()
+//                .name("Название")
+//                .description(null)
+//                .isPhotoAllowed(false)
+////                .isHarmful(true)
+//                .durationDays(5)
+//                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+//                .daysOfWeek(null)
+//                .timesPerWeek(1)
+//                .timesPerMonth(null)
+//                .build();
+//
+//        String userIdStr = "1";
+//
+//        mockMvc.perform(post("/api/v1/habits/create")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                        .header("X-User-Id", userIdStr))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.errors[0]").value("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
+//
+//        long habitsCount = habitRepository.count();
+//        assertThat(habitsCount).isEqualTo(0);
+//    }
 
     @Test
     @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -333,7 +333,7 @@ public class HabitControllerIntegrationTest {
                 .name("Старое название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -346,7 +346,7 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name("Новое название")
                 .description("Описание")
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .build();
 
@@ -362,7 +362,7 @@ public class HabitControllerIntegrationTest {
                 .name("Старое название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -393,7 +393,7 @@ public class HabitControllerIntegrationTest {
                 .name("Старое название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -406,7 +406,7 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(0)
                 .build();
 
@@ -422,7 +422,7 @@ public class HabitControllerIntegrationTest {
                 .name("Старое название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -452,7 +452,7 @@ public class HabitControllerIntegrationTest {
                 .name("Старое название")
                 .description(null)
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(5)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -465,7 +465,7 @@ public class HabitControllerIntegrationTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name("Новое название")
                 .description("Описание")
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .build();
 
@@ -550,52 +550,52 @@ public class HabitControllerIntegrationTest {
 //        assertThat(habitsCount).isEqualTo(2);
 //    }
 
-    @Test
-    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void failSetHarmfulTrueWithNotWeeklyOnDaysFrequency() throws Exception {
-        String userIdStr = "1";
-        Long userId = 1L;
-
-        Habit existingHabit = Habit.builder()
-                .userId(userId)
-                .name("Название")
-                .description(null)
-                .isPhotoAllowed(true)
-                .isHarmful(false)
-                .durationDays(5)
-                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
-                .daysOfWeek(null)
-                .timesPerWeek(2)
-                .timesPerMonth(null)
-                .build();
-
-        habitRepository.save(existingHabit);
-
-        HabitEditingRequest request = HabitEditingRequest.builder()
-//                .name(null)
-                .description(null)
-                .isHarmful(true)
-                .durationDays(null)
-                .build();
-
-        mockMvc.perform(put("/api/v1/habits/1/edit")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", userIdStr))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
-
-        Optional<Habit> oldHabit = habitRepository.findByName("Название");
-        assertThat(oldHabit.isPresent()).isTrue();
-
-        assertThat(oldHabit.get())
-                .usingRecursiveComparison()
-                .ignoringFields("id", "createdAt")
-                .isEqualTo(existingHabit);
-
-        long habitsCount = habitRepository.count();
-        assertThat(habitsCount).isEqualTo(1);
-    }
+//    @Test
+//    @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+//    void failSetHarmfulTrueWithNotWeeklyOnDaysFrequency() throws Exception {
+//        String userIdStr = "1";
+//        Long userId = 1L;
+//
+//        Habit existingHabit = Habit.builder()
+//                .userId(userId)
+//                .name("Название")
+//                .description(null)
+//                .isPhotoAllowed(true)
+//                .isHarmful(false)
+//                .durationDays(5)
+//                .frequencyType(FrequencyType.WEEKLY_X_TIMES)
+//                .daysOfWeek(null)
+//                .timesPerWeek(2)
+//                .timesPerMonth(null)
+//                .build();
+//
+//        habitRepository.save(existingHabit);
+//
+//        HabitEditingRequest request = HabitEditingRequest.builder()
+////                .name(null)
+//                .description(null)
+//                .isHarmful(true)
+//                .durationDays(null)
+//                .build();
+//
+//        mockMvc.perform(put("/api/v1/habits/1/edit")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                        .header("X-User-Id", userIdStr))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.error").value("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
+//
+//        Optional<Habit> oldHabit = habitRepository.findByName("Название");
+//        assertThat(oldHabit.isPresent()).isTrue();
+//
+//        assertThat(oldHabit.get())
+//                .usingRecursiveComparison()
+//                .ignoringFields("id", "createdAt")
+//                .isEqualTo(existingHabit);
+//
+//        long habitsCount = habitRepository.count();
+//        assertThat(habitsCount).isEqualTo(1);
+//    }
 
     @Test
     @Sql(statements = "ALTER SEQUENCE habit_seq RESTART WITH 1", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -959,7 +959,7 @@ public class HabitControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Название"))
                 .andExpect(jsonPath("$.description").doesNotExist())
                 .andExpect(jsonPath("$.isPhotoAllowed").value("false"))
-                .andExpect(jsonPath("$.isHarmful").value("false"))
+//                .andExpect(jsonPath("$.isHarmful").value("false"))
                 .andExpect(jsonPath("$.durationDays").doesNotExist())
                 .andExpect(jsonPath("$.howManyDaysLeft").doesNotExist())
                 .andExpect(jsonPath("$.frequencyType").value("WEEKLY_ON_DAYS"))
@@ -1008,7 +1008,7 @@ public class HabitControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Название"))
                 .andExpect(jsonPath("$.description").doesNotExist())
                 .andExpect(jsonPath("$.isPhotoAllowed").value("false"))
-                .andExpect(jsonPath("$.isHarmful").value("false"))
+//                .andExpect(jsonPath("$.isHarmful").value("false"))
                 .andExpect(jsonPath("$.durationDays").value(3))
                 .andExpect(jsonPath("$.howManyDaysLeft").value(3))
                 .andExpect(jsonPath("$.frequencyType").value("WEEKLY_ON_DAYS"))
@@ -1070,7 +1070,7 @@ public class HabitControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Название"))
                 .andExpect(jsonPath("$.description").doesNotExist())
                 .andExpect(jsonPath("$.isPhotoAllowed").value("false"))
-                .andExpect(jsonPath("$.isHarmful").value("false"))
+//                .andExpect(jsonPath("$.isHarmful").value("false"))
                 .andExpect(jsonPath("$.durationDays").value(3))
                 .andExpect(jsonPath("$.howManyDaysLeft").value(-1))
                 .andExpect(jsonPath("$.frequencyType").value("MONTHLY_X_TIMES"))

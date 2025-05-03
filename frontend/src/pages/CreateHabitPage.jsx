@@ -10,7 +10,6 @@ const CreateHabitPage = () => {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState("regular");
   const [frequencyType, setFrequencyType] = useState("weekdays");
   const [weekdays, setWeekdays] = useState([]);
   const [timesCount, setTimesCount] = useState(1);
@@ -27,7 +26,6 @@ const CreateHabitPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const isHarmful = type === "harmful";
     const durationDaysWithNullPossible =
       durationDays === "" ? null : Number(durationDays);
 
@@ -57,7 +55,6 @@ const CreateHabitPage = () => {
       name,
       description,
       isPhotoAllowed,
-      isHarmful,
       durationDays: durationDaysWithNullPossible,
       frequencyType: frequencyTypeWithPeriod,
       daysOfWeek,
@@ -121,58 +118,6 @@ const CreateHabitPage = () => {
 
           <div>
             <label className="block text-base font-medium text-gray-700 mb-2">
-              Какая это будет привычка? *
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-start sm:items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="regular"
-                  checked={type === "regular"}
-                  onChange={() => setType("regular")}
-                />
-                <span className="text-sm flex items-center gap-1">
-                  Регулярная
-                  <div className="relative group">
-                    <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                    <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                      По умолчанию привычка считается{" "}
-                      <strong>невыполненной</strong>, и с указанной
-                      регулярностью нужно ставить отметку о выполнении
-                    </div>
-                  </div>
-                </span>
-              </label>
-
-              <label className="flex items-start sm:items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="harmful"
-                  checked={type === "harmful"}
-                  onChange={() => {
-                    setType("harmful");
-                    setFrequencyType("weekdays");
-                  }}
-                />
-                <span className="text-sm flex items-center gap-1">
-                  Вредная
-                  <div className="relative group">
-                    <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                    <div className="absolute left-6 top-0 w-72 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                      По умолчанию привычка считается{" "}
-                      <strong>выполненной</strong>, и в случае срыва нужно снять
-                      отметку
-                    </div>
-                  </div>
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-gray-700 mb-2">
               Когда нужно будет выполнять эту привычку? *
             </label>
             <div className="space-y-2">
@@ -186,33 +131,16 @@ const CreateHabitPage = () => {
                 />
                 <span className="text-sm">В определённые дни недели</span>
               </label>
-              <label
-                className={`flex items-center gap-2 ${
-                  type === "harmful" ? "text-gray-500 cursor-not-allowed" : ""
-                }`}
-              >
+              <label className={"flex items-center gap-2"}>
                 <input
                   type="radio"
                   name="frequency"
                   value="timesPerPeriod"
                   checked={frequencyType === "timesPerPeriod"}
                   onChange={() => setFrequencyType("timesPerPeriod")}
-                  disabled={type === "harmful"}
                 />
-                <span
-                  className={`text-sm flex items-center gap-1 ${
-                    type === "harmful" ? "text-gray-500" : ""
-                  }`}
-                >
+                <span className={"text-sm flex items-center gap-1"}>
                   Определённое количество раз в неделю или месяц
-                  {type === "harmful" && (
-                    <div className="relative group">
-                      <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                      <div className="absolute left-6 top-0 w-72 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                        Эту опцию нельзя выбрать для вредной привычки
-                      </div>
-                    </div>
-                  )}
                 </span>
               </label>
             </div>
@@ -241,7 +169,7 @@ const CreateHabitPage = () => {
               </>
             )}
 
-            {frequencyType === "timesPerPeriod" && type !== "harmful" && (
+            {frequencyType === "timesPerPeriod" && (
               <>
                 <label className="block text-base font-medium text-gray-700 mt-4 mb-2">
                   Укажите количество повторений *

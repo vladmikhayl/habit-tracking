@@ -40,7 +40,6 @@ public class HabitFlowTests extends BaseE2ETest {
                         null,
                         null,
                         null,
-                        null,
                         FrequencyType.WEEKLY_X_TIMES,
                         null,
                         5,
@@ -73,7 +72,6 @@ public class HabitFlowTests extends BaseE2ETest {
                 new HabitCreationRequest(
                         "Привычка 2",
                         "Описание",
-                        true,
                         true,
                         null,
                         FrequencyType.WEEKLY_ON_DAYS,
@@ -125,7 +123,6 @@ public class HabitFlowTests extends BaseE2ETest {
                         "Привычка 1",
                         "Старое описание",
                         false,
-                        false,
                         null,
                         FrequencyType.WEEKLY_ON_DAYS,
                         Set.of(LocalDate.now().getDayOfWeek()),
@@ -145,7 +142,7 @@ public class HabitFlowTests extends BaseE2ETest {
         // Проверяем общую инфу по созданной привычке
         HabitGeneralInfoResponse habitGeneralInfoResponse1 = habitHelper.getGeneralInfo(token, existingHabitId);
         assertThat(habitGeneralInfoResponse1.getDescription()).isEqualTo("Старое описание");
-        assertThat(habitGeneralInfoResponse1.getIsHarmful()).isEqualTo(false);
+//        assertThat(habitGeneralInfoResponse1.getIsHarmful()).isEqualTo(false);
         assertThat(habitGeneralInfoResponse1.getDurationDays()).isEqualTo(null);
 
         // Юзер редактирует свою привычку
@@ -154,7 +151,6 @@ public class HabitFlowTests extends BaseE2ETest {
                 existingHabitId,
                 new HabitEditingRequest(
                         "Новое описание",
-                        true,
                         30
                 )
         );
@@ -162,7 +158,7 @@ public class HabitFlowTests extends BaseE2ETest {
         // Проверяем общую инфу по измененной привычке
         HabitGeneralInfoResponse habitGeneralInfoResponse2 = habitHelper.getGeneralInfo(token, existingHabitId);
         assertThat(habitGeneralInfoResponse2.getDescription()).isEqualTo("Новое описание");
-        assertThat(habitGeneralInfoResponse2.getIsHarmful()).isEqualTo(true);
+//        assertThat(habitGeneralInfoResponse2.getIsHarmful()).isEqualTo(true);
         assertThat(habitGeneralInfoResponse2.getDurationDays()).isEqualTo(30);
 
         // Юзер редактирует свою привычку
@@ -171,7 +167,6 @@ public class HabitFlowTests extends BaseE2ETest {
                 existingHabitId,
                 new HabitEditingRequest(
                         null,
-                        null,
                         0
                 )
         );
@@ -179,7 +174,7 @@ public class HabitFlowTests extends BaseE2ETest {
         // Проверяем общую инфу по измененной привычке
         HabitGeneralInfoResponse habitGeneralInfoResponse3 = habitHelper.getGeneralInfo(token, existingHabitId);
         assertThat(habitGeneralInfoResponse3.getDescription()).isEqualTo("Новое описание");
-        assertThat(habitGeneralInfoResponse3.getIsHarmful()).isEqualTo(true);
+//        assertThat(habitGeneralInfoResponse3.getIsHarmful()).isEqualTo(true);
         assertThat(habitGeneralInfoResponse3.getDurationDays()).isEqualTo(null);
     }
 
@@ -206,7 +201,6 @@ public class HabitFlowTests extends BaseE2ETest {
                 new HabitCreationRequest(
                         "Привычка 1",
                         null,
-                        false,
                         false,
                         null,
                         FrequencyType.WEEKLY_ON_DAYS,

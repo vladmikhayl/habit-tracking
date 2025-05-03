@@ -10,7 +10,6 @@ const EditingHabitPage = () => {
   const { id: pageHabitId } = useParams();
 
   const [description, setDescription] = useState("");
-  const [type, setType] = useState("regular");
   const [durationDays, setDurationDays] = useState("");
 
   useEffect(() => {
@@ -19,7 +18,6 @@ const EditingHabitPage = () => {
         const data = await habitsApi.getGeneralInfo(pageHabitId);
         setDescription(data.description || "");
         setDurationDays(data.durationDays?.toString() || "");
-        setType(data.isHarmful ? "harmful" : "regular");
       } catch (error) {
         console.error("Ошибка при загрузке данных привычки:", error);
         toast.error("Не удалось загрузить данные привычки");
@@ -33,13 +31,11 @@ const EditingHabitPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const isHarmful = type === "harmful";
 
     try {
       await habitsApi.edit(pageHabitId, {
         description,
         durationDays: durationDays === "" ? 0 : Number(durationDays),
-        isHarmful,
       });
       toast.success("Привычка успешно изменена");
       navigate(`/habits/${pageHabitId}`);
@@ -80,63 +76,6 @@ const EditingHabitPage = () => {
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none"
             />
-          </div>
-
-          <div>
-            <label className="block text-base font-medium text-gray-700 mb-2 flex items-center gap-1">
-              Какая это привычка?
-              <div className="relative group">
-                <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                <div className="absolute left-6 top-0 w-72 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                  Изменение этого пункта повлияет на все отметки о выполнении,
-                  начиная с завтрашнего дня
-                </div>
-              </div>
-            </label>
-
-            <div className="space-y-2">
-              <label className="flex items-start sm:items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="regular"
-                  checked={type === "regular"}
-                  onChange={() => setType("regular")}
-                />
-                <span className="text-sm flex items-center gap-1">
-                  Регулярная
-                  <div className="relative group">
-                    <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                    <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                      По умолчанию привычка считается{" "}
-                      <strong>невыполненной</strong>, и нужно регулярно отмечать
-                      её выполнение
-                    </div>
-                  </div>
-                </span>
-              </label>
-
-              <label className="flex items-start sm:items-center gap-2">
-                <input
-                  type="radio"
-                  name="type"
-                  value="harmful"
-                  checked={type === "harmful"}
-                  onChange={() => setType("harmful")}
-                />
-                <span className="text-sm flex items-center gap-1">
-                  Вредная
-                  <div className="relative group">
-                    <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                    <div className="absolute left-6 top-0 w-72 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                      По умолчанию привычка считается{" "}
-                      <strong>выполненной</strong>, и в случае срыва нужно снять
-                      отметку
-                    </div>
-                  </div>
-                </span>
-              </label>
-            </div>
           </div>
 
           <div>

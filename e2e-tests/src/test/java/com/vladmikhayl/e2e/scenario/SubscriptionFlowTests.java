@@ -37,7 +37,6 @@ public class SubscriptionFlowTests extends BaseE2ETest {
                         null,
                         null,
                         null,
-                        null,
                         FrequencyType.WEEKLY_X_TIMES,
                         null,
                         5,
@@ -142,7 +141,6 @@ public class SubscriptionFlowTests extends BaseE2ETest {
                 token1,
                 new HabitCreationRequest(
                         "Привычка 1",
-                        null,
                         null,
                         null,
                         null,
@@ -256,7 +254,6 @@ public class SubscriptionFlowTests extends BaseE2ETest {
                         null,
                         null,
                         null,
-                        null,
                         FrequencyType.WEEKLY_X_TIMES,
                         null,
                         5,
@@ -318,7 +315,6 @@ public class SubscriptionFlowTests extends BaseE2ETest {
                 token1,
                 new HabitCreationRequest(
                         "Привычка 1",
-                        null,
                         null,
                         null,
                         null,

@@ -52,7 +52,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -79,7 +79,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description(null)
                 .isPhotoAllowed(false)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(null)
                 .frequencyType(FrequencyType.MONTHLY_X_TIMES)
                 .daysOfWeek(null)
@@ -106,7 +106,7 @@ class HabitControllerTest {
                 .name("")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -136,7 +136,7 @@ class HabitControllerTest {
                 .name("А".repeat(256))
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -166,7 +166,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("А".repeat(1001))
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -196,7 +196,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(0)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -226,7 +226,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(731)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY))
@@ -256,7 +256,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(null)
                 .daysOfWeek(null)
@@ -286,7 +286,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(null)
@@ -316,7 +316,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_ON_DAYS)
                 .daysOfWeek(Set.of())
@@ -346,7 +346,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.WEEKLY_X_TIMES)
                 .daysOfWeek(null)
@@ -376,7 +376,7 @@ class HabitControllerTest {
                 .name("Название")
                 .description("Описание")
                 .isPhotoAllowed(true)
-                .isHarmful(false)
+//                .isHarmful(false)
                 .durationDays(30)
                 .frequencyType(FrequencyType.MONTHLY_X_TIMES)
                 .daysOfWeek(Set.of(DayOfWeek.MONDAY))
@@ -400,35 +400,35 @@ class HabitControllerTest {
         verify(habitService, never()).createHabit(any(), any());
     }
 
-    @Test
-    void failCreateHabitWithWrongHarmfulSetting() throws Exception {
-        HabitCreationRequest request = HabitCreationRequest.builder()
-                .name("Название")
-                .description("Описание")
-                .isPhotoAllowed(true)
-                .isHarmful(true)
-                .durationDays(30)
-                .frequencyType(FrequencyType.MONTHLY_X_TIMES)
-                .daysOfWeek(null)
-                .timesPerWeek(null)
-                .timesPerMonth(10)
-                .build();
-
-        String userIdStr = "1";
-
-        mockMvc.perform(post("/api/v1/habits/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))
-                        .header("X-User-Id", userIdStr))
-                .andExpect(result -> {
-                    Exception exception = result.getResolvedException();
-                    assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
-                })
-                .andExpect(status().isBadRequest());
-
-        verify(habitService, never()).createHabit(any(), any());
-    }
+//    @Test
+//    void failCreateHabitWithWrongHarmfulSetting() throws Exception {
+//        HabitCreationRequest request = HabitCreationRequest.builder()
+//                .name("Название")
+//                .description("Описание")
+//                .isPhotoAllowed(true)
+////                .isHarmful(true)
+//                .durationDays(30)
+//                .frequencyType(FrequencyType.MONTHLY_X_TIMES)
+//                .daysOfWeek(null)
+//                .timesPerWeek(null)
+//                .timesPerMonth(10)
+//                .build();
+//
+//        String userIdStr = "1";
+//
+//        mockMvc.perform(post("/api/v1/habits/create")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request))
+//                        .header("X-User-Id", userIdStr))
+//                .andExpect(result -> {
+//                    Exception exception = result.getResolvedException();
+//                    assertTrue(exception instanceof MethodArgumentNotValidException);
+//                    assertTrue(exception.getMessage().contains("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
+//                })
+//                .andExpect(status().isBadRequest());
+//
+//        verify(habitService, never()).createHabit(any(), any());
+//    }
 
     @Test
     void failCreateHabitWhenRequestBodyIsMissing() throws Exception {
@@ -443,7 +443,7 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name("Название")
                 .description("Описание")
-                .isHarmful(true)
+//                .isHarmful(true)
                 .durationDays(30)
                 .build();
 
@@ -466,7 +466,7 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(0)
                 .build();
 
@@ -489,7 +489,7 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(null)
                 .build();
 
@@ -562,7 +562,7 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description("А".repeat(1001))
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(null)
                 .build();
 
@@ -587,7 +587,7 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(-1)
                 .build();
 
@@ -612,7 +612,7 @@ class HabitControllerTest {
         HabitEditingRequest request = HabitEditingRequest.builder()
 //                .name(null)
                 .description(null)
-                .isHarmful(null)
+//                .isHarmful(null)
                 .durationDays(731)
                 .build();
 

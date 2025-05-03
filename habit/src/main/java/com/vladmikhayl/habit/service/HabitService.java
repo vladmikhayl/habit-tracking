@@ -75,7 +75,7 @@ public class HabitService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .isPhotoAllowed(request.isPhotoAllowed())
-                .isHarmful(request.isHarmful())
+//                .isHarmful(request.isHarmful())
                 .durationDays(request.getDurationDays())
                 .frequencyType(request.getFrequencyType())
                 .daysOfWeek(request.getDaysOfWeek())
@@ -118,13 +118,13 @@ public class HabitService {
             habit.setDescription(request.getDescription());
         }
 
-        if (request.getIsHarmful() != null) {
-            if (habit.getFrequencyType() != FrequencyType.WEEKLY_ON_DAYS && request.getIsHarmful()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Привычка может быть вредной, только если она выполняется в определённые дни недели");
-            }
-            habit.setHarmful(request.getIsHarmful());
-        }
+//        if (request.getIsHarmful() != null) {
+//            if (habit.getFrequencyType() != FrequencyType.WEEKLY_ON_DAYS && request.getIsHarmful()) {
+//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                        "Привычка может быть вредной, только если она выполняется в определённые дни недели");
+//            }
+//            habit.setHarmful(request.getIsHarmful());
+//        }
 
         // Чтобы положить значение null в поле durationDays, в качестве этого параметра нужно передать 0
         if (request.getDurationDays() != null) {
@@ -185,7 +185,7 @@ public class HabitService {
                 .name(habit.getName())
                 .description(habit.getDescription())
                 .isPhotoAllowed(habit.isPhotoAllowed())
-                .isHarmful(habit.isHarmful())
+//                .isHarmful(habit.isHarmful())
                 .durationDays(habit.getDurationDays())
                 .howManyDaysLeft(howManyDaysLeft)
                 .frequencyType(habit.getFrequencyType())

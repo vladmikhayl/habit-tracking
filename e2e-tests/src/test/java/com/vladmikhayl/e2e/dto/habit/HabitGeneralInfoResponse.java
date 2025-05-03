@@ -22,7 +22,7 @@ public class HabitGeneralInfoResponse {
 
     private Boolean isPhotoAllowed;
 
-    private Boolean isHarmful;
+//    private Boolean isHarmful;
 
     private Integer durationDays;
 

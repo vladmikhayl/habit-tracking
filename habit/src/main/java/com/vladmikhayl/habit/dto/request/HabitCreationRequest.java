@@ -36,9 +36,9 @@ public class HabitCreationRequest {
     @Schema(description = "Подразумевает ли эта привычка фотоотчёт", example = "false")
     private boolean isPhotoAllowed;
 
-    @JsonProperty("isHarmful")
-    @Schema(description = "Является ли эта привычка вредной", example = "false")
-    private boolean isHarmful;
+//    @JsonProperty("isHarmful")
+//    @Schema(description = "Является ли эта привычка вредной", example = "false")
+//    private boolean isHarmful;
 
     @Min(value = 1, message = "Если длительность указана, то она должна составлять хотя бы 1 день")
     @Max(value = 730, message = "Длительность не может превышать 730 дней")
@@ -79,10 +79,10 @@ public class HabitCreationRequest {
         };
     }
 
-    @AssertTrue(message = "Привычка может быть вредной, только если она выполняется в определённые дни недели")
-    @Hidden
-    public boolean isValidHarmful() {
-        return !isHarmful || frequencyType == FrequencyType.WEEKLY_ON_DAYS;
-    }
+//    @AssertTrue(message = "Привычка может быть вредной, только если она выполняется в определённые дни недели")
+//    @Hidden
+//    public boolean isValidHarmful() {
+//        return !isHarmful || frequencyType == FrequencyType.WEEKLY_ON_DAYS;
+//    }
 
 }

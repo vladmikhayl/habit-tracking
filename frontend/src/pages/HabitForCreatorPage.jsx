@@ -97,7 +97,6 @@ const HabitForCreatorPage = () => {
     name,
     description,
     isPhotoAllowed,
-    isHarmful,
     durationDays,
     howManyDaysLeft,
     frequencyType,
@@ -340,21 +339,6 @@ const HabitForCreatorPage = () => {
             </div>
 
             <div>
-              <span className="text-gray-500">Тип привычки:</span>
-              <div className="text-base text-gray-800 flex items-center gap-1">
-                {isHarmful ? "Вредная" : "Регулярная"}
-                <div className="relative group">
-                  <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
-                  <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
-                    {isHarmful
-                      ? "По умолчанию привычка считается выполненной, и в случае срыва нужно снять отметку"
-                      : "По умолчанию привычка считается невыполненной, и с указанной регулярностью нужно ставить отметку о выполнении"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
               <span className="text-gray-500">
                 {frequencyType === "WEEKLY_ON_DAYS"
                   ? "Запланированные дни выполнения:"
@@ -365,12 +349,15 @@ const HabitForCreatorPage = () => {
           </div>
 
           {description && description.trim() && (
-            <div>
-              <span className="text-gray-500">Описание:</span>
-              <p className="mt-1 text-base text-gray-800 break-words whitespace-pre-wrap">
-                {description}
-              </p>
-            </div>
+            <>
+              <hr className="my-2 border-gray-300" />
+              <div>
+                <span className="text-gray-500">Описание:</span>
+                <p className="mt-1 text-base text-gray-800 break-words whitespace-pre-wrap">
+                  {description}
+                </p>
+              </div>
+            </>
           )}
         </div>
 

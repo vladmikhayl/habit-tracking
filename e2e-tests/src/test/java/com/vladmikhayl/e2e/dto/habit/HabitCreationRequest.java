@@ -19,8 +19,8 @@ public class HabitCreationRequest {
     @JsonProperty("isPhotoAllowed")
     private Boolean isPhotoAllowed;
 
-    @JsonProperty("isHarmful")
-    private Boolean isHarmful;
+//    @JsonProperty("isHarmful")
+//    private Boolean isHarmful;
 
     private Integer durationDays;
 
