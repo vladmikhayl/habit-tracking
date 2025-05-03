@@ -48,6 +48,9 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
       await reportsApi.createReport(habitId, date, photoUrl);
       toast.success("Отметка о выполнении поставлена");
       onActionComplete();
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setSelectedFile(null);
     } catch (err) {
       console.error(err);
       toast.error(err.message);
@@ -93,6 +96,9 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
       ); // временно photoUrl = ... при изменении фото
       toast.success("Фото изменено");
       onActionComplete();
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setSelectedFile(null);
     } catch (err) {
       console.error(err);
       toast.error(err.message);
@@ -147,6 +153,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
 
       <div className="pt-2 space-y-3">
         {!isCompleted ? (
+          // Если отмечена невыполненной
           !isPhotoAllowed ? (
             <button
               onClick={markHabitCompleted}
@@ -176,7 +183,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                     <span>
                       {selectedFile
                         ? selectedFile.name
-                        : "Выберите файл, если хотите прикрепить фото (необязательно)"}
+                        : "Это привычка с фотоотчётами. Выберите файл, если хотите прикрепить фото"}
                     </span>
                     {selectedFile && (
                       <button
@@ -216,6 +223,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
             <></>
           )
         ) : (
+          // Если отмечена выполненной
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row gap-3">
               <button
@@ -233,7 +241,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                 </button>
               )}
             </div>
-            {isPhotoAllowed && (
+            {isPhotoAllowed && !isPhotoUploaded && (
               <div className="flex flex-col gap-3 border border-gray-300 p-4 rounded-xl bg-gray-50">
                 <label className="flex items-center justify-between gap-4 cursor-pointer">
                   <div className="flex items-center gap-3 text-gray-700">
@@ -256,9 +264,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                       <span>
                         {selectedFile
                           ? selectedFile.name
-                          : isPhotoUploaded
-                          ? "Выберите файл, если хотите заменить фото"
-                          : "Выберите файл, если хотите добавить фото"}
+                          : "Это привычка с фотоотчётами. Выберите файл, если хотите добавить фото"}
                       </span>
                       {selectedFile && (
                         <button
@@ -289,9 +295,9 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                 </label>
                 <button
                   onClick={changeHabitPhoto}
-                  className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold px-5 py-2 rounded-xl transition"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold px-5 py-2 rounded-xl transition"
                 >
-                  {isPhotoUploaded ? "Заменить фото" : "Добавить фото"}
+                  Добавить фото
                 </button>
               </div>
             )}
