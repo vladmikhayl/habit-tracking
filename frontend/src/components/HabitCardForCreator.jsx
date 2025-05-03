@@ -140,13 +140,17 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
       </div>
 
       <div className="text-gray-700 flex items-center gap-1">
-        <UsersIcon className="h-5 w-5 text-blue-500 mr-1" />
+        <span className="flex-shrink-0 h-5 w-5">
+          <UsersIcon className="h-5 w-5 text-blue-500 mr-1" />
+        </span>
         Подписчиков: <span className="font-medium">{subscribersCount}</span>
       </div>
 
       {getProgressText() && (
         <div className="text-gray-700 flex items-center gap-1">
-          <CalendarIcon className="h-5 w-5 text-blue-500 mr-1" />
+          <span className="flex-shrink-0 h-5 w-5">
+            <CalendarIcon className="h-5 w-5 text-blue-500 mr-1" />
+          </span>
           {getProgressText()}
         </div>
       )}
@@ -180,7 +184,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                     />
                   </svg>
                   <div className="flex items-center gap-2">
-                    <span>
+                    <span className="text-sm sm:text-base">
                       {selectedFile
                         ? selectedFile.name
                         : "Это привычка с фотоотчётами. Выберите файл, если хотите прикрепить фото"}
@@ -261,7 +265,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                     </svg>
 
                     <div className="flex items-center gap-2">
-                      <span>
+                      <span className="text-sm sm:text-base">
                         {selectedFile
                           ? selectedFile.name
                           : "Это привычка с фотоотчётами. Выберите файл, если хотите добавить фото"}

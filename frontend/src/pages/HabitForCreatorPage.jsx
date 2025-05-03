@@ -246,7 +246,7 @@ const HabitForCreatorPage = () => {
 
   return (
     <MainLayout>
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-3xl mx-auto p-3 sm:p-6">
         <button
           onClick={() =>
             navigate("/my-habits", { state: { selectedDateForHabits } })
@@ -256,7 +256,9 @@ const HabitForCreatorPage = () => {
           ← Назад
         </button>
         <div className="flex flex-wrap items-center gap-4 mb-4">
-          <h1 className="text-3xl font-bold break-all">{name}</h1>
+          <h1 className="text-3xl font-bold break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+            {name}
+          </h1>
           <span className="text-sm font-semibold px-4 py-2 rounded-full bg-blue-100 text-blue-700">
             Это ваша привычка
           </span>
@@ -291,22 +293,28 @@ const HabitForCreatorPage = () => {
         >
           {howManyDaysLeft === null ? (
             <>
-              <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+              <span className="flex-shrink-0 h-5 w-5">
+                <InformationCircleIcon className="h-5 w-5 text-gray-500" />
+              </span>
               Длительность привычки не задана
             </>
           ) : howManyDaysLeft <= 0 ? (
             <>
-              <CheckCircleIcon className="h-5 w-5 text-green-600" />
+              <span className="flex-shrink-0 h-5 w-5">
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
+              </span>
               Привычка завершена: прошло {durationDays} / {durationDays} дней
             </>
           ) : (
             <div className="flex items-center gap-1 text-blue-700">
-              <ClockIcon className="h-5 w-5 text-blue-600" />
+              <span className="flex-shrink-0 h-5 w-5">
+                <ClockIcon className="h-5 w-5 text-blue-600" />
+              </span>
               <span className="ml-1">
                 Осталось: {howManyDaysLeft} / {durationDays} дней
               </span>
               <div className="relative group">
-                <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer hidden sm:block" />
                 <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm font-normal p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
                   Включая сегодняшний день
                 </div>
@@ -316,13 +324,13 @@ const HabitForCreatorPage = () => {
         </div>
 
         <div className="bg-gray-100 shadow-md rounded-2xl p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <span className="text-gray-500">ID привычки:</span>
               <div className="flex items-center gap-1">
                 <div className="text-base text-gray-800">{id}</div>
                 <div className="relative group">
-                  <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                  <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer hidden sm:block" />
                   <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
                     С помощью этого ID другие люди могут подписаться на вашу
                     привычку
@@ -353,7 +361,7 @@ const HabitForCreatorPage = () => {
               <hr className="my-2 border-gray-300" />
               <div>
                 <span className="text-gray-500">Описание:</span>
-                <p className="mt-1 text-base text-gray-800 break-words whitespace-pre-wrap">
+                <p className="mt-1 text-base text-gray-800 break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
                   {description}
                 </p>
               </div>
@@ -398,17 +406,19 @@ const HabitForCreatorPage = () => {
         </div>
 
         <div className="bg-gray-100 shadow-md rounded-2xl p-6 mt-6 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap">
             <div className="text-base text-gray-800 flex items-center gap-2">
               Необработанных заявок: {pendingRequests.length}
               {pendingRequests.length > 0 && (
-                <ExclamationCircleIcon className="h-6 w-6 text-yellow-500" />
+                <span className="flex-shrink-0 h-5 w-5">
+                  <ExclamationCircleIcon className="h-6 w-6 text-yellow-500" />
+                </span>
               )}
             </div>
             {pendingRequests.length > 0 && (
               <button
                 onClick={handleTogglePending}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-blue-600 hover:underline w-full sm:w-auto mt-2 sm:mt-0"
               >
                 {showPending ? "Скрыть" : "Показать"}
               </button>
@@ -424,7 +434,7 @@ const HabitForCreatorPage = () => {
                   {pendingRequests.map((req) => (
                     <div
                       key={req.subscriptionId}
-                      className="flex items-center justify-between bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                     >
                       <div className="flex items-center gap-3">
                         <UserCircleIcon className="h-6 w-6 text-blue-500" />
@@ -432,16 +442,16 @@ const HabitForCreatorPage = () => {
                           {req.subscriberLogin}
                         </span>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 sm:gap-4 justify-end sm:ml-auto flex-wrap">
                         <button
                           onClick={() => handleAccept(req.subscriptionId)}
-                          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg"
+                          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg w-full sm:w-auto mb-2 sm:mb-0"
                         >
                           Принять
                         </button>
                         <button
                           onClick={() => handleDeny(req.subscriptionId)}
-                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg"
+                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg w-full sm:w-auto"
                         >
                           Отклонить
                         </button>
@@ -460,22 +470,22 @@ const HabitForCreatorPage = () => {
               Статистика выполнения
             </h3>
 
-            <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+            <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <span className="text-gray-500">
                 Сколько всего раз вы выполнили эту привычку:
               </span>
-              <span className="text-gray-800">
+              <span className="text-gray-800 text-start sm:text-end">
                 {reportsInfo.completionsInTotal}
               </span>
             </div>
 
             {frequencyType === "WEEKLY_ON_DAYS" && (
               <>
-                <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <span className="text-gray-500">
                     Процент успешных выполнений:
                   </span>
-                  <span className="text-gray-800">
+                  <span className="text-gray-800 text-start sm:text-end">
                     {reportsInfo.completionsPercent !== null ? (
                       `${reportsInfo.completionsPercent}% от всех запланированных`
                     ) : (
@@ -494,7 +504,7 @@ const HabitForCreatorPage = () => {
                             }
                           }}
                         >
-                          <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                          <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer hidden sm:block" />
                           <div
                             className="tooltip fixed w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none"
                             style={{ top: 0, left: 0 }}
@@ -509,11 +519,11 @@ const HabitForCreatorPage = () => {
                   </span>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <span className="text-gray-500">
                     Выполнений подряд в текущей серии:
                   </span>
-                  <span className="text-gray-800 inline-flex items-center gap-1 relative">
+                  <span className="text-gray-800 text-start sm:text-end inline-flex items-center gap-1 relative">
                     {reportsInfo.serialDays !== null
                       ? reportsInfo.serialDays
                       : "0"}
@@ -529,7 +539,7 @@ const HabitForCreatorPage = () => {
                         }
                       }}
                     >
-                      <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                      <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer hidden sm:block" />
                       <div
                         className="tooltip fixed w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 pointer-events-none"
                         style={{ top: 0, left: 0 }}
@@ -546,7 +556,7 @@ const HabitForCreatorPage = () => {
             {(frequencyType === "WEEKLY_X_TIMES" ||
               frequencyType === "MONTHLY_X_TIMES") && (
               <>
-                <div className="bg-white p-4 rounded-lg shadow-sm flex justify-between items-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <span className="text-gray-500">
                     Выполнений за{" "}
                     {frequencyType === "WEEKLY_X_TIMES"
@@ -554,7 +564,7 @@ const HabitForCreatorPage = () => {
                       : "текущий месяц"}
                     :
                   </span>
-                  <span className="text-gray-800">
+                  <span className="text-gray-800 text-start sm:text-end">
                     {reportsInfo.completionsInPeriod ?? "Не указано"} из{" "}
                     {reportsInfo.completionsPlannedInPeriod ?? "Не указано"}
                   </span>
@@ -567,7 +577,7 @@ const HabitForCreatorPage = () => {
         <div className="bg-gray-100 shadow-md rounded-2xl p-6 mt-6 space-y-4">
           <h3 className="text-lg font-semibold mb-0">История отчётов</h3>
 
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <p className="text-base text-gray-500 mb-0">Выберите дату:</p>
             <input
               type="date"
@@ -618,7 +628,7 @@ const HabitForCreatorPage = () => {
                     <img
                       src={dailyReport.photoUrl}
                       alt="Фотоотчёт"
-                      className="max-w-xs rounded-lg shadow"
+                      className="w-full max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-xs rounded-lg shadow"
                     />
                   )}
                 </>

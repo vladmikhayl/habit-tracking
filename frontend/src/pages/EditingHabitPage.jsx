@@ -85,7 +85,7 @@ const EditingHabitPage = () => {
             >
               Сколько дней длится эта привычка?
               <div className="relative group">
-                <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer" />
+                <InformationCircleIcon className="h-5 w-5 text-blue-500 cursor-pointer hidden sm:block" />
                 <div className="absolute left-6 top-0 w-64 bg-gray-800 text-white text-sm p-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 pointer-events-none">
                   Оставьте поле пустым, чтобы не фиксировать длительность
                 </div>

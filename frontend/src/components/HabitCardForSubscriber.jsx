@@ -63,18 +63,24 @@ const HabitCardForSubscriber = ({ habit, date }) => {
       </div>
 
       <div className="text-gray-700 flex items-center gap-1">
-        <UserIcon className="h-5 w-5 text-blue-500 mr-1" />
+        <span className="flex-shrink-0 h-5 w-5">
+          <UserIcon className="h-5 w-5 text-blue-500 mr-1" />
+        </span>
         Создатель привычки: <span className="font-medium">{creatorLogin}</span>
       </div>
 
       <div className="text-gray-700 flex items-center gap-1">
-        <UsersIcon className="h-5 w-5 text-blue-500 mr-1" />
+        <span className="flex-shrink-0 h-5 w-5">
+          <UsersIcon className="h-5 w-5 text-blue-500 mr-1" />
+        </span>
         Подписчиков: <span className="font-medium">{subscribersCount}</span>
       </div>
 
       {getProgressText() && (
         <div className="text-gray-700 flex items-center gap-1">
-          <CalendarIcon className="h-5 w-5 text-blue-500 mr-1" />
+          <span className="flex-shrink-0 h-5 w-5">
+            <CalendarIcon className="h-5 w-5 text-blue-500 mr-1" />
+          </span>
           {getProgressText()}
         </div>
       )}

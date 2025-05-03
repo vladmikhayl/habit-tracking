@@ -152,13 +152,13 @@ const MySubscriptionsPage = () => {
                   {acceptedSubscriptions.map((sub) => (
                     <div
                       key={sub.habitId}
-                      className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                     >
-                      <span className="text-gray-800 text-sm flex items-center gap-2">
+                      <span className="text-gray-800 text-sm flex items-center gap-2 w-full">
                         <span className="flex-shrink-0 h-5 w-5">
                           <ClipboardIcon className="h-5 w-5 text-blue-500" />
                         </span>
-                        <span className="break-all">
+                        <span className="break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
                           {sub.habitName} (ID {sub.habitId})
                         </span>
                       </span>
@@ -196,15 +196,15 @@ const MySubscriptionsPage = () => {
                   {pendingRequests.map((req) => (
                     <div
                       key={req.habitId}
-                      className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                     >
-                      <span className="text-gray-800 text-sm flex items-center gap-2 flex-1">
+                      <span className="text-gray-800 text-sm flex items-center gap-2 flex-1 w-full">
                         <span className="flex-shrink-0 h-5 w-5">
                           <ClipboardIcon className="h-5 w-5 text-blue-500" />
                         </span>
-                        <span className="break-all">
+                        <p className="break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
                           {req.habitName} (ID {req.habitId})
-                        </span>
+                        </p>
                       </span>
                       <button
                         onClick={() => handleUnsubscribe(req.habitId)}
