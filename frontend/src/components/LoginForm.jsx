@@ -11,6 +11,7 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  // При нажатии на кнопку для входа в аккаунт
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");

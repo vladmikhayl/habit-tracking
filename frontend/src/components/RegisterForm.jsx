@@ -10,6 +10,7 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  // При нажатии на кнопку для создания аккаунта
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");

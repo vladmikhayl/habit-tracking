@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 const MainLayout = ({ children }) => {
   const navigate = useNavigate();
 
+  // При нажатии на кнопку для выхода из аккаунта
   const handleLogout = () => {
     localStorage.removeItem("token");
     toast.success("Успешный выход из аккаунта");

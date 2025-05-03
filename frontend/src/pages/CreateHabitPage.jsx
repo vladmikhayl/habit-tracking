@@ -23,6 +23,7 @@ const CreateHabitPage = () => {
     );
   };
 
+  // При нажатии на кнопку для создания привычки
   const handleSubmit = async (e) => {
     e.preventDefault();
 

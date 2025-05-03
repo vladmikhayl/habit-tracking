@@ -35,11 +35,13 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     return null;
   };
 
+  // При прикреплении файла в форму
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
 
-  const markHabitCompleted = async () => {
+  // При нажатии на кнопку для отметки о выполнении
+  const handleMarkingHabitCompleted = async () => {
     console.log("Отмечаем как выполненную:", habitId, selectedFile);
     try {
       const photoUrl = selectedFile
@@ -57,7 +59,8 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     }
   };
 
-  const cancelHabitCompletion = async () => {
+  // При нажатии на кнопку для отмены отметки о выполнении
+  const handleCancellingHabitCompletion = async () => {
     console.log("Отменяем выполнение:", habitId);
     try {
       await reportsApi.deleteReport(reportId);
@@ -69,7 +72,8 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     }
   };
 
-  const deleteHabitPhoto = async () => {
+  // При нажатии на кнопку для удаления фото отчета
+  const handleDeletingHabitPhoto = async () => {
     console.log("Удаляем фото:", habitId);
     try {
       await reportsApi.changeReportPhoto(reportId, "");
@@ -81,7 +85,8 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     }
   };
 
-  const changeHabitPhoto = async () => {
+  // При нажатии на кнопку для изменения фото отчета
+  const handleChangingHabitPhoto = async () => {
     console.log("Изменяем фото:", habitId, selectedFile);
 
     if (!selectedFile) {
@@ -160,7 +165,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
           // Если отмечена невыполненной
           !isPhotoAllowed ? (
             <button
-              onClick={markHabitCompleted}
+              onClick={handleMarkingHabitCompleted}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold px-5 py-2 rounded-xl transition"
             >
               Отметить как выполненную
@@ -217,7 +222,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                 />
               </label>
               <button
-                onClick={markHabitCompleted}
+                onClick={handleMarkingHabitCompleted}
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold px-5 py-2 rounded-xl transition"
               >
                 Отметить как выполненную
@@ -231,14 +236,14 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={cancelHabitCompletion}
+                onClick={handleCancellingHabitCompletion}
                 className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded-xl transition"
               >
                 Отменить выполнение
               </button>
               {isPhotoUploaded && (
                 <button
-                  onClick={deleteHabitPhoto}
+                  onClick={handleDeletingHabitPhoto}
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-xl transition"
                 >
                   Удалить фото
@@ -298,7 +303,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
                   />
                 </label>
                 <button
-                  onClick={changeHabitPhoto}
+                  onClick={handleChangingHabitPhoto}
                   className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold px-5 py-2 rounded-xl transition"
                 >
                   Добавить фото

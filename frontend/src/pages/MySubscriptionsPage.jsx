@@ -70,10 +70,13 @@ const MySubscriptionsPage = () => {
     fetchSubscriptions();
   }, [selectedDate, dateFromState]);
 
+  // При нажатии на кнопку для показа/скрытия необработанных заявок
   const handleTogglePending = () => setShowPending(!showPending);
 
+  // При нажатии на кнопку для показа/скрытия принятых подписок
   const handleToggleAccepted = () => setShowAccepted(!showAccepted);
 
+  // При нажатии на кнопку для отписки
   const handleUnsubscribe = async (habitId) => {
     try {
       await subscriptionsApi.unsubscribe(habitId);
@@ -87,6 +90,7 @@ const MySubscriptionsPage = () => {
     }
   };
 
+  // При нажатии на кнопку для отправки заявки на подписку
   const handleSendRequest = async () => {
     if (newHabitId === "") {
       toast.error("Введите ID привычки");
