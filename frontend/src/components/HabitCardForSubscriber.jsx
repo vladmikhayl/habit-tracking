@@ -2,7 +2,7 @@ import { UserIcon, UsersIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
-const HabitCardForSubscriber = ({ habit }) => {
+const HabitCardForSubscriber = ({ habit, date }) => {
   const navigate = useNavigate();
 
   const {
@@ -83,7 +83,7 @@ const HabitCardForSubscriber = ({ habit }) => {
         <button
           onClick={() =>
             navigate(`/subscribed-habits/${habitId}`, {
-              state: { creatorLogin },
+              state: { creatorLogin, selectedDateForHabits: date },
             })
           }
           className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition"

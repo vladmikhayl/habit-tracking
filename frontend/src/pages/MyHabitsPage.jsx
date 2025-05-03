@@ -5,12 +5,14 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import habitsApi from "../api/habitsApi";
 import HabitCardForCreator from "../components/HabitCardForCreator";
+import { useLocation } from "react-router-dom";
 
 const MyHabitsPage = () => {
   const [habits, setHabits] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const location = useLocation();
+  const dateFromState = location.state?.selectedDateForHabits;
 
   const navigate = useNavigate();
 
@@ -24,8 +26,20 @@ const MyHabitsPage = () => {
   };
 
   useEffect(() => {
+    if (dateFromState) {
+      setSelectedDate(dateFromState);
+    }
+
+    if (location.state?.selectedDateForHabits) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+
+    if (!selectedDate) {
+      setSelectedDate(format(new Date(), "yyyy-MM-dd"));
+    }
+
     fetchHabits(selectedDate);
-  }, [selectedDate]);
+  }, [selectedDate, dateFromState]);
 
   return (
     <MainLayout>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { CameraIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
@@ -12,6 +12,7 @@ import habitsApi from "../api/habitsApi";
 import { format } from "date-fns";
 
 const HabitForSubscriberPage = () => {
+  const navigate = useNavigate();
   const { id: pageHabitId } = useParams();
 
   const [habit, setHabit] = useState(null);
@@ -25,6 +26,8 @@ const HabitForSubscriberPage = () => {
 
   const location = useLocation();
   const { creatorLogin } = location.state || {};
+  const selectedDateForHabits =
+    location.state?.selectedDateForHabits ?? format(new Date(), "yyyy-MM-dd");
 
   // Подгрузка основных данных о привычке
   const fetchData = async () => {
@@ -131,8 +134,16 @@ const HabitForSubscriberPage = () => {
   return (
     <MainLayout>
       <div className="max-w-3xl mx-auto p-6">
+        <button
+          onClick={() =>
+            navigate("/my-subscriptions", { state: { selectedDateForHabits } })
+          }
+          className="mb-4 text-blue-600 hover:underline"
+        >
+          ← Назад
+        </button>
         <div className="flex flex-wrap items-center gap-4 mb-4">
-          <h1 className="text-3xl font-bold">{name}</h1>
+          <h1 className="text-3xl font-bold break-all">{name}</h1>
           <span className="text-sm font-semibold px-4 py-2 rounded-full bg-blue-100 text-blue-700">
             Вы подписаны
           </span>
@@ -244,7 +255,9 @@ const HabitForSubscriberPage = () => {
           {description && description.trim() && (
             <div>
               <span className="text-gray-500">Описание:</span>
-              <p className="mt-1 text-base text-gray-800">{description}</p>
+              <p className="mt-1 text-base text-gray-800 break-words whitespace-pre-wrap">
+                {description}
+              </p>
             </div>
           )}
         </div>

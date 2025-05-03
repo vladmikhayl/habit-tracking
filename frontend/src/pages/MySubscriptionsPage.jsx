@@ -7,13 +7,23 @@ import HabitCardForSubscriber from "../components/HabitCardForSubscriber";
 import subscriptionsApi from "../api/subscriptionsApi";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const MySubscriptionsPage = () => {
+  const navigate = useNavigate();
+
   const [habits, setHabits] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
+  const [selectedDate, setSelectedDate] = useState(null);
   const [newHabitId, setNewHabitId] = useState("");
+
+  const location = useLocation();
+  const dateFromState = location.state?.selectedDateForHabits;
+
+  useEffect(() => {
+    if (dateFromState) {
+      setSelectedDate(dateFromState);
+    }
+  }, [dateFromState]);
 
   // Хуки для списков подписок
   const [acceptedSubscriptions, setAcceptedSubscriptions] = useState([]);
@@ -44,9 +54,21 @@ const MySubscriptionsPage = () => {
   };
 
   useEffect(() => {
+    if (dateFromState) {
+      setSelectedDate(dateFromState);
+    }
+
+    if (location.state?.selectedDateForHabits) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+
+    if (!selectedDate) {
+      setSelectedDate(format(new Date(), "yyyy-MM-dd"));
+    }
+
     fetchHabits(selectedDate);
     fetchSubscriptions();
-  }, [selectedDate]);
+  }, [selectedDate, dateFromState]);
 
   const handleTogglePending = () => setShowPending(!showPending);
 
@@ -133,12 +155,16 @@ const MySubscriptionsPage = () => {
                       className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                     >
                       <span className="text-gray-800 text-sm flex items-center gap-2">
-                        <ClipboardIcon className="h-5 w-5 text-blue-500" />
-                        {sub.habitName} (ID {sub.habitId})
+                        <span className="flex-shrink-0 h-5 w-5">
+                          <ClipboardIcon className="h-5 w-5 text-blue-500" />
+                        </span>
+                        <span className="break-all">
+                          {sub.habitName} (ID {sub.habitId})
+                        </span>
                       </span>
                       <button
                         onClick={() => handleUnsubscribe(sub.habitId)}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg"
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg ml-4"
                       >
                         Отписаться
                       </button>
@@ -172,13 +198,17 @@ const MySubscriptionsPage = () => {
                       key={req.habitId}
                       className="flex items-center justify-between bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
                     >
-                      <span className="text-gray-800 text-sm flex items-center gap-2">
-                        <ClipboardIcon className="h-5 w-5 text-blue-500" />
-                        {req.habitName} (ID {req.habitId})
+                      <span className="text-gray-800 text-sm flex items-center gap-2 flex-1">
+                        <span className="flex-shrink-0 h-5 w-5">
+                          <ClipboardIcon className="h-5 w-5 text-blue-500" />
+                        </span>
+                        <span className="break-all">
+                          {req.habitName} (ID {req.habitId})
+                        </span>
                       </span>
                       <button
                         onClick={() => handleUnsubscribe(req.habitId)}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg"
+                        className="flex-shrink-0 px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg ml-4"
                       >
                         Отменить заявку
                       </button>
@@ -221,7 +251,11 @@ const MySubscriptionsPage = () => {
             ) : (
               <div className="flex flex-col gap-4">
                 {habits.map((habit) => (
-                  <HabitCardForSubscriber key={habit.habitId} habit={habit} />
+                  <HabitCardForSubscriber
+                    key={habit.habitId}
+                    habit={habit}
+                    date={selectedDate}
+                  />
                 ))}
               </div>
             )}

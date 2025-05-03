@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { CameraIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
@@ -21,6 +21,10 @@ const HabitForCreatorPage = () => {
 
   const [habit, setHabit] = useState(null);
   const [reportsInfo, setReportsInfo] = useState(null);
+
+  const location = useLocation();
+  const selectedDateForHabits =
+    location.state?.selectedDateForHabits ?? format(new Date(), "yyyy-MM-dd");
 
   // Хуки для показа принятых подписчиков
   const [showSubscribers, setShowSubscribers] = useState(false);
@@ -244,8 +248,16 @@ const HabitForCreatorPage = () => {
   return (
     <MainLayout>
       <div className="max-w-3xl mx-auto p-6">
+        <button
+          onClick={() =>
+            navigate("/my-habits", { state: { selectedDateForHabits } })
+          }
+          className="mb-4 text-blue-600 hover:underline"
+        >
+          ← Назад
+        </button>
         <div className="flex flex-wrap items-center gap-4 mb-4">
-          <h1 className="text-3xl font-bold">{name}</h1>
+          <h1 className="text-3xl font-bold break-all">{name}</h1>
           <span className="text-sm font-semibold px-4 py-2 rounded-full bg-blue-100 text-blue-700">
             Это ваша привычка
           </span>
@@ -355,7 +367,9 @@ const HabitForCreatorPage = () => {
           {description && description.trim() && (
             <div>
               <span className="text-gray-500">Описание:</span>
-              <p className="mt-1 text-base text-gray-800">{description}</p>
+              <p className="mt-1 text-base text-gray-800 break-words whitespace-pre-wrap">
+                {description}
+              </p>
             </div>
           )}
         </div>
