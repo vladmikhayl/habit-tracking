@@ -8,6 +8,7 @@ import com.vladmikhayl.report.repository.ReportRepository;
 import com.vladmikhayl.report.service.feign.HabitClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -34,7 +36,7 @@ public class ReportService {
         try {
             return Long.parseLong(userId);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("Invalid user ID format");
+            throw new IllegalArgumentException("Неверный формат ID пользователя");
         }
     }
 
@@ -48,21 +50,23 @@ public class ReportService {
         boolean isHabitCurrentAtThatDateForThatUser = getIsCurrentOrThrow(request.getHabitId(), userIdLong, request.getDate());
 
         if (!isHabitCurrentAtThatDateForThatUser) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this habit on this day");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Эта привычка не является текущей в указанный день для текущего пользователя");
         }
 
         Long habitId = request.getHabitId();
 
         if (reportRepository.existsByHabitIdAndDate(habitId, request.getDate())) {
-            throw new DataIntegrityViolationException("This habit has already been marked as completed on this day");
+            throw new DataIntegrityViolationException("Эта привычка уже отмечена как выполненная в указанный день");
         }
 
         if (request.getPhotoUrl() != null && !habitPhotoAllowedCacheRepository.existsById(habitId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This habit doesn't imply a photo, but it was attached");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "К отчёту было прикреплено фото, хотя эта привычка не подразумевает фотоотчёты");
         }
 
         if (request.getDate().isAfter(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "It is forbidden to mark a habit as completed for a day that has not yet arrived");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Этот день ещё не наступил");
         }
 
         Report report = Report.builder()
@@ -85,12 +89,13 @@ public class ReportService {
         Long userIdLong = parseUserId(userId);
 
         Report report = reportRepository.findByIdAndUserId(reportId, userIdLong)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this report"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "У текущего пользователя отсутствует указанный отчёт"));
 
         long habitId = report.getHabitId();
 
         if (!habitPhotoAllowedCacheRepository.existsById(habitId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This habit doesn't imply a photo");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Эта привычка не подразумевает фотоотчёты");
         }
 
         String photoUrl = request.getPhotoUrl();
@@ -114,7 +119,8 @@ public class ReportService {
         Long userIdLong = parseUserId(userId);
 
         if (!reportRepository.existsByIdAndUserId(reportId, userIdLong)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have this report");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "У текущего пользователя отсутствует указанный отчёт");
         }
 
         reportRepository.deleteById(reportId);
@@ -124,9 +130,11 @@ public class ReportService {
         try {
             return habitClient.isCurrent(internalToken, habitId, userId, date).getBody();
         } catch (FeignException.ServiceUnavailable e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Habit service is unavailable");
+            log.error("Микросервис Habit недоступен");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
         } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Habit service returned an error");
+            log.error("Микросервис Habit вернул ошибку");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Произошла внутренняя ошибка");
         }
     }
 

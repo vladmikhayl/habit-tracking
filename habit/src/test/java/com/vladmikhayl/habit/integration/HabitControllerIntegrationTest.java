@@ -289,7 +289,7 @@ public class HabitControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("This user already has a habit with that name"));
+                .andExpect(jsonPath("$.error").value("У вас уже есть привычка с таким названием"));
 
         long habitsCount = habitRepository.count();
         assertThat(habitsCount).isEqualTo(1);
@@ -316,7 +316,7 @@ public class HabitControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0]").value("A habit with this FrequencyType cannot be harmful"));
+                .andExpect(jsonPath("$.errors[0]").value("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
 
         long habitsCount = habitRepository.count();
         assertThat(habitsCount).isEqualTo(0);
@@ -474,7 +474,7 @@ public class HabitControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have a habit with this id"));
+                .andExpect(jsonPath("$.error").value("У текущего пользователя отсутствует указанная привычка"));
 
         Optional<Habit> oldHabit = habitRepository.findByName("Старое название");
         assertThat(oldHabit.isPresent()).isTrue();
@@ -583,7 +583,7 @@ public class HabitControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("A habit with this FrequencyType cannot be harmful"));
+                .andExpect(jsonPath("$.error").value("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
 
         Optional<Habit> oldHabit = habitRepository.findByName("Название");
         assertThat(oldHabit.isPresent()).isTrue();
@@ -650,7 +650,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/habits/1/delete")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have a habit with this id"));
+                .andExpect(jsonPath("$.error").value("У текущего пользователя отсутствует указанная привычка"));
 
         assertThat(habitRepository.count()).isEqualTo(1);
     }
@@ -665,7 +665,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/habits/1/delete")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have a habit with this id"));
+                .andExpect(jsonPath("$.error").value("У текущего пользователя отсутствует указанная привычка"));
 
         assertThat(habitRepository.count()).isEqualTo(0);
     }
@@ -795,7 +795,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/reports-info")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+                .andExpect(jsonPath("$.error").value("Отсутствует доступ к указанной привычке"));
     }
 
     @Test
@@ -806,7 +806,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/reports-info")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+                .andExpect(jsonPath("$.error").value("Отсутствует доступ к указанной привычке"));
     }
 
     @Test
@@ -917,7 +917,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+                .andExpect(jsonPath("$.error").value("Отсутствует доступ к указанной привычке"));
     }
 
     @Test
@@ -928,7 +928,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/get-report/at-day/2025-04-11")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+                .andExpect(jsonPath("$.error").value("Отсутствует доступ к указанной привычке"));
     }
 
     @Test
@@ -1128,7 +1128,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/general-info")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+                .andExpect(jsonPath("$.error").value("Отсутствует доступ к указанной привычке"));
     }
 
     @Test
@@ -1139,7 +1139,7 @@ public class HabitControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/habits/1/general-info")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have access to this habit"));
+                .andExpect(jsonPath("$.error").value("Отсутствует доступ к указанной привычке"));
     }
 
     @Test

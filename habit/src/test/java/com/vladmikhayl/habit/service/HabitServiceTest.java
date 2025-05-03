@@ -232,7 +232,7 @@ class HabitServiceTest {
 
         assertThatThrownBy(() -> underTest.createHabit(request, userIdStr))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessage("This user already has a habit with that name");
+                .hasMessage("У вас уже есть привычка с таким названием");
 
         verify(habitRepository, never()).save(any());
 
@@ -389,7 +389,7 @@ class HabitServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have a habit with this id");
+                .hasMessageContaining("У текущего пользователя отсутствует указанная привычка");
     }
 
 //    @Test
@@ -452,7 +452,7 @@ class HabitServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                 })
-                .hasMessageContaining("A habit with this FrequencyType cannot be harmful");
+                .hasMessageContaining("Привычка может быть вредной, только если она выполняется в определённые дни недели");
     }
 
     @Test
@@ -502,7 +502,7 @@ class HabitServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have a habit with this id");
+                .hasMessageContaining("У текущего пользователя отсутствует указанная привычка");
 
         verify(habitEventProducer, never()).sendHabitDeletedEvent(any());
     }
@@ -649,7 +649,7 @@ class HabitServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have access to this habit");
+                .hasMessageContaining("Отсутствует доступ к указанной привычке");
 
         verify(reportClient, never()).getReportsInfo(any(), any(), any(), any(), any(), any(), any());
     }
@@ -721,7 +721,7 @@ class HabitServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have access to this habit");
+                .hasMessageContaining("Отсутствует доступ к указанной привычке");
 
         verify(reportClient, never()).getReportAtDay(any(), any(), any());
     }
@@ -917,7 +917,7 @@ class HabitServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have access to this habit");
+                .hasMessageContaining("Отсутствует доступ к указанной привычке");
     }
 
     @Test

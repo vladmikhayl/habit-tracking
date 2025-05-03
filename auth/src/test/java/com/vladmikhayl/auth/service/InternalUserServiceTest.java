@@ -48,7 +48,7 @@ class InternalUserServiceTest {
 
         assertThatThrownBy(() -> underTest.getUserLogin(userId))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("User not found");
+                .hasMessage("Пользователь не найден");
     }
 
 }

@@ -243,7 +243,7 @@ public class HabitFlowTests extends BaseE2ETest {
         // Проверяем, что юзер 3 не может отправить заявку на удаленную привычку
         assertThatThrownBy(() -> subscriptionHelper.sendSubscriptionRequest(token3, existingHabitId))
                 .isInstanceOf(HttpClientErrorException.NotFound.class)
-                .hasMessageContaining("Habit not found");
+                .hasMessageContaining("Привычка не найдена");
     }
 
 }

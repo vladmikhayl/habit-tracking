@@ -61,7 +61,7 @@ public class InternalReportService {
 
         if (isCompleted) {
             Report report = reportRepository.findByHabitIdAndDate(habitId, date)
-                    .orElseThrow(() -> new EntityNotFoundException("Report not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Отчёт не найден"));
             isPhotoUploaded = report.getPhotoUrl() != null;
             reportId = report.getId();
         }
@@ -172,28 +172,28 @@ public class InternalReportService {
     ) {
         if (frequencyType == FrequencyType.WEEKLY_ON_DAYS) {
             if (daysOfWeek == null || daysOfWeek.isEmpty()) {
-                throw new IllegalArgumentException("Invalid daysOfWeek value for WEEKLY ON DAYS");
+                throw new IllegalArgumentException("Неверное значение daysOfWeek для WEEKLY ON DAYS");
             }
             if (timesPerWeek != null || timesPerMonth != null) {
-                throw new IllegalArgumentException("Extra parameters are transmitted for WEEKLY ON DAYS");
+                throw new IllegalArgumentException("Переданы лишние параметры для WEEKLY ON DAYS");
             }
         }
 
         if (frequencyType == FrequencyType.WEEKLY_X_TIMES) {
             if (timesPerWeek == null) {
-                throw new IllegalArgumentException("Invalid timesPerWeek value for WEEKLY X TIMES");
+                throw new IllegalArgumentException("Неверное значение timesPerWeek для WEEKLY X TIMES");
             }
             if (daysOfWeek != null || timesPerMonth != null) {
-                throw new IllegalArgumentException("Extra parameters are transmitted for WEEKLY X TIMES");
+                throw new IllegalArgumentException("Переданы лишние параметры для WEEKLY X TIMES");
             }
         }
 
         if (frequencyType == FrequencyType.MONTHLY_X_TIMES) {
             if (timesPerMonth == null) {
-                throw new IllegalArgumentException("Invalid timesPerMonth value for MONTHLY X TIMES");
+                throw new IllegalArgumentException("Неверное значение timesPerMonth для MONTHLY X TIMES");
             }
             if (daysOfWeek != null || timesPerWeek != null) {
-                throw new IllegalArgumentException("Extra parameters are transmitted for MONTHLY X TIMES");
+                throw new IllegalArgumentException("Переданы лишние параметры для MONTHLY X TIMES");
             }
         }
     }

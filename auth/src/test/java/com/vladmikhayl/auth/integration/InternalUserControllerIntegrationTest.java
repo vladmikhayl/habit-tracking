@@ -79,7 +79,7 @@ public class InternalUserControllerIntegrationTest {
 
         mockMvc.perform(get("/internal/auth/2/get-login"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("User not found"));
+                .andExpect(jsonPath("$.error").value("Пользователь не найден"));
     }
 
 }

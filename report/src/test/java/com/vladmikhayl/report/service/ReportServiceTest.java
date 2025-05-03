@@ -146,7 +146,7 @@ class ReportServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                 })
-                .hasMessageContaining("This habit doesn't imply a photo, but it was attached");
+                .hasMessageContaining("К отчёту было прикреплено фото, хотя эта привычка не подразумевает фотоотчёты");
 
         verify(reportRepository, never()).save(any());
     }
@@ -174,7 +174,7 @@ class ReportServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                 })
-                .hasMessageContaining("It is forbidden to mark a habit as completed for a day that has not yet arrived");
+                .hasMessageContaining("Этот день ещё не наступил");
 
         verify(reportRepository, never()).save(any());
     }
@@ -198,7 +198,7 @@ class ReportServiceTest {
 
         assertThatThrownBy(() -> underTest.createReport(request, userIdStr))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessage("This habit has already been marked as completed on this day");
+                .hasMessage("Эта привычка уже отмечена как выполненная в указанный день");
 
         verify(reportRepository, never()).save(any());
     }
@@ -224,7 +224,7 @@ class ReportServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have this habit on this day");
+                .hasMessageContaining("Эта привычка не является текущей в указанный день для текущего пользователя");
 
         verify(reportRepository, never()).save(any());
     }
@@ -353,7 +353,7 @@ class ReportServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have this report");
+                .hasMessageContaining("У текущего пользователя отсутствует указанный отчёт");
     }
 
     @Test
@@ -383,7 +383,7 @@ class ReportServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This habit doesn't imply a photo");
+                .hasMessageContaining("Эта привычка не подразумевает фотоотчёты");
     }
 
     // TODO: тест на changeReportPhoto когда некорректный URL фото
@@ -415,7 +415,7 @@ class ReportServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("This user doesn't have this report");
+                .hasMessageContaining("У текущего пользователя отсутствует указанный отчёт");
 
         verify(reportRepository, never()).deleteById(reportId);
     }

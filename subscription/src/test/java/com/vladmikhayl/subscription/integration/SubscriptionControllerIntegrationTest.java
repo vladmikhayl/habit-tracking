@@ -158,7 +158,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/subscriptions/15/send-subscription-request")
                         .header("X-User-Id", subscriberIdStr))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("This user is already subscribed to this habit or has an unprocessed request for it"));
+                .andExpect(jsonPath("$.error").value("У вас уже есть подписка/заявка на эту привычку"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(1);
     }
@@ -173,7 +173,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/subscriptions/15/send-subscription-request")
                         .header("X-User-Id", subscriberIdStr))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Habit not found"));
+                .andExpect(jsonPath("$.error").value("Привычка не найдена"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(0);
     }
@@ -197,7 +197,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/subscriptions/15/send-subscription-request")
                         .header("X-User-Id", subscriberIdStr))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("It is impossible to subscribe to your own habit"));
+                .andExpect(jsonPath("$.error").value("Нельзя подписаться на собственную привычку"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(0);
     }
@@ -270,7 +270,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("Subscription request has already been accepted"));
+                .andExpect(jsonPath("$.error").value("Заявка уже была принята"));
     }
 
     @Test
@@ -297,7 +297,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(put("/api/v1/subscriptions/1/accept")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("The user is not the creator of the habit that the subscription request is for"));
+                .andExpect(jsonPath("$.error").value("Текущий пользователь не является создателем привычки, на которую отправлена эта заявка"));
     }
 
     @Test
@@ -358,7 +358,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/subscriptions/1/deny")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Subscription request is already accepted"));
+                .andExpect(jsonPath("$.error").value("Заявка уже была принята"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(1);
     }
@@ -389,7 +389,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/subscriptions/1/deny")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("The user is not the creator of the habit that the subscription request is for"));
+                .andExpect(jsonPath("$.error").value("Текущий пользователь не является создателем привычки, на которую отправлена эта заявка"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(1);
     }
@@ -460,7 +460,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/subscriptions/15/unsubscribe")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("Subscription (or subscription request) not found"));
+                .andExpect(jsonPath("$.error").value("Подписка/заявка не найдена"));
 
         assertThat(subscriptionRepository.count()).isEqualTo(2);
     }
@@ -574,7 +574,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/subscriptions/15/get-habit-unprocessed-requests")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("The habit doesn't belong to that user"));
+                .andExpect(jsonPath("$.error").value("Эта привычка не принадлежит текущему пользователю"));
     }
 
     @Test
@@ -880,7 +880,7 @@ public class SubscriptionControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/subscriptions/15/get-habit-accepted-subscriptions")
                         .header("X-User-Id", currentUserIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("The habit doesn't belong to that user"));
+                .andExpect(jsonPath("$.error").value("Эта привычка не принадлежит текущему пользователю"));
     }
 
 }

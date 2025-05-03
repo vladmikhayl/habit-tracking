@@ -17,6 +17,7 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HabitService {
@@ -54,7 +56,7 @@ public class HabitService {
         try {
             return Long.parseLong(userId);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("Invalid user ID format");
+            throw new IllegalArgumentException("Неверный формат ID пользователя");
         }
     }
 
@@ -65,7 +67,7 @@ public class HabitService {
         Long userIdLong = parseUserId(userId);
 
         if (habitRepository.existsByUserIdAndName(userIdLong, request.getName())) {
-            throw new DataIntegrityViolationException("This user already has a habit with that name");
+            throw new DataIntegrityViolationException("У вас уже есть привычка с таким названием");
         }
 
         Habit habit = Habit.builder()
@@ -102,7 +104,8 @@ public class HabitService {
         Long userIdLong = parseUserId(userId);
 
         Habit habit = habitRepository.findByIdAndUserId(habitId, userIdLong)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have a habit with this id"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "У текущего пользователя отсутствует указанная привычка"));
 
 //        if (request.getName() != null) {
 //            if (habitRepository.existsByUserIdAndName(userIdLong, request.getName())) {
@@ -117,7 +120,8 @@ public class HabitService {
 
         if (request.getIsHarmful() != null) {
             if (habit.getFrequencyType() != FrequencyType.WEEKLY_ON_DAYS && request.getIsHarmful()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A habit with this FrequencyType cannot be harmful");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Привычка может быть вредной, только если она выполняется в определённые дни недели");
             }
             habit.setHarmful(request.getIsHarmful());
         }
@@ -136,7 +140,8 @@ public class HabitService {
         Long userIdLong = parseUserId(userId);
 
         Habit habit = habitRepository.findByIdAndUserId(habitId, userIdLong)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have a habit with this id"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "У текущего пользователя отсутствует указанная привычка"));
 
         habitRepository.delete(habit);
 
@@ -153,11 +158,11 @@ public class HabitService {
         boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);
 
         if (!doesUserHaveAccess) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Отсутствует доступ к указанной привычке");
         }
 
         Habit habit = habitRepository.findById(habitId)
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"));
 
         int subscribersCount = subscriptionCacheRepository.countById_HabitId(habitId);
 
@@ -198,11 +203,11 @@ public class HabitService {
         boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);
 
         if (!doesUserHaveAccess) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Отсутствует доступ к указанной привычке");
         }
 
         Habit habit = habitRepository.findById(habitId)
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"));
 
         return getReportsInfoOrThrow(habit);
     }
@@ -213,7 +218,7 @@ public class HabitService {
         boolean doesUserHaveAccess = isUserEitherHabitCreatorOrSubscriber(habitId, userIdLong);
 
         if (!doesUserHaveAccess) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This user doesn't have access to this habit");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Отсутствует доступ к указанной привычке");
         }
 
         return getReportAtDayOrThrow(habitId, date);
@@ -363,9 +368,11 @@ public class HabitService {
         try {
             return reportClient.isCompletedAtDay(internalToken, habitId, date).getBody();
         } catch (FeignException.ServiceUnavailable e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
+            log.error("Микросервис Report недоступен");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
         } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
+            log.error("Микросервис Report вернул ошибку");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Произошла внутренняя ошибка");
         }
     }
 
@@ -373,9 +380,11 @@ public class HabitService {
         try {
             return reportClient.countCompletionsInPeriod(internalToken, habitId, period, date).getBody();
         } catch (FeignException.ServiceUnavailable e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
+            log.error("Микросервис Report недоступен");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
         } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
+            log.error("Микросервис Report вернул ошибку");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Произошла внутренняя ошибка");
         }
     }
 
@@ -383,9 +392,11 @@ public class HabitService {
         try {
             return reportClient.getReportAtDay(internalToken, habitId, date).getBody();
         } catch (FeignException.ServiceUnavailable e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
+            log.error("Микросервис Report недоступен");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
         } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
+            log.error("Микросервис Report вернул ошибку");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Произошла внутренняя ошибка");
         }
     }
 
@@ -402,9 +413,11 @@ public class HabitService {
                     habit.getCreatedAt().toLocalDate()
             ).getBody();
         } catch (FeignException.ServiceUnavailable e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Report service is unavailable");
+            log.error("Микросервис Report недоступен");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
         } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Report service returned an error");
+            log.error("Микросервис Report вернул ошибку");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Произошла внутренняя ошибка");
         }
     }
 

@@ -23,7 +23,7 @@ public class HabitEditingRequest {
 //    @Schema(description = "Новое название", example = "Бегать")
 //    private String name;
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+    @Size(max = 1000, message = "Описание не может превышать 1000 символов")
     @Schema(description = "Новое описание", example = "Бег это очень полезно, поэтому я решил делать пробежку в течение 2ух месяцев")
     private String description;
 
@@ -31,8 +31,8 @@ public class HabitEditingRequest {
     @Schema(description = "Является ли теперь эта привычка вредной", example = "false")
     private Boolean isHarmful;
 
-    @Min(value = 0, message = "Duration must be at least 1 day, if it is provided")
-    @Max(value = 730, message = "Duration must not exceed 730 days")
+    @Min(value = 0, message = "Если длительность указана, то она должна составлять хотя бы 1 день")
+    @Max(value = 730, message = "Длительность не может превышать 730 дней")
     @Schema(
             description = "Новая длительность привычки в днях (чтобы указать, что привычка теперь вообще не должна " +
                     "иметь фиксированную длительность, нужно указать 0)",

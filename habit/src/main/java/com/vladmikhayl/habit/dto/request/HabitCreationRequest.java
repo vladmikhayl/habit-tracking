@@ -16,8 +16,8 @@ import java.util.Set;
 @Schema(description = "Запрос на создание привычки")
 public class HabitCreationRequest {
 
-    @NotBlank(message = "Name cannot be blank")
-    @Size(max = 255, message = "Name must not exceed 255 characters")
+    @NotBlank(message = "Не указано название")
+    @Size(max = 255, message = "Название не может превышать 255 символов")
     @Schema(
             description = "Название",
             example = "Бегать по понедельникам",
@@ -25,7 +25,7 @@ public class HabitCreationRequest {
     )
     private String name;
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+    @Size(max = 1000, message = "Описание не может превышать 1000 символов")
     @Schema(
             description = "Описание",
             example = "Бег это очень полезно, поэтому я решил по понедельникам делать пробежку в течение месяца"
@@ -40,12 +40,12 @@ public class HabitCreationRequest {
     @Schema(description = "Является ли эта привычка вредной", example = "false")
     private boolean isHarmful;
 
-    @Min(value = 1, message = "Duration must be at least 1 day, if it is provided")
-    @Max(value = 730, message = "Duration must not exceed 730 days")
+    @Min(value = 1, message = "Если длительность указана, то она должна составлять хотя бы 1 день")
+    @Max(value = 730, message = "Длительность не может превышать 730 дней")
     @Schema(description = "Длительность привычки в днях", example = "30")
     private Integer durationDays;
 
-    @NotNull(message = "Frequency type must be specified")
+    @NotNull(message = "Не указана частота выполнения")
     @Schema(
             description = "Частота выполнения привычки",
             example = "WEEKLY_ON_DAYS",
@@ -56,17 +56,17 @@ public class HabitCreationRequest {
     @Schema(description = "В какие дни недели привычка должна выполняться (только для WEEKLY_ON_DAYS, иначе null)")
     private Set<DayOfWeek> daysOfWeek;
 
-    @Min(value = 1, message = "Times per week must be from 1 to 7")
-    @Max(value = 7, message = "Times per week must be from 1 to 7")
+    @Min(value = 1, message = "Число выполнений в неделю должно быть от 1 до 7")
+    @Max(value = 7, message = "Число выполнений в неделю должно быть от 1 до 7")
     @Schema(description = "Сколько раз в неделю привычка должна выполняться (только для WEEKLY_X_TIMES, иначе null)", example = "null")
     private Integer timesPerWeek;
 
-    @Min(value = 1, message = "Times per month must be from 1 to 31")
-    @Max(value = 31, message = "Times per month must be from 1 to 31")
+    @Min(value = 1, message = "Число выполнений в месяц должно быть от 1 до 31")
+    @Max(value = 31, message = "Число выполнений в месяц должно быть от 1 до 31")
     @Schema(description = "Сколько раз в месяц привычка должна выполняться (только для MONTHLY_X_TIMES, иначе null)", example = "null")
     private Integer timesPerMonth;
 
-    @AssertTrue(message = "Invalid frequency settings")
+    @AssertTrue(message = "Неверно указана частота выполнения")
     @Hidden
     public boolean isValidFrequency() {
         if (frequencyType == null) {
@@ -79,7 +79,7 @@ public class HabitCreationRequest {
         };
     }
 
-    @AssertTrue(message = "A habit with this FrequencyType cannot be harmful")
+    @AssertTrue(message = "Привычка может быть вредной, только если она выполняется в определённые дни недели")
     @Hidden
     public boolean isValidHarmful() {
         return !isHarmful || frequencyType == FrequencyType.WEEKLY_ON_DAYS;

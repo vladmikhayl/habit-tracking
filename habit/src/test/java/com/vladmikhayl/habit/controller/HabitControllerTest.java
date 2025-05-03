@@ -123,7 +123,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Name cannot be blank"));
+                    assertTrue(exception.getMessage().contains("Не указано название"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -153,7 +153,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Name must not exceed 255 characters"));
+                    assertTrue(exception.getMessage().contains("Название не может превышать 255 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -183,7 +183,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Description must not exceed 1000 characters"));
+                    assertTrue(exception.getMessage().contains("Описание не может превышать 1000 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -213,7 +213,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Duration must be at least 1 day, if it is provided"));
+                    assertTrue(exception.getMessage().contains("Если длительность указана, то она должна составлять хотя бы 1 день"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -243,7 +243,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Duration must not exceed 730 days"));
+                    assertTrue(exception.getMessage().contains("Длительность не может превышать 730 дней"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -273,7 +273,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Frequency type must be specified"));
+                    assertTrue(exception.getMessage().contains("Не указана частота выполнения"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -303,7 +303,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Invalid frequency settings"));
+                    assertTrue(exception.getMessage().contains("Неверно указана частота выполнения"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -333,7 +333,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Invalid frequency settings"));
+                    assertTrue(exception.getMessage().contains("Неверно указана частота выполнения"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -363,7 +363,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Invalid frequency settings"));
+                    assertTrue(exception.getMessage().contains("Неверно указана частота выполнения"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -393,7 +393,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Invalid frequency settings"));
+                    assertTrue(exception.getMessage().contains("Неверно указана частота выполнения"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -423,7 +423,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("A habit with this FrequencyType cannot be harmful"));
+                    assertTrue(exception.getMessage().contains("Привычка может быть вредной, только если она выполняется в определённые дни недели"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -575,7 +575,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Description must not exceed 1000 characters"));
+                    assertTrue(exception.getMessage().contains("Описание не может превышать 1000 символов"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -600,7 +600,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Duration must be at least 1 day, if it is provided"));
+                    assertTrue(exception.getMessage().contains("Если длительность указана, то она должна составлять хотя бы 1 день"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -625,7 +625,7 @@ class HabitControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Duration must not exceed 730 days"));
+                    assertTrue(exception.getMessage().contains("Длительность не может превышать 730 дней"));
                 })
                 .andExpect(status().isBadRequest());
 

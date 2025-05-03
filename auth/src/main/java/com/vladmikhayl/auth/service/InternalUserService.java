@@ -14,7 +14,7 @@ public class InternalUserService {
 
     public String getUserLogin(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
         return user.getUsername();
     }

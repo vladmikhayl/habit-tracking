@@ -106,7 +106,7 @@ class ReportControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Habit ID must be specified"));
+                    assertTrue(exception.getMessage().contains("Не указано ID привычки"));
                 })
                 .andExpect(status().isBadRequest());
 
@@ -130,7 +130,7 @@ class ReportControllerTest {
                 .andExpect(result -> {
                     Exception exception = result.getResolvedException();
                     assertTrue(exception instanceof MethodArgumentNotValidException);
-                    assertTrue(exception.getMessage().contains("Date must be specified"));
+                    assertTrue(exception.getMessage().contains("Не указана дата"));
                 })
                 .andExpect(status().isBadRequest());
 

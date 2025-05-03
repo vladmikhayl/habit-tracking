@@ -14,6 +14,7 @@ import com.vladmikhayl.subscription.service.kafka.SubscriptionEventProducer;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionService {
@@ -43,7 +45,7 @@ public class SubscriptionService {
         try {
             return Long.parseLong(userId);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("Invalid user ID format");
+            throw new IllegalArgumentException("Неверный формат ID пользователя");
         }
     }
 
@@ -54,16 +56,16 @@ public class SubscriptionService {
 
         if (doesThatSubscriptionAlreadyExists) {
             throw new DataIntegrityViolationException(
-                    "This user is already subscribed to this habit or has an unprocessed request for it"
+                    "У вас уже есть подписка/заявка на эту привычку"
             );
         }
 
         Long habitCreatorId = habitCacheRepository.findByHabitId(habitId)
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"))
                 .getCreatorId();
 
         if (Objects.equals(habitCreatorId, userIdLong)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "It is impossible to subscribe to your own habit");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Нельзя подписаться на собственную привычку");
         }
 
         subscriptionRepository.save(
@@ -80,18 +82,19 @@ public class SubscriptionService {
         Long userIdLong = parseUserId(userId);
 
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new EntityNotFoundException("Subscription request not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Заявка не найдена"));
 
         if (subscription.isAccepted()) {
-            throw new DataIntegrityViolationException("Subscription request has already been accepted");
+            throw new DataIntegrityViolationException("Заявка уже была принята");
         }
 
         Long habitCreatorId = habitCacheRepository.findByHabitId(subscription.getHabitId())
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"))
                 .getCreatorId();
 
         if (!userIdLong.equals(habitCreatorId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The user is not the creator of the habit that the subscription request is for");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Текущий пользователь не является создателем привычки, на которую отправлена эта заявка");
         }
 
         subscription.setAccepted(true);
@@ -111,18 +114,19 @@ public class SubscriptionService {
         Long userIdLong = parseUserId(userId);
 
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new EntityNotFoundException("Subscription request not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Заявка не найдена"));
 
         Long habitCreatorId = habitCacheRepository.findByHabitId(subscription.getHabitId())
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"))
                 .getCreatorId();
 
         if (!userIdLong.equals(habitCreatorId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The user is not the creator of the habit that the subscription request is for");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Текущий пользователь не является создателем привычки, на которую отправлена эта заявка");
         }
 
         if (subscription.isAccepted()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Subscription request is already accepted");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Заявка уже была принята");
         }
 
         subscriptionRepository.delete(subscription);
@@ -132,7 +136,7 @@ public class SubscriptionService {
         Long userIdLong = parseUserId(userId);
 
         Subscription subscription = subscriptionRepository.findByHabitIdAndSubscriberId(habitId, userIdLong)
-                .orElseThrow(() -> new EntityNotFoundException("Subscription (or subscription request) not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Подписка/заявка не найдена"));
 
         subscriptionRepository.delete(subscription);
 
@@ -164,11 +168,11 @@ public class SubscriptionService {
         Long userIdLong = parseUserId(userId);
 
         Long habitCreatorId = habitCacheRepository.findByHabitId(habitId)
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"))
                 .getCreatorId();
 
         if (!Objects.equals(habitCreatorId, userIdLong)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The habit doesn't belong to that user");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Эта привычка не принадлежит текущему пользователю");
         }
 
         return subscriptionRepository.findAllByHabitId(habitId).stream()
@@ -202,11 +206,11 @@ public class SubscriptionService {
         Long userIdLong = parseUserId(userId);
 
         Long habitCreatorId = habitCacheRepository.findByHabitId(habitId)
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"))
                 .getCreatorId();
 
         if (!Objects.equals(habitCreatorId, userIdLong)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The habit doesn't belong to that user");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Эта привычка не принадлежит текущему пользователю");
         }
 
         return subscriptionRepository.findAllByHabitId(habitId).stream()
@@ -223,7 +227,7 @@ public class SubscriptionService {
 
     private String getHabitName(Long habitId) {
         return habitCacheRepository.findByHabitId(habitId)
-                .orElseThrow(() -> new EntityNotFoundException("Habit not found"))
+                .orElseThrow(() -> new EntityNotFoundException("Привычка не найдена"))
                 .getHabitName();
     }
 
@@ -231,9 +235,11 @@ public class SubscriptionService {
         try {
             return authClient.getUserLogin(internalToken, userId).getBody();
         } catch (FeignException.ServiceUnavailable e) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Auth service is unavailable");
+            log.error("Микросервис Auth недоступен");
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
         } catch (FeignException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Auth service returned an error");
+            log.error("Микросервис Auth вернул ошибку");
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Произошла внутренняя ошибка");
         }
     }
 

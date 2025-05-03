@@ -233,7 +233,7 @@ public class ReportControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("This habit doesn't imply a photo, but it was attached"));
+                .andExpect(jsonPath("$.error").value("К отчёту было прикреплено фото, хотя эта привычка не подразумевает фотоотчёты"));
 
         long reportsCount = reportRepository.count();
         assertThat(reportsCount).isEqualTo(0);
@@ -260,7 +260,7 @@ public class ReportControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("It is forbidden to mark a habit as completed for a day that has not yet arrived"));
+                .andExpect(jsonPath("$.error").value("Этот день ещё не наступил"));
 
         long reportsCount = reportRepository.count();
         assertThat(reportsCount).isEqualTo(0);
@@ -296,7 +296,7 @@ public class ReportControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("This habit has already been marked as completed on this day"));
+                .andExpect(jsonPath("$.error").value("Эта привычка уже отмечена как выполненная в указанный день"));
 
         long reportsCount = reportRepository.count();
         assertThat(reportsCount).isEqualTo(1);
@@ -323,7 +323,7 @@ public class ReportControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have this habit on this day"));
+                .andExpect(jsonPath("$.error").value("Эта привычка не является текущей в указанный день для текущего пользователя"));
 
         long reportsCount = reportRepository.count();
         assertThat(reportsCount).isEqualTo(0);
@@ -463,7 +463,7 @@ public class ReportControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have this report"));
+                .andExpect(jsonPath("$.error").value("У текущего пользователя отсутствует указанный отчёт"));
 
         long reportsCount = reportRepository.count();
         assertThat(reportsCount).isEqualTo(0);
@@ -494,7 +494,7 @@ public class ReportControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This habit doesn't imply a photo"));
+                .andExpect(jsonPath("$.error").value("Эта привычка не подразумевает фотоотчёты"));
 
         Optional<Report> report = reportRepository.findById(1L);
         assertThat(report.isPresent()).isTrue();
@@ -537,7 +537,7 @@ public class ReportControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/reports/1/delete")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have this report"));
+                .andExpect(jsonPath("$.error").value("У текущего пользователя отсутствует указанный отчёт"));
 
         assertThat(reportRepository.count()).isEqualTo(0);
     }
@@ -562,7 +562,7 @@ public class ReportControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/reports/1/delete")
                         .header("X-User-Id", userIdStr))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error").value("This user doesn't have this report"));
+                .andExpect(jsonPath("$.error").value("У текущего пользователя отсутствует указанный отчёт"));
 
         assertThat(reportRepository.count()).isEqualTo(1);
     }

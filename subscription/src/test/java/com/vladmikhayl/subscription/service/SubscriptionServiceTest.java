@@ -91,7 +91,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.sendSubscriptionRequest(habitId, subscriberIdStr))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessage("This user is already subscribed to this habit or has an unprocessed request for it");
+                .hasMessage("У вас уже есть подписка/заявка на эту привычку");
     }
 
     @Test
@@ -106,7 +106,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.sendSubscriptionRequest(habitId, subscriberIdStr))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Habit not found");
+                .hasMessage("Привычка не найдена");
     }
 
     @Test
@@ -130,7 +130,7 @@ class SubscriptionServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                 })
-                .hasMessageContaining("It is impossible to subscribe to your own habit");
+                .hasMessageContaining("Нельзя подписаться на собственную привычку");
     }
 
     @Test
@@ -182,7 +182,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.acceptSubscriptionRequest(subscriptionId, userIdStr))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Subscription request not found");
+                .hasMessage("Заявка не найдена");
 
         verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
     }
@@ -201,7 +201,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.acceptSubscriptionRequest(subscriptionId, userIdStr))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessage("Subscription request has already been accepted");
+                .hasMessage("Заявка уже была принята");
 
         verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
     }
@@ -234,7 +234,7 @@ class SubscriptionServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("The user is not the creator of the habit that the subscription request is for");
+                .hasMessageContaining("Текущий пользователь не является создателем привычки, на которую отправлена эта заявка");
 
         verify(subscriptionEventProducer, never()).sendAcceptedSubscriptionCreatedEvent(any());
     }
@@ -281,7 +281,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.denySubscriptionRequest(subscriptionId, userIdStr))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Subscription request not found");
+                .hasMessage("Заявка не найдена");
 
         verify(subscriptionRepository, never()).delete(any());
     }
@@ -314,7 +314,7 @@ class SubscriptionServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("The user is not the creator of the habit that the subscription request is for");
+                .hasMessageContaining("Текущий пользователь не является создателем привычки, на которую отправлена эта заявка");
 
         verify(subscriptionRepository, never()).delete(any());
     }
@@ -347,7 +347,7 @@ class SubscriptionServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
                 })
-                .hasMessageContaining("Subscription request is already accepted");
+                .hasMessageContaining("Заявка уже была принята");
 
         verify(subscriptionRepository, never()).delete(any());
     }
@@ -426,7 +426,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.unsubscribe(habitId, userIdStr))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Subscription (or subscription request) not found");
+                .hasMessage("Подписка/заявка не найдена");
 
         verify(subscriptionRepository, never()).delete(any());
 
@@ -616,7 +616,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.getHabitUnprocessedRequests(habitId, userIdStr))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Habit not found");
+                .hasMessage("Привычка не найдена");
     }
 
     @Test
@@ -637,7 +637,7 @@ class SubscriptionServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("The habit doesn't belong to that user");
+                .hasMessageContaining("Эта привычка не принадлежит текущему пользователю");
     }
 
     @Test
@@ -816,7 +816,7 @@ class SubscriptionServiceTest {
 
         assertThatThrownBy(() -> underTest.getHabitAcceptedSubscriptions(habitId, userIdStr))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Habit not found");
+                .hasMessage("Привычка не найдена");
     }
 
     @Test
@@ -837,7 +837,7 @@ class SubscriptionServiceTest {
                     ResponseStatusException e = (ResponseStatusException) ex;
                     assertThat(e.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
                 })
-                .hasMessageContaining("The habit doesn't belong to that user");
+                .hasMessageContaining("Эта привычка не принадлежит текущему пользователю");
     }
 
 }
