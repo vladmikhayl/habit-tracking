@@ -14,24 +14,24 @@ const MainLayout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 p-4">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-        <nav className="flex justify-between items-center bg-blue-500 text-white px-6 py-4">
+        <nav className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-blue-500 text-white px-6 py-4">
           <div className="flex gap-3">
             <Link
               to="/my-habits"
-              className="bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition"
+              className="w-full sm:w-auto text-center bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition flex items-center justify-center"
             >
               Мои привычки
             </Link>
             <Link
               to="/my-subscriptions"
-              className="bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition"
+              className="w-full sm:w-auto text-center bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition flex items-center justify-center"
             >
               Мои подписки
             </Link>
           </div>
           <button
             onClick={handleLogout}
-            className="bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition"
+            className="w-full sm:w-auto text-center bg-white text-blue-500 font-semibold px-4 py-2 rounded-xl hover:bg-blue-100 transition flex items-center justify-center"
           >
             Выйти из аккаунта
           </button>
