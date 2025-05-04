@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authApi from "../api/authApi";
 import { toast } from "react-toastify";
+import SubmitButton from "../components/buttons/SubmitButton";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -94,12 +95,7 @@ const RegisterForm = () => {
         />
       </div>
 
-      <button
-        type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg py-2 px-4 rounded-xl transition"
-      >
-        Зарегистрироваться
-      </button>
+      <SubmitButton>Зарегистрироваться</SubmitButton>
 
       <p className="text-center text-base text-gray-600">
         Уже есть аккаунт?{" "}

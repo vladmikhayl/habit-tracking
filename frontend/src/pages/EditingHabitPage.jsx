@@ -4,6 +4,7 @@ import MainLayout from "../layouts/MainLayout";
 import habitsApi from "../api/habitsApi";
 import { toast } from "react-toastify";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import SubmitButton from "../components/buttons/SubmitButton";
 
 const EditingHabitPage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const EditingHabitPage = () => {
     }
   }, [pageHabitId]);
 
-  // При нажатии на кнопку для создания привычки
+  // При нажатии на кнопку для сохранения изменений
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -102,12 +103,7 @@ const EditingHabitPage = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg py-3 px-4 rounded-xl transition"
-          >
-            Сохранить изменения
-          </button>
+          <SubmitButton>Сохранить изменения</SubmitButton>
         </form>
       </div>
     </MainLayout>

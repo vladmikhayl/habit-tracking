@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import authApi from "../api/authApi";
 import { toast } from "react-toastify";
+import SubmitButton from "../components/buttons/SubmitButton";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -74,12 +75,7 @@ const LoginForm = () => {
         />
       </div>
 
-      <button
-        type="submit"
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg py-2 px-4 rounded-xl transition"
-      >
-        Войти
-      </button>
+      <SubmitButton>Войти</SubmitButton>
 
       <p className="text-center text-base text-gray-600">
         Нет аккаунта?{" "}

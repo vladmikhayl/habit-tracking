@@ -1,6 +1,7 @@
 import { UserIcon, UsersIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import React from "react";
+import LearnMoreAboutHabitButton from "./buttons/LearnMoreAboutHabitButton";
 
 const HabitCardForSubscriber = ({ habit, date }) => {
   const navigate = useNavigate();
@@ -27,6 +28,12 @@ const HabitCardForSubscriber = ({ habit, date }) => {
     }
     return null;
   };
+
+  // При нажатии на кнопку для подробностей о привычке
+  const handleClickLearnMoreAboutHabit = () =>
+    navigate(`/subscribed-habits/${habitId}`, {
+      state: { creatorLogin, selectedDateForHabits: date },
+    });
 
   return (
     <div className="w-full bg-white border-2 border-gray-400 rounded-2xl shadow-lg p-6 space-y-4">
@@ -86,16 +93,7 @@ const HabitCardForSubscriber = ({ habit, date }) => {
       )}
 
       <div className="pt-2 space-y-3">
-        <button
-          onClick={() =>
-            navigate(`/subscribed-habits/${habitId}`, {
-              state: { creatorLogin, selectedDateForHabits: date },
-            })
-          }
-          className="w-full border border-gray-400 text-gray-700 hover:bg-gray-100 font-semibold px-5 py-2 rounded-xl transition"
-        >
-          Подробнее о привычке
-        </button>
+        <LearnMoreAboutHabitButton onClick={handleClickLearnMoreAboutHabit} />
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import habitsApi from "../api/habitsApi";
 import HabitCardForCreator from "../components/HabitCardForCreator";
 import { useLocation } from "react-router-dom";
+import NewHabitButton from "../components/buttons/NewHabitButton";
 
 const MyHabitsPage = () => {
   const [habits, setHabits] = useState([]);
@@ -57,12 +58,7 @@ const MyHabitsPage = () => {
             />
           </div>
 
-          <button
-            onClick={() => navigate("/create-habit")}
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-xl transition"
-          >
-            + Новая привычка
-          </button>
+          <NewHabitButton />
         </div>
 
         {selectedDate && (
@@ -82,7 +78,7 @@ const MyHabitsPage = () => {
                     key={habit.habitId}
                     habit={habit}
                     date={selectedDate}
-                    onActionComplete={() => fetchHabits(selectedDate)}
+                    onReportChange={() => fetchHabits(selectedDate)}
                   />
                 ))}
               </div>

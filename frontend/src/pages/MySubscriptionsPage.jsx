@@ -8,6 +8,7 @@ import subscriptionsApi from "../api/subscriptionsApi";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
+import BlueBlockLayout from "../layouts/BlueBlockLayout";
 
 const MySubscriptionsPage = () => {
   const navigate = useNavigate();
@@ -111,7 +112,7 @@ const MySubscriptionsPage = () => {
   return (
     <MainLayout>
       <div className="space-y-6">
-        <div className="bg-blue-50 border border-blue-200 shadow-sm rounded-2xl p-6">
+        <BlueBlockLayout>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Подписаться на привычку
           </h2>
@@ -131,98 +132,96 @@ const MySubscriptionsPage = () => {
               Отправить заявку
             </button>
           </div>
-        </div>
+        </BlueBlockLayout>
 
-        <div className="space-y-6">
-          <div className="bg-blue-50 border border-blue-200 shadow-sm rounded-2xl p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-base text-gray-800 flex items-center gap-2">
-                Привычки, на которые вы подписаны и приняты:{" "}
-                {acceptedSubscriptions.length}
-              </div>
-              {acceptedSubscriptions.length > 0 && (
-                <button
-                  onClick={handleToggleAccepted}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  {showAccepted ? "Скрыть" : "Показать"}
-                </button>
-              )}
+        <BlueBlockLayout>
+          <div className="flex items-center justify-between">
+            <div className="text-base text-gray-800 flex items-center gap-2">
+              Привычки, на которые вы подписаны и приняты:{" "}
+              {acceptedSubscriptions.length}
             </div>
-
-            {showAccepted && acceptedSubscriptions.length > 0 && (
-              <div className="mt-2">
-                <div className="space-y-2">
-                  {acceptedSubscriptions.map((sub) => (
-                    <div
-                      key={sub.habitId}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
-                    >
-                      <span className="text-gray-800 text-sm flex items-center gap-2 w-full">
-                        <span className="flex-shrink-0 h-5 w-5">
-                          <ClipboardIcon className="h-5 w-5 text-blue-500" />
-                        </span>
-                        <span className="break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
-                          {sub.habitName} (ID {sub.habitId})
-                        </span>
-                      </span>
-                      <button
-                        onClick={() => handleUnsubscribe(sub.habitId)}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg ml-4"
-                      >
-                        Отписаться
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {acceptedSubscriptions.length > 0 && (
+              <button
+                onClick={handleToggleAccepted}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showAccepted ? "Скрыть" : "Показать"}
+              </button>
             )}
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 shadow-sm rounded-2xl p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-base text-gray-800 flex items-center gap-2">
-                Ваши необработанные заявки: {pendingRequests.length}
-              </div>
-              {pendingRequests.length > 0 && (
-                <button
-                  onClick={handleTogglePending}
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  {showPending ? "Скрыть" : "Показать"}
-                </button>
-              )}
-            </div>
-
-            {showPending && pendingRequests.length > 0 && (
-              <div className="mt-2">
-                <div className="space-y-2">
-                  {pendingRequests.map((req) => (
-                    <div
-                      key={req.habitId}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
-                    >
-                      <span className="text-gray-800 text-sm flex items-center gap-2 flex-1 w-full">
-                        <span className="flex-shrink-0 h-5 w-5">
-                          <ClipboardIcon className="h-5 w-5 text-blue-500" />
-                        </span>
-                        <p className="break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
-                          {req.habitName} (ID {req.habitId})
-                        </p>
+          {showAccepted && acceptedSubscriptions.length > 0 && (
+            <div className="mt-2">
+              <div className="space-y-2">
+                {acceptedSubscriptions.map((sub) => (
+                  <div
+                    key={sub.habitId}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                  >
+                    <span className="text-gray-800 text-sm flex items-center gap-2 w-full">
+                      <span className="flex-shrink-0 h-5 w-5">
+                        <ClipboardIcon className="h-5 w-5 text-blue-500" />
                       </span>
-                      <button
-                        onClick={() => handleUnsubscribe(req.habitId)}
-                        className="flex-shrink-0 px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg ml-4"
-                      >
-                        Отменить заявку
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                      <span className="break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                        {sub.habitName} (ID {sub.habitId})
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => handleUnsubscribe(sub.habitId)}
+                      className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg ml-4"
+                    >
+                      Отписаться
+                    </button>
+                  </div>
+                ))}
               </div>
+            </div>
+          )}
+        </BlueBlockLayout>
+
+        <BlueBlockLayout>
+          <div className="flex items-center justify-between">
+            <div className="text-base text-gray-800 flex items-center gap-2">
+              Ваши необработанные заявки: {pendingRequests.length}
+            </div>
+            {pendingRequests.length > 0 && (
+              <button
+                onClick={handleTogglePending}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showPending ? "Скрыть" : "Показать"}
+              </button>
             )}
           </div>
-        </div>
+
+          {showPending && pendingRequests.length > 0 && (
+            <div className="mt-2">
+              <div className="space-y-2">
+                {pendingRequests.map((req) => (
+                  <div
+                    key={req.habitId}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-blue-100 border border-blue-300 px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition"
+                  >
+                    <span className="text-gray-800 text-sm flex items-center gap-2 flex-1 w-full">
+                      <span className="flex-shrink-0 h-5 w-5">
+                        <ClipboardIcon className="h-5 w-5 text-blue-500" />
+                      </span>
+                      <p className="break-words whitespace-pre-wrap [overflow-wrap:anywhere]">
+                        {req.habitName} (ID {req.habitId})
+                      </p>
+                    </span>
+                    <button
+                      onClick={() => handleUnsubscribe(req.habitId)}
+                      className="flex-shrink-0 px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg ml-4"
+                    >
+                      Отменить заявку
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </BlueBlockLayout>
 
         <div className="border-t border-gray-300 my-8" />
 
