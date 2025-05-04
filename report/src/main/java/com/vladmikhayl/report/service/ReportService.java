@@ -126,7 +126,7 @@ public class ReportService {
 
     private boolean getIsCurrentOrThrow(Long habitId, Long userId, LocalDate date) {
         try {
-            return habitClient.isCurrent(internalToken, habitId, userId, date).getBody();
+            return Boolean.TRUE.equals(habitClient.isCurrent(internalToken, habitId, userId, date).getBody());
         } catch (FeignException.ServiceUnavailable e) {
             log.error("Микросервис Habit недоступен");
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Произошла внутренняя ошибка");
