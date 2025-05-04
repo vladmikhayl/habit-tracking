@@ -1,6 +1,5 @@
 package com.vladmikhayl.e2e.dto.habit;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
