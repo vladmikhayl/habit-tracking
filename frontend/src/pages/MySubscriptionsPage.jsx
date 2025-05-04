@@ -1,14 +1,14 @@
-import React from "react";
-import MainLayout from "../layouts/MainLayout";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import habitsApi from "../api/habitsApi";
-import HabitCardForSubscriber from "../components/HabitCardForSubscriber";
-import subscriptionsApi from "../api/subscriptionsApi";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
-import { useLocation, useNavigate } from "react-router-dom";
+
+import MainLayout from "../layouts/MainLayout";
 import BlueBlockLayout from "../layouts/BlueBlockLayout";
+import HabitCardForSubscriber from "../components/HabitCardForSubscriber";
+import habitsApi from "../api/habitsApi";
+import subscriptionsApi from "../api/subscriptionsApi";
 
 const MySubscriptionsPage = () => {
   const navigate = useNavigate();

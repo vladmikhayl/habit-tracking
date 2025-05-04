@@ -1,7 +1,8 @@
 import React from "react";
 import { toast } from "react-toastify";
-import habitsApi from "../../api/habitsApi";
 import { useNavigate } from "react-router-dom";
+
+import habitsApi from "../../api/habitsApi";
 
 const DeleteHabitButton = ({ habitId }) => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React from "react";
 import {
-  UserCircleIcon,
   ExclamationCircleIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/solid";
 
 const HabitPendings = ({

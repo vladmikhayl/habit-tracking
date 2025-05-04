@@ -1,12 +1,11 @@
-import React from "react";
-import MainLayout from "../layouts/MainLayout";
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
-import habitsApi from "../api/habitsApi";
+
+import MainLayout from "../layouts/MainLayout";
 import HabitCardForCreator from "../components/HabitCardForCreator";
-import { useLocation } from "react-router-dom";
 import NewHabitButton from "../components/buttons/NewHabitButton";
+import habitsApi from "../api/habitsApi";
 
 const MyHabitsPage = () => {
   const [habits, setHabits] = useState([]);

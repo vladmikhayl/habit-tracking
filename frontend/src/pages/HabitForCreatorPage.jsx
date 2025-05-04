@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
+import { format } from "date-fns";
+import { toast } from "react-toastify";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 import habitsApi from "../api/habitsApi";
 import subscriptionsApi from "../api/subscriptionsApi";
-import { toast } from "react-toastify";
-import { format } from "date-fns";
-
+import MainLayout from "../layouts/MainLayout";
 import GrayBlockLayout from "../layouts/GrayBlockLayout";
 import DeleteHabitButton from "../components/buttons/DeleteHabitButton";
 import EditHabitButton from "../components/buttons/EditHabitButton";
@@ -65,9 +64,8 @@ const HabitForCreatorPage = () => {
     }
 
     try {
-      const data = await subscriptionsApi.getHabitUnprocessedRequests(
-        pageHabitId
-      );
+      const data =
+        await subscriptionsApi.getHabitUnprocessedRequests(pageHabitId);
       setPendingRequests(data);
     } catch (error) {
       console.error("Ошибка при получении необработанных заявок:", error);

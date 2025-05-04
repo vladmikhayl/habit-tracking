@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
-import habitsApi from "../api/habitsApi";
 import { format } from "date-fns";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
+import habitsApi from "../api/habitsApi";
+import MainLayout from "../layouts/MainLayout";
 import GrayBlockLayout from "../layouts/GrayBlockLayout";
 import HabitTitle from "../components/habit-page-components/HabitTitle";
 import IsPhotoForHabitAllowed from "../components/habit-page-components/IsPhotoForHabitAllowed";

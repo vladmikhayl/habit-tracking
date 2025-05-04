@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import authApi from "../api/authApi";
 import { toast } from "react-toastify";
+
+import authApi from "../api/authApi";
 import SubmitButton from "../components/buttons/SubmitButton";
 
 const RegisterForm = () => {
@@ -22,7 +23,7 @@ const RegisterForm = () => {
     }
 
     try {
-      const data = await authApi.register({ username, password });
+      await authApi.register({ username, password });
       console.log("Зарегистрирован:", username, ",", password);
       toast.success("Аккаунт успешно зарегистрирован");
       navigate("/login");

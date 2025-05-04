@@ -1,9 +1,8 @@
-import React from "react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import authApi from "../api/authApi";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+
+import authApi from "../api/authApi";
 import SubmitButton from "../components/buttons/SubmitButton";
 
 const LoginForm = () => {

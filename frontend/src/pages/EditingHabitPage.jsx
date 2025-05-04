@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
-import habitsApi from "../api/habitsApi";
 import { toast } from "react-toastify";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
+
+import habitsApi from "../api/habitsApi";
+import MainLayout from "../layouts/MainLayout";
 import SubmitButton from "../components/buttons/SubmitButton";
 
 const EditingHabitPage = () => {

@@ -1,22 +1,23 @@
 import React from "react";
 import {
+  Navigate,
   Route,
+  RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
-  RouterProvider,
-  Navigate,
 } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import MyHabitsPage from "./pages/MyHabitsPage";
-import MySubscriptionsPage from "./pages/MySubscriptionsPage";
-import CreateHabitPage from "./pages/CreateHabitPage";
-import HabitForCreatorPage from "./pages/HabitForCreatorPage";
-import EditingHabitPage from "./pages/EditingHabitPage";
-import HabitForSubscriberPage from "./pages/HabitForSubscriberPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 import PrivateRoute from "./api/PrivateRoute";
+import CreateHabitPage from "./pages/CreateHabitPage";
+import EditingHabitPage from "./pages/EditingHabitPage";
+import HabitForCreatorPage from "./pages/HabitForCreatorPage";
+import HabitForSubscriberPage from "./pages/HabitForSubscriberPage";
+import LoginPage from "./pages/LoginPage";
+import MyHabitsPage from "./pages/MyHabitsPage";
+import MySubscriptionsPage from "./pages/MySubscriptionsPage";
+import RegisterPage from "./pages/RegisterPage";
 
 const App = () => {
   const router = createBrowserRouter(

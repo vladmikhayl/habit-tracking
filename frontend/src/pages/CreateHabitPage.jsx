@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import MainLayout from "../layouts/MainLayout";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
+
 import habitsApi from "../api/habitsApi";
+import MainLayout from "../layouts/MainLayout";
 
 const CreateHabitPage = () => {
   const navigate = useNavigate();
