@@ -229,8 +229,6 @@ class ReportServiceTest {
         verify(reportRepository, never()).save(any());
     }
 
-    // TODO: тест на createReport когда некорректный URL фото
-
     @Test
     void canChangeReportPhotoWhenItHasAlreadyBeenAttached() {
         String userIdStr = "3";
@@ -386,7 +384,6 @@ class ReportServiceTest {
                 .hasMessageContaining("Эта привычка не подразумевает фотоотчёты");
     }
 
-    // TODO: тест на changeReportPhoto когда некорректный URL фото
 
     @Test
     void canDeleteReport() {

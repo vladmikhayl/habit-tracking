@@ -1,5 +1,36 @@
 services:
 
+  # MinIO starts at the beginning
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend
+
+  # MinIO-init starts after MinIO is started
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 10 &&
+        mc alias set myminio http://minio:9000 minio minio123 &&
+        mc mb myminio/reportphotos --ignore-existing &&
+        mc anonymous set download myminio/reportphotos
+      "
+    networks:
+      - backend
+
   # Postgres starts at the beginning
   postgres:
     image: postgres:15
@@ -191,3 +222,4 @@ networks:
 
 volumes:
   pgdata:
+  minio_data:

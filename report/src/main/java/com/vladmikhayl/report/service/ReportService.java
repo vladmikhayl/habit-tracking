@@ -40,7 +40,6 @@ public class ReportService {
         }
     }
 
-    // TODO: проверять что URL фото правильное
     public void createReport(
             ReportCreationRequest request,
             String userId
@@ -79,7 +78,6 @@ public class ReportService {
         reportRepository.save(report);
     }
 
-    // TODO: проверять что URL фото правильное
     @Transactional
     public void changeReportPhoto(
             Long reportId,

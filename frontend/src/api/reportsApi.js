@@ -1,4 +1,48 @@
 const reportsApi = {
+  // Загрузить файл
+  uploadFile: async (selectedFile) => {
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    try {
+      const response = await fetch(`/api/reports/upload-file`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      let resultText = await response.text();
+      let result;
+
+      try {
+        result = JSON.parse(resultText);
+      } catch (e) {
+        result = null;
+      }
+
+      if (!response.ok) {
+        const errorMessage = result?.error || "Ошибка при загрузке файла";
+        throw new Error(errorMessage);
+      }
+
+      return resultText;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("Maximum upload size exceeded")) {
+        throw new Error("Прикреплённый файл слишком большой");
+      } else if (message.includes("Можно загружать только изображения")) {
+        throw new Error(
+          "Можно загружать только изображения (jpg, png, jpeg, webp, gif)"
+        );
+      } else {
+        throw new Error("Ошибка при загрузке файла");
+      }
+    }
+  },
+
   // Создать отчет о выполнении
   createReport: async (habitId, date, photoUrl) => {
     const token = localStorage.getItem("token");

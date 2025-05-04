@@ -427,7 +427,7 @@ const HabitForSubscriberPage = () => {
                     <img
                       src={dailyReport.photoUrl}
                       alt="Фотоотчёт"
-                      className="w-full max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-xs rounded-lg shadow"
+                      className="w-full max-w-xs sm:max-w-sm md:max-w-sm lg:max-w-sm xl:max-w-sm rounded-lg shadow"
                     />
                   )}
                 </>

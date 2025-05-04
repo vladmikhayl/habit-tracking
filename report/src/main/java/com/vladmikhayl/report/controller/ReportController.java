@@ -2,6 +2,7 @@ package com.vladmikhayl.report.controller;
 
 import com.vladmikhayl.report.dto.request.ReportCreationRequest;
 import com.vladmikhayl.report.dto.request.ReportPhotoEditingRequest;
+import com.vladmikhayl.report.service.FileUploadService;
 import com.vladmikhayl.report.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -22,12 +26,30 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "BearerAuth") // показываем, что для этих эндпоинтов нужен JWT (для Сваггера)
 @Tag(name = "Отчеты о выполнении привычек", description = "Эндпоинты для работы с отчетами о выполнении привычек")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело"),
-        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT")
+        @ApiResponse(responseCode = "400", description = "Переданы некорректные параметры или тело", content = @Content),
+        @ApiResponse(responseCode = "401", description = "Передан некорректный JWT", content = @Content)
 })
 public class ReportController {
 
     private final ReportService reportService;
+
+    private final FileUploadService fileUploadService;
+
+    @PostMapping("/upload-file")
+    @Operation(
+            summary = "Загрузить файл",
+            description = "Загружает переданный файл в хранилище и возвращает ссылку на сохраненный объект"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успешная загрузка файла"),
+    })
+    public ResponseEntity<String> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("X-User-Id") @Parameter(hidden = true) String userId
+    ) {
+        String fileUrl = fileUploadService.upload(file, UUID.randomUUID() + "-" + file.getOriginalFilename());
+        return ResponseEntity.ok(fileUrl);
+    }
 
     @PostMapping("/create")
     @Operation(

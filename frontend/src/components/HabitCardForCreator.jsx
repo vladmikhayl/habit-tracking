@@ -45,8 +45,11 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     console.log("Отмечаем как выполненную:", habitId, selectedFile);
     try {
       const photoUrl = selectedFile
-        ? "https://i.pinimg.com/736x/b9/a7/55/b9a75516248779bead50d84c52daebf3.jpg"
-        : null; // временно photoUrl = ... при создании отчета с фото
+        ? await reportsApi.uploadFile(selectedFile)
+        : null;
+
+      console.log("photoUrl:", photoUrl);
+
       await reportsApi.createReport(habitId, date, photoUrl);
       toast.success("Отметка о выполнении поставлена");
       onActionComplete();
@@ -54,7 +57,7 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setSelectedFile(null);
     } catch (err) {
-      console.error(err);
+      console.error("Ошибка при создании отметки о выполнении", err);
       toast.error(err.message);
     }
   };
@@ -97,8 +100,8 @@ const HabitCardForCreator = ({ habit, date, onActionComplete }) => {
     try {
       await reportsApi.changeReportPhoto(
         reportId,
-        "https://i.pinimg.com/736x/b9/a7/55/b9a75516248779bead50d84c52daebf3.jpg"
-      ); // временно photoUrl = ... при изменении фото
+        await reportsApi.uploadFile(selectedFile)
+      );
       toast.success("Фото изменено");
       onActionComplete();
 
