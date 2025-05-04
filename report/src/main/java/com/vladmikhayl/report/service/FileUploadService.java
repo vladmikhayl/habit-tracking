@@ -40,9 +40,7 @@ public class FileUploadService {
             s3Client.putObject(putObjectRequest,
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            return s3Client.utilities()
-                    .getUrl(GetUrlRequest.builder().bucket(bucketName).key(fileName).build())
-                    .toString();
+            return "http://localhost:9000/" + bucketName + "/" + fileName;
 
         } catch (IOException e) {
             log.info("Ошибка при загрузке файла: {}", e.getMessage());

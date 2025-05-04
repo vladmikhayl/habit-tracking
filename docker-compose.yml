@@ -216,6 +216,19 @@ services:
       - CONFIG_SERVER_URL=http://config-server:8888
       - SPRING_PROFILES_ACTIVE=docker
 
+  # Subscription starts after Gateway is started
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    networks:
+      - backend
+    depends_on:
+      - gateway
+
 networks:
   backend:
     driver: bridge
