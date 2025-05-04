@@ -137,8 +137,7 @@ const MySubscriptionsPage = () => {
         <BlueBlockLayout>
           <div className="flex items-center justify-between">
             <div className="text-base text-gray-800 flex items-center gap-2">
-              Привычки, на которые вы подписаны и приняты:{" "}
-              {acceptedSubscriptions.length}
+              Привычки, на которые вы подписаны: {acceptedSubscriptions.length}
             </div>
             {acceptedSubscriptions.length > 0 && (
               <button
@@ -182,7 +181,8 @@ const MySubscriptionsPage = () => {
         <BlueBlockLayout>
           <div className="flex items-center justify-between">
             <div className="text-base text-gray-800 flex items-center gap-2">
-              Ваши необработанные заявки: {pendingRequests.length}
+              Ваши заявки, которые пока не были рассмотрены создателем привычки:{" "}
+              {pendingRequests.length}
             </div>
             {pendingRequests.length > 0 && (
               <button
