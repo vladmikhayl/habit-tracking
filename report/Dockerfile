@@ -16,6 +16,6 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # Копируем сгенерированный .jar
-COPY --from=build /build/report/target/report-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /build/report/target/report-1.0.0.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

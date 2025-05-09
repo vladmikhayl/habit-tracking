@@ -16,6 +16,6 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # Копируем сгенерированный .jar
-COPY --from=build /build/habit/target/habit-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /build/habit/target/habit-1.0.0.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

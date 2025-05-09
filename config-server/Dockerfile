@@ -19,6 +19,6 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 # Копируем сгенерированный .jar
-COPY --from=build /build/config-server/target/config-server-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /build/config-server/target/config-server-1.0.0.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
